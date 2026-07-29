@@ -15,7 +15,27 @@ body{background:#020617;color:#f8fafc}
 </head>
 <body class="min-h-screen">
 <div class="max-w-7xl mx-auto px-4 py-6 md:py-10">
-  <header class="glass rounded-3xl p-6 md:p-8 mb-5">
+  
+<div class="glass rounded-3xl p-6 mb-5">
+<h2 class="text-xl font-black mb-4">Database Tools</h2>
+<div class="flex flex-wrap gap-3">
+<label class="cursor-pointer px-4 py-3 rounded-xl bg-violet-600 font-bold">
+Import Cards JSON
+<input id="jsonImport" type="file" accept=".json" hidden>
+</label>
+<button onclick="backupTable('cards')" class="px-4 py-3 rounded-xl bg-slate-700 font-bold">
+Backup Cards
+</button>
+</div>
+</div>
+<script src="js/card-import.js"></script>
+<script src="js/backup.js"></script>
+<script>
+document.getElementById('jsonImport').addEventListener('change',e=>{
+ if(e.target.files[0]) importCards(e.target.files[0]);
+});
+</script>
+<header class="glass rounded-3xl p-6 md:p-8 mb-5">
     <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-5">
       <div>
         <span class="inline-flex px-2.5 py-1 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-300 text-[10px] font-black uppercase tracking-widest">Eugene Card 3.0</span>
@@ -77,7 +97,7 @@ const user = session?.user || null;
   }
   let claims = {};
   try { claims = (await user.getIdTokenResult(true)).claims || {}; } catch(e) {}
-  const isAdmin = claims.admin === true || ADMIN_EMAILS.includes((user.email||'').toLowerCase());
+  const isAdmin = ['eugene.aquila@gmail.com','yujinybwork@gmail.com'].includes((user.email||'').toLowerCase());
   set('admin-status', isAdmin ? 'VERIFIED' : 'RESTRICTED');
   document.getElementById('admin-status').className = 'text-[10px] font-black ' + (isAdmin ? 'text-emerald-400' : 'text-rose-400');
   if (!isAdmin) {
