@@ -5,14 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Eugene Card — Admin Command Center 3.0</title>
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 <style>
 body{background:#020617;color:#f8fafc}
 .glass{background:rgba(15,23,42,.76);backdrop-filter:blur(16px);border:1px solid rgba(148,163,184,.14)}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase.js"></script>
 </head>
 <body class="min-h-screen">
 <div class="max-w-7xl mx-auto px-4 py-6 md:py-10">
@@ -64,23 +63,14 @@ body{background:#020617;color:#f8fafc}
 
 <script>
 const ADMIN_EMAILS = ['eugene.aquila06@gmail.com','yujinybwork@gmail.com'];
-const firebaseConfig = {
-      apiKey: "AIzaSyCm13Nh6k6W9wsL0_OPpjKZNrbSg-pFsuA",
-      authDomain: "eugene-card-marketplace.firebaseapp.com",
-      projectId: "eugene-card-marketplace",
-      storageBucket: "eugene-card-marketplace.firebasestorage.app",
-      messagingSenderId: "789014481646",
-      appId: "1:789014481646:web:3858909b429985005a41ff",
-      measurementId: "G-MRPT21P9M1"
-    };
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-const auth = firebase.auth();
+const db = window.db;
+    const auth = window.auth;
 
 const money = v => new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(Number(v||0));
 const set = (id,v) => document.getElementById(id).textContent = v;
 
-auth.onAuthStateChanged(async user => {
+supabase.auth.onAuthStateChange(async (_event, session) => {
+const user = session?.user || null;
   if (!user) {
     document.getElementById('auth-state').innerHTML = '<div class="glass rounded-2xl p-4 text-sm text-rose-300">Please sign in through Eugene Card first, then open this page.</div>';
     return;
@@ -111,5 +101,8 @@ auth.onAuthStateChanged(async user => {
   db.collection('tradeRequests').where('status','in',['PENDING','COUNTERED']).onSnapshot(s => set('trades',s.size.toLocaleString('en-US')), () => set('trades','—'));
 });
 </script>
+
+<script type="module" src="js/supabase.js"></script>
+<script type="module" src="js/firebase-to-supabase.js"></script>
 </body>
 </html>
