@@ -417,10 +417,13 @@ main{margin-left:264px;max-width:none!important;width:auto!important;padding:28p
 
 
 /* Sidebar authentication card */
-#sidebar-auth-container .sidebar-login{width:100%;padding:14px;border-radius:16px;background:rgba(15,23,42,.8);border:1px solid rgba(99,102,241,.45);color:#fff;font-weight:800;cursor:pointer;}
+#sidebar-auth-container .sidebar-login{width:100%;padding:12px 14px;border-radius:14px;background:#fff;border:1px solid rgba(15,23,42,.08);color:#1f2937;font-weight:800;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 8px 20px rgba(0,0,0,.25);}
+#sidebar-auth-container .sidebar-login svg{width:16px;height:16px;flex-shrink:0;}
+#sidebar-auth-container .sidebar-login-note{margin-top:10px;padding:10px 12px;border-radius:14px;background:rgba(15,23,42,.6);border:1px solid rgba(148,163,184,.12);color:#64748b;font-size:10px;line-height:1.4;}
 #sidebar-auth-container .sidebar-user{padding:12px;border-radius:16px;background:rgba(15,23,42,.9);border:1px solid rgba(148,163,184,.15);}
 #sidebar-auth-container button{transition:.2s;}
-#sidebar-auth-container button:hover{transform:translateY(-1px);}
+#sidebar-auth-container .sidebar-login:hover{transform:translateY(-1px);box-shadow:0 10px 24px rgba(0,0,0,.32);}
+#sidebar-auth-container .sidebar-user button:hover{transform:translateY(-1px);}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase.js"></script>
@@ -539,66 +542,7 @@ main{margin-left:264px;max-width:none!important;width:auto!important;padding:28p
         </div>
       </div>
 
-      <!-- Navigation Tabs -->
-      <nav class="flex items-center gap-1 bg-slate-900/90 p-1.5 rounded-2xl border border-slate-800 overflow-x-auto max-w-full">
-        <button id="nav-catalog" onclick="switchTab('catalog')" class="px-3 py-1.5 rounded-xl text-xs font-semibold text-white bg-slate-800 shadow-sm flex items-center gap-1.5 whitespace-nowrap">
-          <i class="fa-solid fa-layer-group text-amber-400"></i> <span data-i18n="navCollection">Collection</span>
-        </button>
-        <button id="nav-trade" onclick="switchTab('trade')" class="px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white flex items-center gap-1.5 whitespace-nowrap">
-          <i class="fa-solid fa-right-left text-amber-400"></i> <span data-i18n="navTrade">Trade</span>
-        </button>
-        <button id="nav-auction" onclick="switchTab('auction')" class="px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white flex items-center gap-1.5 whitespace-nowrap">
-          <i class="fa-solid fa-gavel text-emerald-400"></i> <span data-i18n="navAuction">Auction</span>
-        </button>
-        <button id="nav-trade-req" onclick="switchTab('trade-req')" class="px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white flex items-center gap-1.5 whitespace-nowrap">
-          <i class="fa-solid fa-handshake text-purple-400"></i> <span data-i18n="navRequests">Trade Requests</span>
-        </button>
-        
-       <!-- Revenue Navigation Button (Opens revenue.html) -->
-        <button id="nav-revenue" onclick="window.location.href='revenue.html'" class="admin-only-nav hidden px-3 py-1.5 rounded-xl text-xs font-semibold text-emerald-300 hover:text-white flex items-center gap-1.5 whitespace-nowrap bg-emerald-950/40 border border-emerald-500/40 transition-all">
-          <i class="fa-solid fa-sack-dollar text-emerald-400"></i> <span data-i18n="navRevenue">Revenue</span> <i class="fa-solid fa-arrow-up-right-from-square text-[9px] ml-0.5 opacity-70"></i>
-        </button>
-
-<!-- Analytics Navigation Button (Opens analytics.html) -->
-		<button id="nav-analytics" onclick="window.location.href='analytics.html'" class="admin-only-nav hidden px-3 py-1.5 rounded-xl text-xs font-semibold text-amber-300 hover:text-white flex items-center gap-1.5 whitespace-nowrap bg-amber-950/40 border border-amber-500/40 transition-all">
-			<i class="fa-solid fa-chart-line text-amber-400"></i> <span data-i18n="navAnalytics">Analytics</span>
-		</button>
-
-        <button id="nav-inbox" onclick="switchTab('inbox')" class="px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white flex items-center gap-1.5 whitespace-nowrap">
-          <i class="fa-solid fa-comments text-indigo-400"></i> <span data-i18n="navInbox">Inbox</span>
-          <span id="inbox-unread-nav-badge" class="hidden min-w-4 h-4 ec-unread-badge px-1 bg-rose-500 text-white font-black text-[9px] rounded-full items-center justify-center leading-none">0</span>
-        </button>
-        <button id="nav-holders" onclick="switchTab('holders')" class="px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white flex items-center gap-1.5 whitespace-nowrap">
-          <i class="fa-solid fa-users text-teal-400"></i> <span data-i18n="navHolders">Holders</span>
-        </button>
-        <button id="nav-history" onclick="switchTab('history')" class="px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white flex items-center gap-1.5 whitespace-nowrap">
-          <i class="fa-solid fa-clock-rotate-left text-cyan-400"></i> <span data-i18n="navHistory">History</span>
-        </button>
-
-        <div class="h-4 w-px bg-slate-800 mx-1 self-center hidden sm:block"></div>
-
-        <button id="nav-hub" onclick="switchTab('collector-hub')" class="px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white flex items-center gap-1.5 whitespace-nowrap">
-          <i class="fa-solid fa-chart-pie text-cyan-400"></i> <span>Collector Hub</span>
-        </button>
-        <button id="nav-dashboard" onclick="switchTab('dashboard')" class="px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white flex items-center gap-1.5 whitespace-nowrap">
-          <i class="fa-solid fa-vault text-amber-400"></i> <span data-i18n="navVault">My Vault</span>
-        </button>
-        <button id="nav-wishlist" onclick="switchTab('wishlist')" class="px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white flex items-center gap-1.5 whitespace-nowrap">
-          <i class="fa-solid fa-heart text-rose-400"></i> <span data-i18n="navWishlist">Wishlist</span>
-        </button>
-
-        <div id="admin-nav-separator" class="h-4 w-px bg-slate-800 mx-1 self-center hidden"></div>
-
-        <button id="nav-inventory" onclick="switchTab('inventory')" class="admin-only-nav hidden px-3 py-1.5 rounded-xl text-xs font-semibold text-rose-400 hover:text-white flex items-center gap-1.5 whitespace-nowrap bg-rose-950/30 border border-rose-500/20">
-          <i class="fa-solid fa-boxes-stacked"></i> <span data-i18n="navInventory">Inventory</span>
-        </button>
-        <button id="nav-command-center" onclick="switchTab('command-center')" class="admin-only-nav hidden px-3 py-1.5 rounded-xl text-xs font-semibold text-violet-300 hover:text-white flex items-center gap-1.5 whitespace-nowrap bg-violet-950/30 border border-violet-500/20">
-          <i class="fa-solid fa-gauge-high"></i> <span>Command Center</span>
-        </button>
-        <button id="nav-admin" onclick="switchTab('admin')" class="admin-only-nav hidden px-3 py-1.5 rounded-xl text-xs font-semibold text-rose-400 hover:text-white flex items-center gap-1.5 whitespace-nowrap bg-rose-950/30 border border-rose-500/20">
-          <i class="fa-solid fa-shield-halved"></i> <span data-i18n="navAdmin">Admin Hub</span>
-        </button>
-      </nav>
+      <!-- Navigation now lives in the sidebar (see #ec3-sidebar). -->
 
       <!-- Language Toggle, Cart, Notifications & Auth Header -->
       <div class="flex items-center gap-2 shrink-0">
@@ -4002,7 +3946,7 @@ function renderSidebarAuth(){
         </div>
       </div>`;
   }else{
-    box.innerHTML=`<button class="sidebar-login" onclick="openAuthModal()">🌈 Login with Google</button><p class="text-[10px] text-slate-500 mt-2">Secure login with your Google account</p>`;
+    box.innerHTML=`<button class="sidebar-login" onclick="openAuthModal()"><svg viewBox="0 0 48 48"><path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12s5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24s8.955,20,20,20s20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/><path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/><path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/><path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/></svg>Login with Google</button><div class="sidebar-login-note">Secure login with your Google account</div>`;
   }
 }
 
