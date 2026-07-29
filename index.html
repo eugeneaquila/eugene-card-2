@@ -56,6 +56,19 @@
   </style>
 <link rel="stylesheet" href="css/ui-2.0.css">
   <link rel="stylesheet" href="css/ui-3.0.css">
+
+<style id="eugene-dashboard-ui">
+body{background:#050816!important}
+.eug-sidebar{position:fixed;left:0;top:0;bottom:0;width:270px;background:rgba(5,8,22,.96);border-right:1px solid rgba(99,102,241,.18);padding:28px 18px;z-index:80;display:flex;flex-direction:column;gap:20px}
+.eug-sidebar .brand{font-size:22px;font-weight:900;letter-spacing:1px;color:white}
+.eug-sidebar .tag{font-size:11px;color:#94a3b8}
+.eug-menu-title{font-size:11px;color:#64748b;text-transform:uppercase;font-weight:800;margin-top:20px}
+.eug-menu a{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;color:#94a3b8;text-decoration:none;font-weight:700;margin:5px 0}
+.eug-menu a:hover,.eug-menu a.active{background:linear-gradient(90deg,rgba(124,58,237,.35),rgba(59,130,246,.15));color:white}
+.eug-auth-box{margin-top:auto;border:1px solid rgba(124,58,237,.5);background:#0b1024;border-radius:18px;padding:16px;color:white}
+.eug-main-shift{margin-left:270px}
+@media(max-width:900px){.eug-sidebar{display:none}.eug-main-shift{margin-left:0}}
+</style>
 </head>
 <body class="min-h-screen flex flex-col justify-between selection:bg-amber-500 selection:text-black relative">
 
