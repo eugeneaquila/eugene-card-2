@@ -9,6 +9,11 @@
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='42' fill='none' stroke='%234f46e5' stroke-width='5' stroke-dasharray='210 50' transform='rotate(-45 50 50)'/><polygon points='50,18 80,35 80,68 50,85 20,68 20,35' fill='%236366f1'/><path d='M 32 42 C 38 32, 52 32, 58 40 C 62 46, 48 54, 40 60 C 35 64, 45 70, 60 62' fill='none' stroke='%23ffffff' stroke-width='4' stroke-linecap='round'/></svg>">
 
   <!-- Google Firebase Compatibility SDKs (v10.7.1) -->
+  <!-- Firestore/Auth compat SDKs removed: data reads/writes and auth now go through Supabase (see js/supabase.js). -->
+  <!-- app/functions/analytics compat kept: callServer(...) still calls Firebase Cloud Functions, not yet migrated. -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-functions-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics-compat.js"></script>
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -1743,8 +1748,17 @@ main{margin-left:264px;max-width:none!important;width:auto!important;padding:28p
 
   <!-- JAVASCRIPT LOGIC WITH FIREBASE CONFIG -->
   <script>
-    const db = window.db;
-    const auth = window.auth;
+    const firebaseConfig = {
+      apiKey: "AIzaSyCm13Nh6k6W9wsL0_OPpjKZNrbSg-pFsuA",
+      authDomain: "eugene-card-marketplace.firebaseapp.com",
+      projectId: "eugene-card-marketplace",
+      storageBucket: "eugene-card-marketplace.firebasestorage.app",
+      messagingSenderId: "789014481646",
+      appId: "1:789014481646:web:3858909b429985005a41ff",
+      measurementId: "G-MRPT21P9M1"
+    };
+
+    firebase.initializeApp(firebaseConfig);
     const functions = firebase.app().functions('asia-southeast1');
     const analytics = firebase.analytics();
 
@@ -2195,10 +2209,11 @@ main{margin-left:264px;max-width:none!important;width:auto!important;padding:28p
 
     async function loadCollectorProfiles() {
       try {
-        const snapshot = await db.collection("profiles").get();
+        const { data, error } = await supabase.from('profiles').select('*');
+        if (error) throw error;
         globalCollectorProfiles = {};
-        snapshot.forEach(doc => {
-          globalCollectorProfiles[doc.id] = doc.data();
+        (data || []).forEach(row => {
+          if (row.email) globalCollectorProfiles[row.email] = row;
         });
       } catch (e) {
         console.warn('Error loading collector profiles:', e);
@@ -2333,7 +2348,7 @@ main{margin-left:264px;max-width:none!important;width:auto!important;padding:28p
       setCookie(`profile_${currentUser.email}`, profilePayload, 30);
 
       try {
-        await db.collection("profiles").doc(currentUser.email).set(profilePayload, { merge: true });
+        await supabase.from('profiles').upsert({ id: currentUser.uid, email: currentUser.email, ...profilePayload }, { onConflict: 'id' });
         await loadCollectorProfiles();
       } catch (e) {}
 
@@ -2500,12 +2515,11 @@ main{margin-left:264px;max-width:none!important;width:auto!important;padding:28p
       const unsubs = [];
       let initialSnapshots = 0;
 
-      const processSnapshot = (snapshot) => {
-        snapshot.forEach(doc => {
-          const d = doc.data() || {};
+      const processRows = (rows) => {
+        (rows || []).forEach(d => {
           const participants = Array.isArray(d.participants)
             ? d.participants
-            : doc.id.replace(/^chat-/, '').split('-vs-');
+            : String(d.id).replace(/^chat-/, '').split('-vs-');
 
           const participantNames = participants.map(p => String(p).trim().toLowerCase());
           const isMine = currentUser.isAdmin ||
@@ -2516,12 +2530,12 @@ main{margin-left:264px;max-width:none!important;width:auto!important;padding:28p
 
           const sender = String(d.lastSender || '').trim().toLowerCase();
           const updated = getTimeMillis(d.updatedAt);
-          const seen = Number(inboxUnreadState[doc.id]?.lastSeen || 0);
+          const seen = Number(inboxUnreadState[d.id]?.lastSeen || 0);
           const incoming = sender && !myNames.includes(sender);
 
-          if (incoming && updated > seen && doc.id !== currentChatContextId) {
-            const wasUnread = !!inboxUnreadState[doc.id]?.unread;
-            inboxUnreadState[doc.id] = { lastSeen: seen, unread: true };
+          if (incoming && updated > seen && d.id !== currentChatContextId) {
+            const wasUnread = !!inboxUnreadState[d.id]?.unread;
+            inboxUnreadState[d.id] = { lastSeen: seen, unread: true };
 
             if (inboxUnreadInitialized && !wasUnread) {
               addNotification(
@@ -2539,39 +2553,22 @@ main{margin-left:264px;max-width:none!important;width:auto!important;padding:28p
         renderInboxUnreadBadge();
       };
 
-      const attach = (query, key) => {
-        if (seenQueries.has(key)) return;
-        seenQueries.add(key);
-
+      const refetchAndProcess = async () => {
         try {
-          const unsub = query.onSnapshot(
-            snapshot => processSnapshot(snapshot),
-            err => console.warn('Inbox unread listener:', err?.message || err)
-          );
-          unsubs.push(unsub);
+          const { data, error } = await supabase.from('chats').select('*');
+          if (error) throw error;
+          processRows(data);
         } catch (err) {
-          console.warn('Inbox unread listener setup:', err);
+          console.warn('Inbox unread fetch failed:', err?.message || err);
         }
       };
 
-      attach(
-        db.collection('chats').where('participantUids', 'array-contains', currentUser.uid),
-        `uid:${currentUser.uid}`
-      );
-
-      if (currentUser.username) {
-        attach(
-          db.collection('chats').where('participants', 'array-contains', currentUser.username),
-          `name:${currentUser.username.toLowerCase()}`
-        );
-      }
-
-      if (currentUser.name && currentUser.name.toLowerCase() !== String(currentUser.username || '').toLowerCase()) {
-        attach(
-          db.collection('chats').where('participants', 'array-contains', currentUser.name),
-          `name:${currentUser.name.toLowerCase()}`
-        );
-      }
+      refetchAndProcess();
+      const channel = supabase
+        .channel(`inbox-unread-${currentUser.uid || 'anon'}`)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'chats' }, () => refetchAndProcess())
+        .subscribe();
+      unsubs.push(() => supabase.removeChannel(channel));
 
       inboxUnreadUnsubscribe = () => {
         unsubs.splice(0).forEach(unsub => {
@@ -2593,26 +2590,33 @@ main{margin-left:264px;max-width:none!important;width:auto!important;padding:28p
     function startServerAuthorityListeners() {
       if (!currentUser) return;
       if (serverStatsUnsubscribe) serverStatsUnsubscribe();
-      serverStatsUnsubscribe = db.collection('collectorStats').doc(currentUser.uid).onSnapshot(doc => {
-        if (doc.exists) serverStats = { ...serverStats, ...doc.data() };
-        renderCollectorHub();
-      });
+
+      const fetchCollectorStats = async () => {
+        try {
+          const { data, error } = await supabase.from('collectorStats').select('*').eq('id', currentUser.uid).maybeSingle();
+          if (error) throw error;
+          if (data) serverStats = { ...serverStats, ...data };
+          renderCollectorHub();
+        } catch (e) { console.warn('Collector stats fetch failed:', e); }
+      };
+      fetchCollectorStats();
+      const statsChannel = supabase
+        .channel(`collector-stats-${currentUser.uid}`)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'collectorStats', filter: `id=eq.${currentUser.uid}` }, () => fetchCollectorStats())
+        .subscribe();
+      serverStatsUnsubscribe = () => supabase.removeChannel(statsChannel);
 
       if (serverNotificationsUnsubscribe) serverNotificationsUnsubscribe();
-      serverNotificationsUnsubscribe = db.collection('notifications')
-        .where('recipientUid', '==', currentUser.uid)
-        .limit(30)
-        .onSnapshot(snapshot => {
-          const rows = [];
-          snapshot.forEach(doc => rows.push({ id: doc.id, ...doc.data() }));
-          rows.sort((a,b) => {
-            const at = a.createdAt?.toMillis ? a.createdAt.toMillis() : new Date(a.createdAt || 0).getTime();
-            const bt = b.createdAt?.toMillis ? b.createdAt.toMillis() : new Date(b.createdAt || 0).getTime();
-            return bt - at;
-          });
+
+      const fetchServerNotifications = async () => {
+        try {
+          const { data, error } = await supabase.from('notifications').select('*').eq('recipientUid', currentUser.uid).limit(30);
+          if (error) throw error;
+          const rows = data || [];
+          rows.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
           systemNotifications = rows.slice(0, 20).map(n => ({
             id: n.id, title: n.title, message: n.message,
-            time: n.createdAt?.toDate ? n.createdAt.toDate().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : 'Now',
+            time: n.createdAt ? new Date(n.createdAt).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : 'Now',
             iconClass: n.type === 'trade' ? 'fa-handshake text-purple-400' :
               n.type === 'auction' ? 'fa-gavel text-amber-400' :
               n.type === 'order' ? 'fa-receipt text-emerald-400' :
@@ -2620,16 +2624,24 @@ main{margin-left:264px;max-width:none!important;width:auto!important;padding:28p
             server: true, read: n.read === true
           }));
           renderNotifications();
-        });
+        } catch (e) { console.warn('Notifications fetch failed:', e); }
+      };
+      fetchServerNotifications();
+      const notifChannel = supabase
+        .channel(`notifications-${currentUser.uid}`)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications', filter: `recipientUid=eq.${currentUser.uid}` }, () => fetchServerNotifications())
+        .subscribe();
+      serverNotificationsUnsubscribe = () => supabase.removeChannel(notifChannel);
     }
 
     async function markAllServerNotificationsRead() {
       if (!currentUser) return;
-      const snap = await db.collection('notifications').where('recipientUid', '==', currentUser.uid).limit(30).get();
-      if (snap.empty) return;
-      const batch = db.batch();
-      snap.forEach(doc => batch.update(doc.ref, { read: true, readAt: firebase.firestore.FieldValue.serverTimestamp() }));
-      await batch.commit();
+      try {
+        const { data, error } = await supabase.from('notifications').select('id').eq('recipientUid', currentUser.uid).limit(30);
+        if (error) throw error;
+        if (!data || !data.length) return;
+        await supabase.from('notifications').update({ read: true, readAt: new Date().toISOString() }).in('id', data.map(r => r.id));
+      } catch (e) { console.warn('Mark notifications read failed:', e); }
     }
 
     function renderSmartAlerts() {
@@ -3081,14 +3093,13 @@ main{margin-left:264px;max-width:none!important;width:auto!important;padding:28p
 
       if (chatUnsubscribe) chatUnsubscribe();
 
-      chatUnsubscribe = db.collection("chats").doc(chatId).collection("messages").orderBy("timestamp", "asc").onSnapshot(snapshot => {
-        if (snapshot.empty) {
+      const renderMessages = (rows) => {
+        if (!rows || !rows.length) {
           container.innerHTML = `<div class="text-center py-10 text-slate-500 text-xs" data-i18n="noChatMessages">${i18nDict[currentLanguage].noChatMessages}</div>`;
           return;
         }
 
-        container.innerHTML = snapshot.docs.map(doc => {
-          const msg = doc.data();
+        container.innerHTML = rows.map(msg => {
           const isMe = currentUser && (msg.sender === currentUser.name || msg.sender === currentUser.username);
           const isSenderAdmin = isUserAdmin(msg.sender);
           const senderAvatar = getCollectorAvatar(msg.sender);
@@ -3109,7 +3120,22 @@ main{margin-left:264px;max-width:none!important;width:auto!important;padding:28p
         }).join('');
 
         container.scrollTop = container.scrollHeight;
-      });
+      };
+
+      const fetchMessages = async () => {
+        try {
+          const { data, error } = await supabase.from('messages').select('*').eq('chatId', chatId).order('timestamp', { ascending: true });
+          if (error) throw error;
+          renderMessages(data);
+        } catch (e) { console.warn('Chat messages fetch failed:', e); }
+      };
+
+      fetchMessages();
+      const channel = supabase
+        .channel(`chat-messages-${chatId}`)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'messages', filter: `chatId=eq.${chatId}` }, () => fetchMessages())
+        .subscribe();
+      chatUnsubscribe = () => supabase.removeChannel(channel);
     }
 
     async function sendChatMessage() {
@@ -3210,13 +3236,12 @@ main{margin-left:264px;max-width:none!important;width:auto!important;padding:28p
         }).join('');
       };
 
-      const ingest = (snapshot) => {
-        snapshot.forEach(doc => {
-          const data = doc.data() || {};
-          const chatId = doc.id;
+      const ingest = (rows) => {
+        (rows || []).forEach(data => {
+          const chatId = data.id;
           const rawParticipants = Array.isArray(data.participants)
             ? data.participants
-            : chatId.replace(/^chat-/, '').split('-vs-');
+            : String(chatId).replace(/^chat-/, '').split('-vs-');
 
           const participants = rawParticipants.map(p => String(p).trim()).filter(Boolean);
           const lower = participants.map(p => p.toLowerCase());
@@ -3242,28 +3267,22 @@ main{margin-left:264px;max-width:none!important;width:auto!important;padding:28p
         renderThreads();
       };
 
-      const attach = (query) => {
+      const refetchAndIngest = async () => {
         try {
-          const unsub = query.onSnapshot(
-            snapshot => ingest(snapshot),
-            err => console.warn('Inbox query failed:', err?.message || err)
-          );
-          unsubscribers.push(unsub);
+          const { data, error } = await supabase.from('chats').select('*');
+          if (error) throw error;
+          ingest(data);
         } catch (err) {
-          console.warn('Inbox listener setup failed:', err);
+          console.warn('Inbox query failed:', err?.message || err);
         }
       };
 
-      // Primary modern schema.
-      attach(db.collection('chats').where('participantUids', 'array-contains', currentUser.uid));
-
-      // Legacy compatibility: old chats may only contain participant names.
-      if (currentUser.username) {
-        attach(db.collection('chats').where('participants', 'array-contains', currentUser.username));
-      }
-      if (currentUser.name && currentUser.name.toLowerCase() !== String(currentUser.username || '').toLowerCase()) {
-        attach(db.collection('chats').where('participants', 'array-contains', currentUser.name));
-      }
+      refetchAndIngest();
+      const inboxChannel = supabase
+        .channel(`inbox-threads-${currentUser.uid || 'anon'}`)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'chats' }, () => refetchAndIngest())
+        .subscribe();
+      unsubscribers.push(() => supabase.removeChannel(inboxChannel));
 
       // Clean up all listeners when the Inbox is refreshed or the user logs out.
       inboxUnsubscribe = () => {
@@ -3437,43 +3456,38 @@ main{margin-left:264px;max-width:none!important;width:auto!important;padding:28p
 
           for (let i = 0; i < importedCards.length; i += BATCH_LIMIT) {
             const chunk = importedCards.slice(i, i + BATCH_LIMIT);
-            const batch = db.batch();
 
-            chunk.forEach(c => {
-              const cardId = c.id;
-              const cardData = {
-                id: cardId,
-                serial: c.serial,
-                name: c.name,
-                type: c.type,
-                price: c.price,
-                baseFloorPrice: c.baseFloorPrice || c.price,
-                owner: c.owner || null,
-                status: c.status || 'AVAILABLE',
-                imgUrl: c.imgUrl || c.img_url,
-                edition: c.edition || 'Beta Edition: #0',
-                sn: c.sn || '0001',
-                tier: c.tier || (c.type === 'PREMIUM' ? '500' : '100'),
-                printing: c.printing || '1x'
-              };
+            const rows = chunk.map(c => ({
+              id: c.id,
+              serial: c.serial,
+              name: c.name,
+              type: c.type,
+              price: c.price,
+              baseFloorPrice: c.baseFloorPrice || c.price,
+              owner: c.owner || null,
+              status: c.status || 'AVAILABLE',
+              imgUrl: c.imgUrl || c.img_url,
+              edition: c.edition || 'Beta Edition: #0',
+              sn: c.sn || '0001',
+              tier: c.tier || (c.type === 'PREMIUM' ? '500' : '100'),
+              printing: c.printing || '1x'
+            }));
 
-              const docRef = db.collection("cards").doc(cardId);
-              batch.set(docRef, cardData, { merge: true });
-            });
+            const { error } = await supabase.from('cards').upsert(rows, { onConflict: 'id' });
+            if (error) throw error;
 
-            await batch.commit();
             processed += chunk.length;
-            updateImportProgress(processed, importedCards.length, `Batch saved to Firestore (${processed}/${importedCards.length})`);
+            updateImportProgress(processed, importedCards.length, `Batch saved (${processed}/${importedCards.length})`);
           }
 
           await loadAppState();
           hideLoadingModal();
 
-          showToast(`Bulk imported ${importedCards.length} cards into Firestore!`);
-          addNotification('Firestore Import Success', `Imported ${importedCards.length} records into database.`, 'fa-circle-check text-emerald-400');
+          showToast(`Bulk imported ${importedCards.length} cards into the database!`);
+          addNotification('Import Success', `Imported ${importedCards.length} records into database.`, 'fa-circle-check text-emerald-400');
 
         } catch (err) {
-          console.error('Firestore Import Error:', err);
+          console.error('Card Import Error:', err);
           hideLoadingModal();
           showToast('Failed to parse or import backup JSON.');
         } finally {
@@ -3593,33 +3607,30 @@ main{margin-left:264px;max-width:none!important;width:auto!important;padding:28p
       await loadCollectorProfiles();
 
       try {
-        const snapshot = await db.collection("cards").get();
-        if (!snapshot.empty) {
-          const fetchedCards = [];
-          snapshot.forEach(doc => {
-            const c = doc.data();
-            fetchedCards.push({
-              id: doc.id,
-              serial: c.serial || `*${doc.id}`,
-              name: c.name || 'Unnamed Card',
-              type: c.type || 'STANDARD',
-              price: parseFloat(c.price || 0),
-              baseFloorPrice: parseFloat(c.baseFloorPrice || c.price || 0),
-              owner: c.owner || null,
-              status: c.status || 'AVAILABLE',
-              imgUrl: c.imgUrl || `https://placehold.co/1080x1350/0f172a/fbbf24?text=${encodeURIComponent(c.serial || 'Card')}`,
-              edition: c.edition || "Beta Edition: #0",
-              sn: c.sn || "0001",
-              tier: c.tier || (c.type === 'PREMIUM' ? "500" : "100"),
-              printing: c.printing || "1x"
-            });
-          });
+        const { data, error } = await supabase.from('cards').select('*');
+        if (error) throw error;
+        if (data && data.length) {
+          const fetchedCards = data.map(c => ({
+            id: c.id,
+            serial: c.serial || `*${c.id}`,
+            name: c.name || 'Unnamed Card',
+            type: c.type || 'STANDARD',
+            price: parseFloat(c.price || 0),
+            baseFloorPrice: parseFloat(c.baseFloorPrice || c.price || 0),
+            owner: c.owner || null,
+            status: c.status || 'AVAILABLE',
+            imgUrl: c.imgUrl || `https://placehold.co/1080x1350/0f172a/fbbf24?text=${encodeURIComponent(c.serial || 'Card')}`,
+            edition: c.edition || "Beta Edition: #0",
+            sn: c.sn || "0001",
+            tier: c.tier || (c.type === 'PREMIUM' ? "500" : "100"),
+            printing: c.printing || "1x"
+          }));
 
           inventory = fetchedCards.sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true }));
           loadedFromDb = true;
         }
       } catch (err) {
-        console.warn('Firestore fetch exception:', err);
+        console.warn('Cards fetch exception:', err);
       }
 
       if (!loadedFromDb || inventory.length === 0) {
@@ -3635,9 +3646,9 @@ main{margin-left:264px;max-width:none!important;width:auto!important;padding:28p
 
     async function fetchListings() {
       try {
-        const snapshot = await db.collection("listings").get();
-        activeListings = [];
-        snapshot.forEach(doc => activeListings.push({ id: doc.id, ...doc.data() }));
+        const { data, error } = await supabase.from('listings').select('*');
+        if (error) throw error;
+        activeListings = data || [];
         renderP2PListings();
       } catch (e) {
         console.warn('Fetch listings error:', e);
@@ -3646,12 +3657,9 @@ main{margin-left:264px;max-width:none!important;width:auto!important;padding:28p
 
     async function fetchActiveAuction() {
       try {
-        const doc = await db.collection("system").doc("activeAuction").get();
-        if (doc.exists) {
-          activeAuction = doc.data();
-        } else {
-          activeAuction = null;
-        }
+        const { data, error } = await supabase.from('system').select('*').eq('id', 'activeAuction').maybeSingle();
+        if (error) throw error;
+        activeAuction = data || null;
         renderAuctionView();
       } catch (e) {
         console.warn('Fetch auction error:', e);
@@ -3662,15 +3670,18 @@ main{margin-left:264px;max-width:none!important;width:auto!important;padding:28p
       if (!currentUser) { tradeRequestsList = []; renderTradeRequests(); return; }
       try {
         if (currentUser.isAdmin) {
-          const snapshot = await db.collection('tradeRequests').limit(100).get();
-          tradeRequestsList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          const { data, error } = await supabase.from('tradeRequests').select('*').limit(100);
+          if (error) throw error;
+          tradeRequestsList = data || [];
         } else {
           const [outgoing, incoming] = await Promise.all([
-            db.collection('tradeRequests').where('proposerUid', '==', currentUser.uid).limit(100).get(),
-            db.collection('tradeRequests').where('targetOwnerUid', '==', currentUser.uid).limit(100).get()
+            supabase.from('tradeRequests').select('*').eq('proposerUid', currentUser.uid).limit(100),
+            supabase.from('tradeRequests').select('*').eq('targetOwnerUid', currentUser.uid).limit(100)
           ]);
+          if (outgoing.error) throw outgoing.error;
+          if (incoming.error) throw incoming.error;
           const map = new Map();
-          [...outgoing.docs, ...incoming.docs].forEach(doc => map.set(doc.id, { id: doc.id, ...doc.data() }));
+          [...(outgoing.data || []), ...(incoming.data || [])].forEach(row => map.set(row.id, row));
           tradeRequestsList = [...map.values()];
         }
         tradeRequestsList.sort((a,b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
@@ -3679,36 +3690,42 @@ main{margin-left:264px;max-width:none!important;width:auto!important;padding:28p
       } catch (e) { console.warn('Fetch trade requests error:', e); }
     }
     function setupRealtimeSync() {
-      db.collection("cards").onSnapshot((snapshot) => {
-        snapshot.docChanges().forEach((change) => {
-          if (change.type === "modified" || change.type === "added") {
-            const c = change.doc.data();
-            const existingCard = inventory.find(i => i.id === change.doc.id);
-            if (existingCard) {
-              Object.assign(existingCard, {
-                name: c.name, serial: c.serial, type: c.type,
-                price: parseFloat(c.price || 0), owner: c.owner || null,
-                status: c.status || 'AVAILABLE', imgUrl: c.imgUrl,
-                edition: c.edition, sn: c.sn, tier: c.tier, printing: c.printing
-              });
-            }
+      supabase
+        .channel('realtime-cards')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'cards' }, (payload) => {
+          const c = payload.new || {};
+          if (!c.id) return;
+          const existingCard = inventory.find(i => i.id === c.id);
+          if (existingCard) {
+            Object.assign(existingCard, {
+              name: c.name, serial: c.serial, type: c.type,
+              price: parseFloat(c.price || 0), owner: c.owner || null,
+              status: c.status || 'AVAILABLE', imgUrl: c.imgUrl,
+              edition: c.edition, sn: c.sn, tier: c.tier, printing: c.printing
+            });
           }
-        });
-        updateAllViews();
-        snapshotWishlistPrices();
-        renderCollectorHub();
-      });
+          updateAllViews();
+          snapshotWishlistPrices();
+          renderCollectorHub();
+        })
+        .subscribe();
 
-      db.collection("listings").onSnapshot(() => fetchListings());
+      supabase
+        .channel('realtime-listings')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'listings' }, () => fetchListings())
+        .subscribe();
 
-      db.collection("system").doc("activeAuction").onSnapshot((doc) => {
-        const nextAuction = doc.exists ? doc.data() : null;
-        if (nextAuction) recordAuctionAlerts(nextAuction);
-        activeAuction = nextAuction;
-        renderAuctionView();
-        renderSmartAlerts();
-        renderCollectorHub();
-      });
+      supabase
+        .channel('realtime-active-auction')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'system', filter: 'id=eq.activeAuction' }, (payload) => {
+          const nextAuction = payload.eventType === 'DELETE' ? null : (payload.new || null);
+          if (nextAuction) recordAuctionAlerts(nextAuction);
+          activeAuction = nextAuction;
+          renderAuctionView();
+          renderSmartAlerts();
+          renderCollectorHub();
+        })
+        .subscribe();
     }
 
     function startUserScopedRealtimeListeners() {
@@ -3716,15 +3733,12 @@ main{margin-left:264px;max-width:none!important;width:auto!important;padding:28p
       if (tradeRequestUnsubscribe) tradeRequestUnsubscribe();
 
       const mergeTradeSnapshots = () => fetchTradeRequests();
-      if (currentUser.isAdmin) {
-        tradeRequestUnsubscribe = db.collection('tradeRequests').limit(100).onSnapshot(mergeTradeSnapshots);
-      } else {
-        const unsubs = [
-          db.collection('tradeRequests').where('proposerUid', '==', currentUser.uid).limit(100).onSnapshot(mergeTradeSnapshots),
-          db.collection('tradeRequests').where('targetOwnerUid', '==', currentUser.uid).limit(100).onSnapshot(mergeTradeSnapshots)
-        ];
-        tradeRequestUnsubscribe = () => unsubs.forEach(u => u());
-      }
+      const tradeChannel = supabase
+        .channel(`trade-requests-${currentUser.uid}`)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'tradeRequests' }, mergeTradeSnapshots)
+        .subscribe();
+      tradeRequestUnsubscribe = () => supabase.removeChannel(tradeChannel);
+
       fetchTradeRequests();
       fetchTransactionHistory();
       if (currentUser.isAdmin) loadPendingTransactions();
@@ -4050,8 +4064,6 @@ function renderAuthHeader() {
 
     async function handleUserSession(user) {
       const email = user.email ? user.email.toLowerCase() : '';
-      let tokenResult = {};
-      try { tokenResult = await user.getIdTokenResult(true); } catch (e) {}
 
       await loadCollectorProfiles();
       const savedCustomProfile = globalCollectorProfiles[email] || localStorage.getItem(`profile_${email}`) || getCookie(`profile_${email}`);
@@ -4060,17 +4072,17 @@ function renderAuthHeader() {
         try { customData = typeof savedCustomProfile === 'object' ? savedCustomProfile : JSON.parse(savedCustomProfile); } catch (e) {}
       }
 
-      const name = customData.name || user.displayName || (email ? email.split('@')[0] : 'Eugene');
+      const meta = user.user_metadata || {};
+      const name = customData.name || meta.full_name || meta.name || (email ? email.split('@')[0] : 'Eugene');
       const username = customData.username || name.toLowerCase().replace(/\s+/g, '_');
       // UI/admin navigation compatibility:
       // These two accounts remain recognized as Admin in the interface.
-      // Sensitive writes are STILL enforced by Firebase Custom Claims / Cloud Functions.
-      const isAdmin = tokenResult.claims?.admin === true ||
-        ADMIN_EMAILS.includes(email);
+      // Sensitive writes are STILL enforced server-side by callServer(...) (Cloud Functions, not yet migrated).
+      const isAdmin = ADMIN_EMAILS.includes(email);
       currentUser = {
-        uid: user.uid, name, username, email, isAdmin,
+        uid: user.id, name, username, email, isAdmin,
         isPlusMember: false,
-        avatarUrl: customData.avatarUrl || user.photoURL || `https://api.dicebear.com/7.x/identicon/svg?seed=${email}`,
+        avatarUrl: customData.avatarUrl || meta.avatar_url || meta.picture || `https://api.dicebear.com/7.x/identicon/svg?seed=${email}`,
         bio: customData.bio || (isAdmin ? 'Official Platform Admin' : 'Standard Collector'),
         socialIg: customData.socialIg || '', socialTwitter: customData.socialTwitter || '',
         socialTiktok: customData.socialTiktok || '', socialWeb: customData.socialWeb || ''
@@ -4233,18 +4245,21 @@ function renderAuthHeader() {
 
     async function fetchTransactionHistory() {
       try {
-        let snapshot;
+        let data;
         if (currentUser?.isAdmin) {
-          snapshot = await db.collection('transactions').orderBy('created_at', 'desc').limit(200).get();
+          const res = await supabase.from('transactions').select('*').order('created_at', { ascending: false }).limit(200);
+          if (res.error) throw res.error;
+          data = res.data;
         } else if (currentUser) {
-          snapshot = await db.collection('transactions').where('userUid', '==', currentUser.uid).limit(100).get();
+          const res = await supabase.from('transactions').select('*').eq('userUid', currentUser.uid).limit(100);
+          if (res.error) throw res.error;
+          data = res.data;
         } else {
           transactionsList = [];
           renderTransactionHistoryTable();
           return;
         }
-        const txList = [];
-        snapshot.forEach(doc => txList.push({ id: doc.id, ...doc.data() }));
+        const txList = data || [];
         txList.sort((a,b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
         transactionsList = txList;
         renderTransactionHistoryTable();
@@ -4505,12 +4520,13 @@ function renderAuthHeader() {
       };
 
       try {
-        await db.collection("cards").doc(cardId).set(updatedObj, { merge: true });
+        const { error } = await supabase.from('cards').upsert(updatedObj, { onConflict: 'id' });
+        if (error) throw error;
         Object.assign(card, updatedObj);
-        showToast(`Saved ${updatedSerial} to Firestore!`);
+        showToast(`Saved ${updatedSerial}!`);
       } catch (e) {
-        console.error('Firestore DB write error:', e);
-        showToast('Error saving to Firestore: ' + e.message);
+        console.error('Card DB write error:', e);
+        showToast('Error saving card: ' + e.message);
       }
 
       closeInventoryModal();
@@ -4569,7 +4585,8 @@ function renderAuthHeader() {
       if (!confirm(`Sell back ${card.serial} to Admin via QRIS payout at floor price (${formatIDR(card.price)})?`)) return;
 
       try {
-        await db.collection("cards").doc(cardId).update({ owner: null, status: 'AVAILABLE' });
+        const { error } = await supabase.from('cards').update({ owner: null, status: 'AVAILABLE' }).eq('id', cardId);
+        if (error) throw error;
         showToast(`Successfully sold ${card.serial} back to Admin!`);
         addNotification('Card Sold Back (QRIS Payout)', `Returned ${card.serial} to house stock.`, 'fa-rotate-left text-amber-400');
         await loadAppState();
@@ -5251,15 +5268,9 @@ function renderAuthHeader() {
       if (!container) return;
 
       try {
-        const snapshot = await db.collection("transactions").get();
-        const pendingList = [];
-        
-        snapshot.forEach(doc => {
-          const data = doc.data();
-          if (data.status === 'PENDING') {
-            pendingList.push({ id: doc.id, ...data });
-          }
-        });
+        const { data, error } = await supabase.from('transactions').select('*').eq('status', 'PENDING');
+        if (error) throw error;
+        const pendingList = data || [];
 
         if (pendingList.length === 0) {
           container.innerHTML = `<p class="text-xs text-slate-500" data-i18n="noPendingOrders">${i18nDict[currentLanguage].noPendingOrders}</p>`;
