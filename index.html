@@ -100,12 +100,9 @@
         <button id="nav-trade-req" onclick="switchTab('trade-req')" class="px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white flex items-center gap-1.5 whitespace-nowrap">
           <i class="fa-solid fa-handshake text-purple-400"></i> <span data-i18n="navRequests">Trade Requests</span>
         </button>
-        
-        <!-- Analytics Navigation Button -->
-        <button onclick="openAnalyticsPage()" class="admin-only-nav hidden px-3 py-1.5 rounded-xl text-xs font-semibold text-amber-300 hover:text-white flex items-center gap-1.5 whitespace-nowrap bg-amber-950/30 border border-amber-500/30 transition-all">
-          <i class="fa-solid fa-chart-line text-amber-400"></i> <span data-i18n="navAnalytics">Analytics</span> <i class="fa-solid fa-arrow-up-right-from-square text-[9px] ml-0.5 opacity-70"></i>
+        <button id="nav-analytics" onclick="switchTab('analytics')" class="analytics-nav-btn hidden px-3 py-1.5 rounded-xl text-xs font-semibold text-amber-300 hover:text-white flex items-center gap-1.5 whitespace-nowrap bg-amber-950/30 border border-amber-500/30">
+          <i class="fa-solid fa-chart-line text-amber-400"></i> <span data-i18n="navAnalytics">Analytics</span>
         </button>
-
         <button id="nav-inbox" onclick="switchTab('inbox')" class="px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white flex items-center gap-1.5 whitespace-nowrap">
           <i class="fa-solid fa-comments text-indigo-400"></i> <span data-i18n="navInbox">Inbox</span>
         </button>
@@ -345,6 +342,50 @@
       <div id="trade-requests-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
     </section>
 
+    <!-- MARKET ANALYTICS VIEW (ADMIN ONLY) -->
+    <section id="view-analytics" class="hidden space-y-6">
+      <div class="bg-gradient-to-r from-amber-950/60 via-slate-900 to-indigo-950/60 border border-amber-500/40 rounded-3xl p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <span class="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30 tracking-wider" data-i18n="exclusiveAccess">EXCLUSIVE ACCESS</span>
+          <h2 class="text-2xl font-black text-white uppercase tracking-wide mt-1"><i class="fa-solid fa-chart-line text-amber-400 mr-2"></i> <span data-i18n="analyticsTitle">Market Analytics & Valuation</span></h2>
+          <p class="text-xs text-slate-400 mt-1" data-i18n="analyticsSubtitle">Real-time marketplace metrics, floor price trends, and volume statistics.</p>
+        </div>
+        <button onclick="renderMarketAnalytics()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-bold text-amber-400 rounded-xl border border-slate-700 flex items-center gap-2">
+          <i class="fa-solid fa-rotate"></i> <span data-i18n="refreshAnalytics">Refresh Analytics</span>
+        </button>
+      </div>
+
+      <!-- ANALYTICS METRIC CARDS -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-1">
+          <p class="text-[10px] font-bold text-slate-400 uppercase" data-i18n="totalVolume">Total Marketplace Volume</p>
+          <p id="analytics-total-volume" class="text-2xl font-black text-emerald-400 font-mono">Rp 0</p>
+          <p class="text-[10px] text-emerald-500"><i class="fa-solid fa-arrow-trend-up"></i> <span data-i18n="volumeTrend">+14.2% this week</span></p>
+        </div>
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-1">
+          <p class="text-[10px] font-bold text-slate-400 uppercase" data-i18n="avgFloorPrice">Average Floor Price</p>
+          <p id="analytics-avg-floor" class="text-2xl font-black text-amber-400 font-mono">Rp 0</p>
+          <p class="text-[10px] text-slate-400" data-i18n="acrossCards">Across 50 edition cards</p>
+        </div>
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-1">
+          <p class="text-[10px] font-bold text-slate-400 uppercase" data-i18n="collectedOwned">Collected / Owned</p>
+          <p id="analytics-collected-count" class="text-2xl font-black text-indigo-400 font-mono">0 / 50</p>
+          <p class="text-[10px] text-slate-400" data-i18n="holdersSub">Primary & Secondary holders</p>
+        </div>
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-1">
+          <p class="text-[10px] font-bold text-slate-400 uppercase" data-i18n="activeTradeReqs">Active Trade Requests</p>
+          <p id="analytics-trade-reqs" class="text-2xl font-black text-purple-400 font-mono">0</p>
+          <p class="text-[10px] text-slate-400" data-i18n="pendingCountered">Pending & countered</p>
+        </div>
+      </div>
+
+      <!-- RECENT PRICE TRENDS TABLE -->
+      <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4">
+        <h3 class="text-xs font-extrabold text-white uppercase tracking-wider" data-i18n="topValuationIndex">Top Card Valuation Index</h3>
+        <div id="analytics-valuation-list" class="space-y-2"></div>
+      </div>
+    </section>
+
     <!-- INBOX / CHAT VIEW -->
     <section id="view-inbox" class="hidden space-y-6">
       <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -395,7 +436,6 @@
               <tr>
                 <th class="p-3.5" data-i18n="thOrderRef">Order Ref</th>
                 <th class="p-3.5" data-i18n="thBuyer">Buyer</th>
-                <th class="p-3.5" data-i18n="thSeller">Seller</th>
                 <th class="p-3.5" data-i18n="thItems">Items Acquired</th>
                 <th class="p-3.5" data-i18n="thAmount">Amount (IDR + 2% Tax)</th>
                 <th class="p-3.5" data-i18n="thProof">QRIS Receipt</th>
@@ -421,7 +461,7 @@
         </button>
       </div>
 
-      <!-- COLLECTOR SOCIAL LINKS CARD -->
+      <!-- COLLECTOR SOCIAL LINKS CARD (CLICKABLE) -->
       <div id="collector-social-banner" class="hidden bg-slate-900 border border-slate-800 rounded-3xl p-5 flex flex-wrap items-center justify-between gap-4">
         <div class="flex items-center gap-3">
           <img id="dashboard-banner-avatar" src="" class="w-12 h-12 rounded-full object-cover border-2 border-amber-500/40 bg-slate-950">
@@ -611,11 +651,14 @@
           </select>
         </div>
 
+        <!-- DYNAMIC FIELD FOR OFFERED CARD (OWNED BY USER) -->
         <div id="trade-my-card-container" class="hidden">
           <label class="block font-bold text-purple-400 mb-1" data-i18n="selectMyCardOffer">Select Your Card to Offer in Trade</label>
-          <select id="trade-my-card-select" class="w-full bg-slate-950 border border-purple-500/50 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-purple-400"></select>
+          <select id="trade-my-card-select" class="w-full bg-slate-950 border border-purple-500/50 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-purple-400">
+          </select>
         </div>
 
+        <!-- DYNAMIC FIELD FOR PLUS AMOUNT (TOP UP IDR) -->
         <div id="trade-plus-amount-container" class="hidden">
           <label class="block font-bold text-amber-400 mb-1" data-i18n="plusAmountLabel">Plus Cash / Top-up Amount (IDR - Optional)</label>
           <input type="number" id="trade-plus-amount-input" placeholder="e.g. 50000" class="w-full bg-slate-950 border border-amber-500/40 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-400">
@@ -723,6 +766,7 @@
           <textarea id="profile-edit-bio-input" rows="3" placeholder="e.g. Genesis Card Enthusiast" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:border-amber-500 focus:outline-none resize-y" data-i18n-placeholder="bioPlaceholder"></textarea>
         </div>
 
+        <!-- SOCIAL MEDIA LINKS (OPTIONAL) -->
         <div class="p-3 bg-slate-950 rounded-2xl border border-slate-800 space-y-2">
           <label class="block font-bold text-amber-400 uppercase text-[10px]"><i class="fa-solid fa-share-nodes mr-1"></i> <span data-i18n="socialsTitle">Social Media & Links (Optional)</span></label>
           <div>
@@ -1102,7 +1146,6 @@
         histApproved: "Approved Only",
         thOrderRef: "Order Ref",
         thBuyer: "Buyer",
-        thSeller: "Seller",
         thItems: "Items Acquired",
         thAmount: "Amount (IDR + 2% Tax)",
         thProof: "QRIS Receipt",
@@ -1287,7 +1330,6 @@
         histApproved: "Disetujui Saja",
         thOrderRef: "Ref Pesanan",
         thBuyer: "Pembeli",
-        thSeller: "Penjual",
         thItems: "Kartu Didapat",
         thAmount: "Jumlah (IDR + Pajak 2%)",
         thProof: "Bukti QRIS",
@@ -1404,7 +1446,6 @@
       const btnLabel = document.getElementById('current-lang-label');
       if (btnLabel) btnLabel.innerText = currentLanguage;
       applyTranslations();
-      updateAllViews();
       showToast(currentLanguage === 'ID' ? 'Bahasa diubah ke Bahasa Indonesia' : 'Language switched to English');
     }
 
@@ -1774,7 +1815,7 @@
                 ${isSenderAdmin ? `<span class="text-[8px] font-black px-1 py-0 rounded bg-rose-500/20 text-rose-400 border border-rose-500/30">ADMIN</span>` : ''}
               </div>
               <div class="max-w-[80%] px-3 py-2 rounded-2xl text-xs ${isMe ? 'bg-amber-500 text-slate-950 font-medium rounded-tr-none' : 'bg-slate-950 border border-slate-800 text-white rounded-tl-none'}">
-                ${msg.imgUrl ? `<img src="${msg.imgUrl}" onclick="openReceiptPreview('${msg.imgUrl}')" class="max-w-full max-h-48 rounded-lg mb-1 border border-slate-800 hover:opacity-90 transition-opacity cursor-pointer">` : ''}
+                ${msg.imgUrl ? `<a href="${msg.imgUrl}" target="_blank"><img src="${msg.imgUrl}" class="max-w-full max-h-48 rounded-lg mb-1 border border-slate-800 hover:opacity-90 transition-opacity"></a>` : ''}
                 ${msg.text ? `<div>${msg.text}</div>` : ''}
               </div>
             </div>
@@ -1896,62 +1937,16 @@
       });
     }
 
-    // CANVAS-COMPRESSED SCREENSHOT UPLOAD TO PREVENT MOBILE RAM CRASHES
     function handleQrisScreenshotUpload(event) {
       const file = event.target.files[0];
       if (!file) return;
-
       const reader = new FileReader();
       reader.onload = function(e) {
-        const img = new Image();
-        img.onload = function() {
-          const canvas = document.createElement('canvas');
-          const ctx = canvas.getContext('2d');
-
-          const MAX_WIDTH = 800;
-          let width = img.width;
-          let height = img.height;
-
-          if (width > MAX_WIDTH) {
-            height = Math.round((height * MAX_WIDTH) / width);
-            width = MAX_WIDTH;
-          }
-
-          canvas.width = width;
-          canvas.height = height;
-          ctx.drawImage(img, 0, 0, width, height);
-
-          const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
-
-          document.getElementById('qris-proof-img-data').value = compressedDataUrl;
-          document.getElementById('qris-proof-preview-img').src = compressedDataUrl;
-          document.getElementById('qris-proof-preview-container').classList.remove('hidden');
-        };
-        img.src = e.target.result;
+        document.getElementById('qris-proof-img-data').value = e.target.result;
+        document.getElementById('qris-proof-preview-img').src = e.target.result;
+        document.getElementById('qris-proof-preview-container').classList.remove('hidden');
       };
       reader.readAsDataURL(file);
-    }
-
-    // SAFE MODAL RECEIPT PREVIEW (PREVENTS NEW-TAB MEMORY CRASH)
-    function openReceiptPreview(dataUrl) {
-      if (!dataUrl) return showToast('No receipt file found.');
-      
-      let modal = document.getElementById('receipt-modal');
-      if (!modal) {
-        modal = document.createElement('div');
-        modal.id = 'receipt-modal';
-        modal.className = 'fixed inset-0 bg-slate-950/90 backdrop-blur-md z-[10000] flex items-center justify-center p-4 cursor-pointer';
-        modal.onclick = () => modal.classList.add('hidden');
-        modal.innerHTML = `
-          <div class="relative max-w-sm w-full bg-slate-900 border border-slate-800 p-2 rounded-2xl shadow-2xl">
-            <img id="receipt-modal-img" class="w-full h-auto max-h-[80vh] object-contain rounded-xl">
-            <p class="text-center text-[10px] text-slate-400 mt-2 font-mono">Tap anywhere to close</p>
-          </div>
-        `;
-        document.body.appendChild(modal);
-      }
-      document.getElementById('receipt-modal-img').src = dataUrl;
-      modal.classList.remove('hidden');
     }
 
     function initDefaultInventory() {
@@ -2168,37 +2163,20 @@
       } catch (e) {}
     }
 
-    let auctionTimerInterval = null;
+    let auctionSecondsLeft = 3 * 3600 + 14 * 60 + 22;
 
-    function startLiveAuctionCountdown(expiresAtIso) {
-      const timerEl = document.getElementById('auction-timer');
-      if (!timerEl) return;
-
-      if (auctionTimerInterval) {
-        clearInterval(auctionTimerInterval);
-        auctionTimerInterval = null;
-      }
-
-      const targetTime = new Date(expiresAtIso || Date.now()).getTime();
-
-      const tick = () => {
-        const distance = targetTime - Date.now();
-        if (!activeAuction || distance <= 0) {
-          timerEl.innerText = currentLanguage === 'ID' ? 'Lelang Berakhir' : 'Auction Ended';
-          clearInterval(auctionTimerInterval);
-          auctionTimerInterval = null;
-          renderAuctionView();
-          return;
+    function startAuctionTimer() {
+      setInterval(() => {
+        if (auctionSecondsLeft > 0) {
+          auctionSecondsLeft--;
+          const hrs = Math.floor(auctionSecondsLeft / 3600);
+          const mins = Math.floor((auctionSecondsLeft % 3600) / 60);
+          const secs = auctionSecondsLeft % 60;
+          const pad = n => n < 10 ? '0' + n : n;
+          const timerEl = document.getElementById('auction-timer');
+          if (timerEl) timerEl.innerText = `${pad(hrs)}h ${pad(mins)}m ${pad(secs)}s`;
         }
-        const hrs = Math.floor(distance / (1000 * 60 * 60));
-        const mins = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-        const secs = Math.floor((distance % (1000 * 60)) / 1000);
-        const pad = n => n < 10 ? '0' + n : n;
-        timerEl.innerText = `${pad(hrs)}h ${pad(mins)}m ${pad(secs)}s`;
-      };
-
-      tick();
-      auctionTimerInterval = setInterval(tick, 1000);
+      }, 1000);
     }
 
     let debounceTimer;
@@ -2354,13 +2332,45 @@
       updateCartTotals();
       renderAuctionView();
       renderTradeRequests();
+      if (!document.getElementById('view-analytics').classList.contains('hidden')) {
+        renderMarketAnalytics();
+      }
     }
 
-    function openAnalyticsPage() {
+    function renderMarketAnalytics() {
       if (!currentUser || !currentUser.isAdmin) {
+        switchTab('catalog');
         return showToast('Market Analytics is restricted exclusively to Admins.');
       }
-      window.open('analytics.html', '_blank');
+
+      const totalVol = transactionsList.filter(t => t.status === 'APPROVED').reduce((sum, t) => sum + (t.total_amount || 0), 0);
+      const avgFloor = inventory.length > 0 ? inventory.reduce((s, c) => s + c.price, 0) / inventory.length : 0;
+      const collectedCount = inventory.filter(c => c.owner !== null).length;
+
+      document.getElementById('analytics-total-volume').innerText = formatIDR(totalVol);
+      document.getElementById('analytics-avg-floor').innerText = formatIDR(avgFloor);
+      document.getElementById('analytics-collected-count').innerText = `${collectedCount} / ${inventory.length}`;
+      document.getElementById('analytics-trade-reqs').innerText = tradeRequestsList.length;
+
+      const valuationList = document.getElementById('analytics-valuation-list');
+      if (valuationList) {
+        const sorted = [...inventory].sort((a,b) => b.price - a.price).slice(0, 8);
+        valuationList.innerHTML = sorted.map(c => `
+          <div class="bg-slate-950 p-3 rounded-2xl border border-slate-800 flex justify-between items-center text-xs">
+            <div class="flex items-center gap-3">
+              <img src="${c.imgUrl}" class="w-10 h-10 object-contain rounded bg-slate-900 border border-slate-800">
+              <div>
+                <p class="font-bold text-white">${c.name} (${c.serial})</p>
+                <p class="text-[10px] text-slate-400">Owner: ${c.owner || 'Unowned (House)'}</p>
+              </div>
+            </div>
+            <div class="text-right font-mono">
+              <p class="font-extrabold text-emerald-400">${formatIDR(c.price)}</p>
+              <p class="text-[9px] text-amber-400">${c.type} Tier</p>
+            </div>
+          </div>
+        `).join('');
+      }
     }
 
     function renderAuctionView() {
@@ -2369,10 +2379,6 @@
       const imgEl = document.getElementById('auction-card-img');
       const ownerEl = document.getElementById('auction-card-owner-info');
       const actionContainer = document.getElementById('auction-header-action-container');
-      const bidEl = document.getElementById('auction-current-bid');
-      const bidderEl = document.getElementById('auction-high-bidder');
-      const historyEl = document.getElementById('auction-bid-history');
-      const bidInputEl = document.getElementById('bid-input-amount');
 
       if (!titleEl) return;
 
@@ -2382,13 +2388,6 @@
         if (imgEl) imgEl.src = "https://placehold.co/1080x1350/1e1b4b/fbbf24?text=No+Auction";
         if (ownerEl) ownerEl.innerHTML = `<span data-i18n="ownerLabel">${i18nDict[currentLanguage].ownerLabel}</span>: <strong class="text-white">None</strong>`;
         if (actionContainer) actionContainer.innerHTML = '';
-        if (bidEl) bidEl.innerText = formatIDR(0);
-        if (bidderEl) bidderEl.innerText = 'None';
-        if (historyEl) historyEl.innerHTML = `<p class="text-slate-500 text-xs">No active auction right now.</p>`;
-        if (bidInputEl) bidInputEl.disabled = true;
-        const timerEl = document.getElementById('auction-timer');
-        if (timerEl) timerEl.innerText = '--h --m --s';
-        if (auctionTimerInterval) { clearInterval(auctionTimerInterval); auctionTimerInterval = null; }
         return;
       }
 
@@ -2397,52 +2396,17 @@
       if (imgEl) imgEl.src = activeAuction.imgUrl || "https://placehold.co/1080x1350/1e1b4b/fbbf24?text=Card";
       if (ownerEl) ownerEl.innerHTML = `<span data-i18n="ownerLabel">${i18nDict[currentLanguage].ownerLabel}</span>: <strong class="text-white">${activeAuction.owner || 'Admin'}</strong>`;
 
-      const currentBidAmount = activeAuction.currentBid || activeAuction.startingPrice || 0;
-      if (bidEl) bidEl.innerText = formatIDR(currentBidAmount);
-      if (bidderEl) bidderEl.innerText = activeAuction.highBidder && activeAuction.highBidder !== 'None' ? activeAuction.highBidder : 'None yet';
-
-      const history = Array.isArray(activeAuction.bidHistory) ? [...activeAuction.bidHistory].reverse() : [];
-      if (historyEl) {
-        historyEl.innerHTML = history.length ? history.map(b => `
-          <div class="flex justify-between items-center bg-slate-950 px-3 py-2 rounded-xl border border-slate-800">
-            <span class="font-bold text-white">${b.bidder}</span>
-            <span class="font-mono text-emerald-400">${formatIDR(b.amount)}</span>
-          </div>
-        `).join('') : `<p class="text-slate-500 text-xs">No bids placed yet — be the first!</p>`;
-      }
-
-      const now = Date.now();
-      const expiresAtMs = activeAuction.expiresAt ? new Date(activeAuction.expiresAt).getTime() : null;
-      const hasEnded = expiresAtMs !== null && expiresAtMs <= now;
-
-      const myIdent = currentUser ? (currentUser.username || currentUser.name) : null;
-      const canCancel = currentUser && (currentUser.isAdmin || myIdent === activeAuction.owner);
-
-      if (bidInputEl) bidInputEl.disabled = hasEnded;
-
+      const canCancel = currentUser && (currentUser.isAdmin || currentUser.name === activeAuction.owner || currentUser.username === activeAuction.owner);
       if (actionContainer) {
-        if (hasEnded && currentUser && currentUser.isAdmin) {
-          actionContainer.innerHTML = `
-            <button onclick="finalizeAuctionWinner()" class="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs rounded-xl shadow-lg flex items-center gap-2">
-              <i class="fa-solid fa-flag-checkered"></i> Finalize & Transfer to Winner
-            </button>
-          `;
-        } else if (canCancel) {
+        if (canCancel) {
           actionContainer.innerHTML = `
             <button onclick="cancelActiveAuction()" class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white font-extrabold text-xs rounded-xl shadow-lg flex items-center gap-2">
-              <i class="fa-solid fa-ban"></i> Cancel Auction (${currentUser.isAdmin && myIdent !== activeAuction.owner ? 'Admin' : 'Owner'})
+              <i class="fa-solid fa-ban"></i> Cancel Auction (${currentUser.isAdmin && currentUser.name !== activeAuction.owner ? 'Admin' : 'Owner'})
             </button>
           `;
         } else {
           actionContainer.innerHTML = '';
         }
-      }
-
-      if (expiresAtMs !== null) {
-        startLiveAuctionCountdown(activeAuction.expiresAt);
-      } else {
-        const timerEl = document.getElementById('auction-timer');
-        if (timerEl) timerEl.innerText = '--h --m --s';
       }
     }
 
@@ -2464,6 +2428,7 @@
       await loadAppState();
       setupRealtimeSync();
       renderAuthHeader();
+      startAuctionTimer();
 
       auth.onAuthStateChanged((user) => {
         if (user) {
@@ -2500,14 +2465,17 @@
     function renderAuthHeader() {
       const container = document.getElementById('auth-header-container');
       const adminNavs = document.querySelectorAll('.admin-only-nav');
+      const analyticsNavs = document.querySelectorAll('.analytics-nav-btn');
       const adminSep = document.getElementById('admin-nav-separator');
 
       if (currentUser) {
         if (currentUser.isAdmin) {
           adminNavs.forEach(el => el.classList.remove('hidden'));
+          analyticsNavs.forEach(el => el.classList.remove('hidden'));
           if (adminSep) adminSep.classList.remove('hidden');
         } else {
           adminNavs.forEach(el => el.classList.add('hidden'));
+          analyticsNavs.forEach(el => el.classList.add('hidden'));
           if (adminSep) adminSep.classList.add('hidden');
         }
 
@@ -2530,6 +2498,7 @@
         `;
       } else {
         adminNavs.forEach(el => el.classList.add('hidden'));
+        analyticsNavs.forEach(el => el.classList.add('hidden'));
         if (adminSep) adminSep.classList.add('hidden');
         container.innerHTML = `<button onclick="openAuthModal()" class="px-3.5 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs rounded-xl transition-all">Log In</button>`;
       }
@@ -2704,7 +2673,7 @@
       });
 
       if (filtered.length === 0) {
-        grid.innerHTML = `<div class="col-span-full text-center py-16 text-slate-500 text-xs">${currentLanguage === 'ID' ? 'Tidak ada kartu yang cocok dengan filter Anda.' : 'No cards match your filter criteria.'}</div>`;
+        grid.innerHTML = `<div class="col-span-full text-center py-16 text-slate-500 text-xs">No cards match your filter criteria.</div>`;
         return;
       }
 
@@ -2736,13 +2705,13 @@
               <p class="text-[11px] font-extrabold text-white truncate">${card.name}</p>
               <div class="flex items-center justify-between">
                 <span class="text-xs font-mono text-emerald-400 font-extrabold">${formatIDR(card.price)}</span>
-                <span class="text-[9px] text-slate-400 truncate max-w-[80px]">${card.owner || (currentLanguage === 'ID' ? 'Tidak Dimiliki' : 'Unowned')}</span>
+                <span class="text-[9px] text-slate-400 truncate max-w-[80px]">${card.owner || 'Unowned'}</span>
               </div>
 
               ${!isSold ? `
-                <button onclick="addToCart('${card.id}')" class="w-full py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-[10px] rounded-xl transition-all">${currentLanguage === 'ID' ? 'Tambah ke Keranjang' : 'Add to Cart'}</button>
+                <button onclick="addToCart('${card.id}')" class="w-full py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-[10px] rounded-xl transition-all">Add to Cart</button>
               ` : `
-                <button disabled class="w-full py-1.5 bg-slate-950 text-slate-600 font-bold text-[10px] rounded-xl cursor-not-allowed">${currentLanguage === 'ID' ? 'Dimiliki' : 'Owned'}</button>
+                <button disabled class="w-full py-1.5 bg-slate-950 text-slate-600 font-bold text-[10px] rounded-xl cursor-not-allowed">Owned</button>
               `}
             </div>
           </div>
@@ -2750,7 +2719,7 @@
       }).join('');
 
       if (visibleCardCount < filtered.length) {
-        grid.innerHTML += `<div id="scroll-sentinel" class="col-span-full h-10 flex items-center justify-center text-xs text-slate-500 font-mono">${currentLanguage === 'ID' ? 'Memuat lebih banyak kartu...' : 'Loading more cards...'}</div>`;
+        grid.innerHTML += `<div id="scroll-sentinel" class="col-span-full h-10 flex items-center justify-center text-xs text-slate-500 font-mono">Loading more cards...</div>`;
         setupScrollSentinel(filtered.length);
       }
     }
@@ -2822,7 +2791,7 @@
       });
 
       if (filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" class="p-8 text-center text-slate-500">No transaction records found.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-500">No transaction records found.</td></tr>`;
         return;
       }
 
@@ -2832,22 +2801,18 @@
           ? items.map(i => `<span class="inline-block bg-slate-950 px-1.5 py-0.5 rounded border border-slate-800 text-[10px] font-mono text-amber-400 mr-1 mb-1">${i.serial || 'Card'}</span>`).join('')
           : '<span class="text-slate-500">N/A</span>';
 
-        const sellers = [...new Set(items.map(i => i.owner || 'Admin House'))];
-        const sellerDisplay = sellers.length > 0 ? sellers.join(', ') : 'Admin House';
-
         let badgeClass = 'bg-amber-500/20 text-amber-400 border-amber-500/30';
         if (tx.status === 'APPROVED') badgeClass = 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30';
         if (tx.status === 'REJECTED') badgeClass = 'bg-rose-500/20 text-rose-400 border-rose-500/30';
 
         const proofBtn = tx.qrisProofUrl 
-          ? `<button onclick="openReceiptPreview('${tx.qrisProofUrl}')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-amber-400 text-[10px] font-bold rounded-lg border border-slate-700 inline-flex items-center gap-1"><i class="fa-solid fa-image"></i> View Receipt</button>`
+          ? `<a href="${tx.qrisProofUrl}" target="_blank" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-amber-400 text-[10px] font-bold rounded-lg border border-slate-700 inline-flex items-center gap-1"><i class="fa-solid fa-image"></i> View Receipt</a>`
           : `<span class="text-slate-600 text-[10px]">No File</span>`;
 
         return `
           <tr class="hover:bg-slate-950/60 transition-colors">
             <td class="p-3.5 font-mono font-extrabold text-indigo-400">${tx.id || 'ORD-000'}</td>
             <td class="p-3.5 font-bold text-white">${tx.user_name || 'Guest'}</td>
-            <td class="p-3.5 font-bold text-slate-300">${sellerDisplay}</td>
             <td class="p-3.5">${itemsFormatted}</td>
             <td class="p-3.5 font-mono text-emerald-400 font-extrabold">${formatIDR(tx.total_amount || 0)} <span class="text-[9px] text-amber-400 block font-normal">Includes 2% Tax</span></td>
             <td class="p-3.5">${proofBtn}</td>
@@ -3177,8 +3142,6 @@
           startingPrice: price,
           currentBid: price,
           highBidder: 'None',
-          bidHistory: [],
-          expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
           created_at: new Date().toISOString()
         };
 
@@ -3229,6 +3192,7 @@
         myCardContainer.classList.remove('hidden');
         plusAmountContainer.classList.remove('hidden');
 
+        // Populate dropdown with user's owned cards from Vault
         const myCardSelect = document.getElementById('trade-my-card-select');
         if (myCardSelect && currentUser) {
           const myCards = inventory.filter(c => c.owner === currentUser.name || c.owner === currentUser.username);
@@ -3624,100 +3588,6 @@
       }
     }
 
-    async function placeAuctionBid() {
-      if (!currentUser) return showToast('Please log in first.');
-      if (!activeAuction) return showToast('No active auction to bid on.');
-
-      const expiresAtMs = activeAuction.expiresAt ? new Date(activeAuction.expiresAt).getTime() : null;
-      if (expiresAtMs !== null && expiresAtMs <= Date.now()) {
-        return showToast('This auction has already ended — waiting on Admin to finalize it.');
-      }
-
-      const myIdent = currentUser.username || currentUser.name;
-      if (myIdent === activeAuction.owner) {
-        return showToast("You can't bid on your own card.");
-      }
-
-      const bidInput = document.getElementById('bid-input-amount');
-      const bidAmount = parseFloat(bidInput.value);
-      const currentHighest = activeAuction.currentBid || activeAuction.startingPrice || 0;
-
-      if (!bidAmount || isNaN(bidAmount)) {
-        return showToast('Enter a valid bid amount.');
-      }
-      if (bidAmount <= currentHighest) {
-        return showToast(`Your bid must be higher than the current bid (${formatIDR(currentHighest)}).`);
-      }
-
-      try {
-        await db.collection("system").doc("activeAuction").update({
-          currentBid: bidAmount,
-          highBidder: myIdent,
-          bidHistory: firebase.firestore.FieldValue.arrayUnion({
-            bidder: myIdent,
-            amount: bidAmount,
-            at: new Date().toISOString()
-          })
-        });
-
-        bidInput.value = '';
-        showToast('Bid placed! You are the current high bidder.');
-        addNotification('Bid Placed', `You bid ${formatIDR(bidAmount)} on ${activeAuction.serial}.`, 'fa-gavel text-emerald-400');
-      } catch (e) {
-        console.error('Place bid error:', e);
-        showToast('Failed to place bid: ' + e.message);
-      }
-    }
-
-    async function finalizeAuctionWinner() {
-      if (!currentUser?.isAdmin) return showToast('Admin permission required.');
-      if (!activeAuction) return showToast('No active auction to finalize.');
-
-      const { cardId, serial, name, owner, currentBid, highBidder } = activeAuction;
-
-      if (!highBidder || highBidder === 'None') {
-        if (!confirm('No bids were placed on this auction. Close it without a sale?')) return;
-        try {
-          await db.collection("system").doc("activeAuction").delete();
-          activeAuction = null;
-          showToast('Auction closed with no winner.');
-          renderAuctionView();
-        } catch (e) {
-          showToast('Error closing auction: ' + e.message);
-        }
-        return;
-      }
-
-      if (!confirm(`Transfer ${serial} to ${highBidder} for ${formatIDR(currentBid)}?`)) return;
-
-      try {
-        const orderRef = `AUC-${Math.floor(1000 + Math.random() * 9000)}`;
-        const batch = db.batch();
-
-        batch.update(db.collection("cards").doc(cardId), { owner: highBidder, status: 'SOLD' });
-        batch.set(db.collection("transactions").doc(orderRef), {
-          id: orderRef,
-          user_name: highBidder,
-          items: [{ id: cardId, serial, name, price: currentBid, owner: owner }],
-          total_amount: currentBid,
-          status: 'APPROVED',
-          source: 'AUCTION',
-          created_at: new Date().toISOString()
-        });
-        batch.delete(db.collection("system").doc("activeAuction"));
-
-        await batch.commit();
-        activeAuction = null;
-
-        showToast(`Auction finalized! ${serial} transferred to ${highBidder}.`);
-        addNotification('Auction Finalized', `${serial} transferred to ${highBidder} for ${formatIDR(currentBid)}.`, 'fa-flag-checkered text-emerald-400');
-        await loadAppState();
-      } catch (e) {
-        console.error('Finalize auction error:', e);
-        showToast('Error finalizing auction: ' + e.message);
-      }
-    }
-
     function renderP2PListings() {
       const grid = document.getElementById('p2p-listings-grid');
       if (!grid) return;
@@ -3880,16 +3750,21 @@
 
     function switchTab(tabName) {
       const adminTabs = ['admin', 'inventory'];
+      const analyticsTabs = ['analytics'];
 
       if (adminTabs.includes(tabName) && !currentUser?.isAdmin) {
         return showToast('Admin access required.');
       }
 
-      ['catalog', 'dashboard', 'wishlist', 'admin', 'inventory', 'trade', 'auction', 'trade-req', 'inbox', 'holders', 'history'].forEach(t => {
+      if (analyticsTabs.includes(tabName) && (!currentUser || !currentUser.isAdmin)) {
+        return showToast('Market Analytics is restricted exclusively to Admins.');
+      }
+
+      ['catalog', 'dashboard', 'wishlist', 'admin', 'inventory', 'trade', 'auction', 'trade-req', 'analytics', 'inbox', 'holders', 'history'].forEach(t => {
         const view = document.getElementById(`view-${t}`);
         const nav = document.getElementById(`nav-${t}`);
         if (view) view.classList.add('hidden');
-        if (nav && !adminTabs.includes(t)) {
+        if (nav && !adminTabs.includes(t) && !analyticsTabs.includes(t)) {
           nav.className = 'px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white flex items-center gap-1.5 whitespace-nowrap transition-all';
         }
       });
@@ -3898,7 +3773,7 @@
       const activeNav = document.getElementById(`nav-${tabName}`);
 
       if (activeView) activeView.classList.remove('hidden');
-      if (activeNav && !adminTabs.includes(tabName)) {
+      if (activeNav && !adminTabs.includes(tabName) && !analyticsTabs.includes(tabName)) {
         activeNav.className = 'px-3 py-1.5 rounded-xl text-xs font-semibold text-white bg-slate-800 shadow-sm flex items-center gap-1.5 whitespace-nowrap transition-all';
       }
 
@@ -3910,6 +3785,7 @@
       if (tabName === 'wishlist') renderWishlistPage();
       if (tabName === 'inventory') renderInventoryTable();
       if (tabName === 'admin') loadPendingTransactions();
+      if (tabName === 'analytics') renderMarketAnalytics();
       if (tabName === 'inbox') loadUserInboxThreads();
       if (tabName === 'holders') renderHoldersTable();
       if (tabName === 'history') fetchTransactionHistory();
@@ -4117,7 +3993,7 @@
           const itemsListStr = items.map(i => i.serial || 'Card').join(', ');
 
           const proofPreview = order.qrisProofUrl 
-            ? `<div class="mt-2"><button onclick="openReceiptPreview('${order.qrisProofUrl}')" class="inline-flex items-center gap-1.5 px-3 py-1 bg-indigo-950/60 border border-indigo-500/40 text-indigo-300 text-[10px] font-bold rounded-lg hover:bg-indigo-900/60 transition-all"><i class="fa-solid fa-receipt text-amber-400"></i> View QRIS Receipt Screenshot</button></div>`
+            ? `<div class="mt-2"><a href="${order.qrisProofUrl}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1 bg-indigo-950/60 border border-indigo-500/40 text-indigo-300 text-[10px] font-bold rounded-lg"><i class="fa-solid fa-receipt text-amber-400"></i> View QRIS Receipt Screenshot</a></div>`
             : `<div class="mt-1 text-[10px] text-slate-500 italic">No receipt screenshot attached.</div>`;
 
           const buyerAvatar = getCollectorAvatar(order.user_name);
@@ -4208,25 +4084,6 @@
 
     function formatIDR(amount) {
       return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(amount);
-    }
-
-    // The native file-input button text ("Choose File") is browser UI chrome —
-    // it follows the browser's own language setting and cannot be translated
-    // via CSS or JS. These file inputs are visually hidden and triggered by a
-    // <label for="..."> styled as a button instead, with this function keeping
-    // the "selected filename" text next to it in sync and in the right language.
-    function updateFileNameDisplay(inputEl, displayElId) {
-      const displayEl = document.getElementById(displayElId);
-      if (!displayEl) return;
-      if (inputEl.files && inputEl.files.length > 0) {
-        displayEl.textContent = inputEl.files[0].name;
-        displayEl.classList.remove('text-slate-500');
-        displayEl.classList.add('text-emerald-400');
-      } else {
-        displayEl.textContent = currentLanguage === 'ID' ? 'Belum ada file dipilih' : 'No file chosen';
-        displayEl.classList.remove('text-emerald-400');
-        displayEl.classList.add('text-slate-500');
-      }
     }
 
     function showToast(msg) {
