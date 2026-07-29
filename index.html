@@ -3078,18 +3078,31 @@
     async function sellBackToAdmin(cardId) {
       if (!currentUser) return showToast('Please log in.');
       const card = inventory.find(c => c.id === cardId);
-      const myIdent = currentUser.username || currentUser.name;
       if (!card || (card.owner !== currentUser.name && card.owner !== currentUser.username)) return showToast('You do not own this card.');
 
-      if (!confirm(`Sell back ${card.serial} to Admin via QRIS payout at floor price (${formatIDR(card.price)})?`)) return;
+      if (!confirm(`Submit sell back request for ${card.serial} via QRIS payout (${formatIDR(card.price)})?`)) return;
 
       try {
-        await db.collection("cards").doc(cardId).update({ owner: null, status: 'AVAILABLE' });
-        showToast(`Successfully sold ${card.serial} back to Admin!`);
-        addNotification('Card Sold Back (QRIS Payout)', `Returned ${card.serial} to house stock.`, 'fa-rotate-left text-amber-400');
-        await loadAppState();
+        const { data: authData } = await supabaseClient.auth.getUser();
+        if (!authData.user) return showToast('Authentication required.');
+
+        const { error } = await supabaseClient
+          .from('sell_back_requests')
+          .insert({
+            card_id: card.id,
+            seller_id: authData.user.id,
+            card_name: card.name,
+            amount: card.price || 0,
+            status: 'pending'
+          });
+
+        if (error) throw error;
+
+        addNotification('Sell Back Submitted', `Admin review requested for ${card.serial}.`, 'fa-rotate-left text-amber-400');
+        showToast('Sell back request sent to Admin Hub.');
       } catch (e) {
-        showToast('Error selling back: ' + e.message);
+        console.error(e);
+        showToast('Error submitting sell back: ' + e.message);
       }
     }
 
