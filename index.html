@@ -410,6 +410,12 @@ main{margin-left:264px;max-width:none!important;width:auto!important;padding:28p
 @media(max-width:520px){.ec3-kpi-grid{grid-template-columns:1fr 1fr;gap:8px}.ec3-kpi{padding:13px;min-height:96px}.ec3-kpi-value{font-size:20px}.ec3-hero{padding:20px}.ec3-action-grid{grid-template-columns:1fr}.ec3-title{font-size:28px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{transition-duration:.001ms!important;animation-duration:.001ms!important}}
 
+
+/* Sidebar authentication card */
+#sidebar-auth-container .sidebar-login{width:100%;padding:14px;border-radius:16px;background:rgba(15,23,42,.8);border:1px solid rgba(99,102,241,.45);color:#fff;font-weight:800;cursor:pointer;}
+#sidebar-auth-container .sidebar-user{padding:12px;border-radius:16px;background:rgba(15,23,42,.9);border:1px solid rgba(148,163,184,.15);}
+#sidebar-auth-container button{transition:.2s;}
+#sidebar-auth-container button:hover{transform:translateY(-1px);}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase.js"></script>
@@ -482,9 +488,6 @@ main{margin-left:264px;max-width:none!important;width:auto!important;padding:28p
   </div>
   <div class="ec3-section-label">Workspace</div>
   <div class="ec3-nav">
-  <button onclick="location.href='login.html'">
-    Login
-</button>
     <button class="ec3-nav-btn ec3-active" id="ec3-nav-home" onclick="switchTab('home')"><i class="fa-solid fa-house"></i><span>Overview</span></button>
     <button class="ec3-nav-btn" id="ec3-nav-catalog" onclick="switchTab('catalog')"><i class="fa-solid fa-store"></i><span>Marketplace</span></button>
     <button class="ec3-nav-btn" id="ec3-nav-dashboard" onclick="switchTab('dashboard')"><i class="fa-solid fa-vault"></i><span>My Vault</span></button>
@@ -495,6 +498,7 @@ main{margin-left:264px;max-width:none!important;width:auto!important;padding:28p
     <button class="ec3-nav-btn" id="ec3-nav-history" onclick="switchTab('history')"><i class="fa-solid fa-clock-rotate-left"></i><span>Activity</span></button>
     <button class="ec3-nav-btn" id="ec3-nav-holders" onclick="switchTab('holders')"><i class="fa-solid fa-users"></i><span>Collectors</span></button>
   </div>
+  <div id="sidebar-auth-container" class="mt-4 px-2"></div>
   <div class="ec3-section-label">Admin</div>
   <div class="ec3-nav">
     <button class="ec3-nav-btn ec3-admin-only hidden" id="ec3-nav-command-center" onclick="switchTab('command-center')"><i class="fa-solid fa-gauge-high"></i><span>Command Center</span></button>
@@ -3962,7 +3966,34 @@ main{margin-left:264px;max-width:none!important;width:auto!important;padding:28p
       });
     });
 
-    function renderAuthHeader() {
+    
+function renderSidebarAuth(){
+  const box=document.getElementById('sidebar-auth-container');
+  if(!box) return;
+  if(currentUser){
+    box.innerHTML=`
+      <div class="sidebar-user">
+        <div class="flex items-center gap-3">
+          ${currentUser.avatarUrl ? `<img src="${currentUser.avatarUrl}" class="w-10 h-10 rounded-full">` : `<div class="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center">YU</div>`}
+          <div>
+            <div class="text-white font-bold text-sm">${currentUser.name||'Collector'}</div>
+            <div class="text-xs text-slate-400">${currentUser.isAdmin?'Admin':'Collector'}</div>
+          </div>
+        </div>
+        <div class="mt-3 space-y-1">
+          <button class="w-full text-left text-xs text-slate-300 py-2" onclick="switchTab('dashboard')">▣ My Collection</button>
+          <button class="w-full text-left text-xs text-slate-300 py-2" onclick="switchTab('history')">⇄ Trade History</button>
+          ${currentUser.isAdmin?`<button class="w-full text-left text-xs text-amber-400 py-2" onclick="switchTab('admin')">👑 Admin Panel</button>`:''}
+          <button class="w-full text-left text-xs text-red-400 py-2" onclick="logoutUser()">🚪 Logout</button>
+        </div>
+      </div>`;
+  }else{
+    box.innerHTML=`<button class="sidebar-login" onclick="openAuthModal()">🌈 Login with Google</button><p class="text-[10px] text-slate-500 mt-2">Secure login with your Google account</p>`;
+  }
+}
+
+function renderAuthHeader() {
+  renderSidebarAuth();
       const container = document.getElementById('auth-header-container');
       const adminNavs = document.querySelectorAll('.admin-only-nav');
       const adminShellNavs = document.querySelectorAll('.ec3-admin-only');
