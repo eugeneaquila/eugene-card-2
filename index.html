@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Eugene Card</title>
+  <title>Eugene Card Marketplace | Beta Edition</title>
 
   <!-- Browser Tab Favicon -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='42' fill='none' stroke='%234f46e5' stroke-width='5' stroke-dasharray='210 50' transform='rotate(-45 50 50)'/><polygon points='50,18 80,35 80,68 50,85 20,68 20,35' fill='%236366f1'/><path d='M 32 42 C 38 32, 52 32, 58 40 C 62 46, 48 54, 40 60 C 35 64, 45 70, 60 62' fill='none' stroke='%23ffffff' stroke-width='4' stroke-linecap='round'/></svg>">
@@ -12,7 +12,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-functions-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics-compat.js"></script>
 
   <!-- Tailwind CSS -->
@@ -54,11 +53,6 @@
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: #030712; }
     ::-webkit-scrollbar-thumb { background: #1f2937; border-radius: 9999px; }
-    .collector-stat-bar { height: 7px; border-radius: 9999px; background: #0f172a; overflow: hidden; }
-    .collector-stat-bar > span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #06b6d4, #6366f1); }
-    .achievement-card { transition: transform .2s ease, border-color .2s ease; }
-    .achievement-card:hover { transform: translateY(-2px); border-color: rgba(34,211,238,.45); }
-    .achievement-card.locked { opacity: .42; filter: grayscale(.65); }
   </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between selection:bg-amber-500 selection:text-black relative">
@@ -107,19 +101,13 @@
           <i class="fa-solid fa-handshake text-purple-400"></i> <span data-i18n="navRequests">Trade Requests</span>
         </button>
         
-       <!-- Revenue Navigation Button (Opens revenue.html) -->
-        <button onclick="window.location.href='revenue.html'" class="admin-only-nav hidden px-3 py-1.5 rounded-xl text-xs font-semibold text-emerald-300 hover:text-white flex items-center gap-1.5 whitespace-nowrap bg-emerald-950/40 border border-emerald-500/40 transition-all">
-          <i class="fa-solid fa-sack-dollar text-emerald-400"></i> <span data-i18n="navRevenue">Revenue</span> <i class="fa-solid fa-arrow-up-right-from-square text-[9px] ml-0.5 opacity-70"></i>
+        <!-- Analytics Navigation Button -->
+        <button onclick="openAnalyticsPage()" class="admin-only-nav hidden px-3 py-1.5 rounded-xl text-xs font-semibold text-amber-300 hover:text-white flex items-center gap-1.5 whitespace-nowrap bg-amber-950/30 border border-amber-500/30 transition-all">
+          <i class="fa-solid fa-chart-line text-amber-400"></i> <span data-i18n="navAnalytics">Analytics</span> <i class="fa-solid fa-arrow-up-right-from-square text-[9px] ml-0.5 opacity-70"></i>
         </button>
-
-<!-- Analytics Navigation Button (Opens analytics.html) -->
-		<button onclick="window.location.href='analytics.html'" class="admin-only-nav hidden px-3 py-1.5 rounded-xl text-xs font-semibold text-amber-300 hover:text-white flex items-center gap-1.5 whitespace-nowrap bg-amber-950/40 border border-amber-500/40 transition-all">
-			<i class="fa-solid fa-chart-line text-amber-400"></i> <span data-i18n="navAnalytics">Analytics</span>
-		</button>
 
         <button id="nav-inbox" onclick="switchTab('inbox')" class="px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white flex items-center gap-1.5 whitespace-nowrap">
           <i class="fa-solid fa-comments text-indigo-400"></i> <span data-i18n="navInbox">Inbox</span>
-          <span id="inbox-unread-nav-badge" class="hidden min-w-4 h-4 px-1 bg-rose-500 text-white font-black text-[9px] rounded-full items-center justify-center leading-none">0</span>
         </button>
         <button id="nav-holders" onclick="switchTab('holders')" class="px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white flex items-center gap-1.5 whitespace-nowrap">
           <i class="fa-solid fa-users text-teal-400"></i> <span data-i18n="navHolders">Holders</span>
@@ -130,9 +118,6 @@
 
         <div class="h-4 w-px bg-slate-800 mx-1 self-center hidden sm:block"></div>
 
-        <button id="nav-hub" onclick="switchTab('collector-hub')" class="px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white flex items-center gap-1.5 whitespace-nowrap">
-          <i class="fa-solid fa-chart-pie text-cyan-400"></i> <span>Collector Hub</span>
-        </button>
         <button id="nav-dashboard" onclick="switchTab('dashboard')" class="px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white flex items-center gap-1.5 whitespace-nowrap">
           <i class="fa-solid fa-vault text-amber-400"></i> <span data-i18n="navVault">My Vault</span>
         </button>
@@ -421,102 +406,6 @@
             <tbody id="history-table-body" class="divide-y divide-slate-800/80"></tbody>
           </table>
         </div>
-      </div>
-    </section>
-
-    <!-- COLLECTOR HUB / PORTFOLIO VIEW -->
-    <section id="view-collector-hub" class="hidden space-y-6">
-      <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 flex flex-col lg:flex-row justify-between gap-5">
-        <div class="flex items-center gap-4">
-          <img id="hub-profile-avatar" src="" class="w-16 h-16 rounded-2xl object-cover border-2 border-cyan-500/40 bg-slate-950">
-          <div>
-            <div class="flex items-center gap-2 flex-wrap">
-              <h2 id="hub-profile-name" class="text-2xl font-black text-white">Collector Hub</h2>
-              <span id="hub-profile-level" class="px-2 py-1 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 text-[10px] font-black">LEVEL 1</span>
-            </div>
-            <p id="hub-profile-username" class="text-xs text-amber-400 font-mono mt-1">@collector</p>
-            <p id="hub-profile-bio" class="text-xs text-slate-400 mt-1">Your collection, market activity and collector achievements.</p>
-          </div>
-        </div>
-        <div class="flex items-center gap-2 flex-wrap">
-          <button onclick="openProfileManagerModal()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-bold rounded-xl border border-slate-700">
-            <i class="fa-solid fa-user-gear mr-1 text-amber-400"></i> Profile
-          </button>
-          <button onclick="switchTab('inbox')" class="px-3 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-black rounded-xl">
-            <i class="fa-solid fa-comments mr-1"></i> Inbox
-          </button>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
-          <p class="text-[10px] text-slate-500 font-bold uppercase">Collection Value</p>
-          <p id="hub-collection-value" class="text-lg font-black text-emerald-400 font-mono mt-1">Rp 0</p>
-          <p id="hub-collection-cost" class="text-[10px] text-slate-500 mt-1">Floor-value estimate</p>
-        </div>
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
-          <p class="text-[10px] text-slate-500 font-bold uppercase">Cards Owned</p>
-          <p id="hub-card-count" class="text-lg font-black text-white mt-1">0</p>
-          <p id="hub-completion" class="text-[10px] text-cyan-400 mt-1">0% of catalog</p>
-        </div>
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
-          <p class="text-[10px] text-slate-500 font-bold uppercase">Trading Reputation</p>
-          <p id="hub-reputation" class="text-lg font-black text-amber-400 mt-1">0 XP</p>
-          <p id="hub-trade-count" class="text-[10px] text-slate-500 mt-1">0 completed activities</p>
-        </div>
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
-          <p class="text-[10px] text-slate-500 font-bold uppercase">Wishlist</p>
-          <p id="hub-wishlist-count" class="text-lg font-black text-rose-400 mt-1">0</p>
-          <p class="text-[10px] text-slate-500 mt-1">watching for availability</p>
-        </div>
-      </div>
-
-      <div class="grid lg:grid-cols-3 gap-4">
-        <div class="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-3xl p-5">
-          <div class="flex items-center justify-between mb-4">
-            <div>
-              <h3 class="text-sm font-black text-white uppercase tracking-wider"><i class="fa-solid fa-trophy text-amber-400 mr-2"></i>Achievements</h3>
-              <p class="text-[10px] text-slate-500 mt-1">Milestones earned from collecting, trading and auctions.</p>
-            </div>
-            <span id="hub-achievement-count" class="text-[10px] font-black text-slate-400">0 / 8</span>
-          </div>
-          <div id="hub-achievements" class="grid grid-cols-2 md:grid-cols-4 gap-3"></div>
-        </div>
-
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5">
-          <h3 class="text-sm font-black text-white uppercase tracking-wider"><i class="fa-solid fa-bell text-indigo-400 mr-2"></i>Smart Alerts</h3>
-          <p class="text-[10px] text-slate-500 mt-1 mb-3">Wishlist, auction and order activity.</p>
-          <div id="hub-alerts" class="space-y-2 max-h-72 overflow-y-auto"></div>
-        </div>
-      </div>
-
-      <div class="grid lg:grid-cols-2 gap-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5">
-          <div class="flex items-center justify-between mb-3">
-            <h3 class="text-sm font-black text-white uppercase tracking-wider"><i class="fa-solid fa-chart-line text-emerald-400 mr-2"></i>Collection Portfolio</h3>
-            <button onclick="switchTab('dashboard')" class="text-[10px] text-cyan-400 font-bold hover:text-cyan-300">Open Vault →</button>
-          </div>
-          <div id="hub-portfolio-breakdown" class="space-y-2"></div>
-        </div>
-
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5">
-          <div class="flex items-center justify-between mb-3">
-            <h3 class="text-sm font-black text-white uppercase tracking-wider"><i class="fa-solid fa-clock-rotate-left text-cyan-400 mr-2"></i>Recent Activity</h3>
-            <button onclick="toggleNotificationMenu()" class="text-[10px] text-indigo-400 font-bold hover:text-indigo-300">Open notifications →</button>
-          </div>
-          <div id="hub-recent-activity" class="space-y-2 max-h-72 overflow-y-auto"></div>
-        </div>
-      </div>
-
-      <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5">
-        <div class="flex items-center justify-between mb-3">
-          <div>
-            <h3 class="text-sm font-black text-white uppercase tracking-wider"><i class="fa-solid fa-receipt text-amber-400 mr-2"></i>Order Tracking</h3>
-            <p class="text-[10px] text-slate-500 mt-1">Your latest QRIS orders and delivery state.</p>
-          </div>
-          <button onclick="switchTab('history')" class="text-[10px] text-cyan-400 font-bold">Full history →</button>
-        </div>
-        <div id="hub-order-tracking" class="grid md:grid-cols-2 gap-3"></div>
       </div>
     </section>
 
@@ -1012,55 +901,6 @@
       </div>
 
       <div id="detail-card-action-container"></div>
-      <div class="grid grid-cols-2 gap-2 pt-1">
-        <button id="detail-wishlist-action" onclick="toggleWishlistFromDetail()" class="py-2 bg-rose-950/30 hover:bg-rose-900/40 text-rose-300 font-bold text-[10px] rounded-xl border border-rose-500/30">
-          <i class="fa-solid fa-heart mr-1"></i> Wishlist
-        </button>
-        <button id="detail-owner-chat-action" onclick="chatFromCardDetail()" class="py-2 bg-indigo-950/30 hover:bg-indigo-900/40 text-indigo-300 font-bold text-[10px] rounded-xl border border-indigo-500/30">
-          <i class="fa-solid fa-comments mr-1"></i> Chat Owner
-        </button>
-      </div>
-      <div id="detail-card-history" class="bg-slate-950 border border-slate-800 rounded-2xl p-3">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-[10px] font-black uppercase text-slate-500">Ownership / Activity History</span>
-          <span class="text-[9px] text-slate-600">Derived from marketplace records</span>
-        </div>
-        <div id="detail-card-history-list" class="space-y-1.5 max-h-28 overflow-y-auto"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- DIRECT TRADE OFFER MODAL -->
-  <div id="trade-offer-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[60] hidden flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-purple-500/30 rounded-3xl max-w-lg w-full p-6 space-y-4 relative shadow-2xl">
-      <button onclick="closeTradeOfferModal()" class="absolute top-4 right-4 w-8 h-8 rounded-xl bg-slate-800 text-slate-400 text-xs flex items-center justify-center">
-        <i class="fa-solid fa-xmark"></i>
-      </button>
-      <div>
-        <h3 class="text-lg font-black text-white"><i class="fa-solid fa-handshake text-purple-400 mr-2"></i>Trade Offer</h3>
-        <p id="trade-offer-target-label" class="text-xs text-slate-400 mt-1">Send an offer directly to another collector.</p>
-      </div>
-
-      <input type="hidden" id="trade-offer-target-user">
-      <input type="hidden" id="trade-offer-requested-card">
-
-      <div class="grid md:grid-cols-2 gap-3">
-        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-3">
-          <p class="text-[10px] font-black uppercase text-slate-500 mb-2">You offer</p>
-          <select id="trade-offer-my-card" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white"></select>
-        </div>
-        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-3">
-          <p class="text-[10px] font-black uppercase text-slate-500 mb-2">You want</p>
-          <div id="trade-offer-requested-card-preview" class="text-xs text-slate-300">Select a card first.</div>
-        </div>
-      </div>
-
-      <textarea id="trade-offer-note" rows="3" placeholder="Optional message: explain why you'd like to trade..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-purple-500"></textarea>
-
-      <div class="flex gap-2">
-        <button onclick="closeTradeOfferModal()" class="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl">Cancel</button>
-        <button onclick="submitDirectTradeOffer()" class="flex-1 py-2.5 bg-purple-600 hover:bg-purple-500 text-white font-black text-xs rounded-xl"><i class="fa-solid fa-paper-plane mr-1"></i> Send Offer</button>
-      </div>
     </div>
   </div>
 
@@ -1152,7 +992,6 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const auth = firebase.auth();
-    const functions = firebase.app().functions('asia-southeast1');
     const analytics = firebase.analytics();
 
     const TRADE_FEE_PERCENT = 0.02;
@@ -1181,17 +1020,6 @@
     let chatUnsubscribe = null;
     let chatAttachedImage = null;
     let inboxUnsubscribe = null;
-    let inboxUnreadUnsubscribe = null;
-    let inboxUnreadState = {};
-    let inboxUnreadInitialized = false;
-    let tradeRequestUnsubscribe = null;
-    let auctionAlertTimer = null;
-    let lastAuctionSnapshot = null;
-    let activeDetailCardId = null;
-    let lastWishlistSnapshot = {};
-    let serverStats = { xp: 0, reputation: 0, completedTrades: 0, auctionWins: 0, purchases: 0, sales: 0, level: 1 };
-    let serverStatsUnsubscribe = null;
-    let serverNotificationsUnsubscribe = null;
 
     let visibleCardCount = 10;
     const CARDS_PER_BATCH = 10;
@@ -1207,7 +1035,6 @@
         navTrade: "Trade",
         navAuction: "Auction",
         navRequests: "Trade Requests",
-        navRevenue: "Revenue",
         navAnalytics: "Analytics",
         navInbox: "Inbox",
         navHolders: "Holders",
@@ -1393,7 +1220,6 @@
         navTrade: "Perdagangan",
         navAuction: "Lelang",
         navRequests: "Permintaan Tukar",
-        navRevenue: "Pendapatan",
         navAnalytics: "Analitik",
         navInbox: "Pesan",
         navHolders: "Kolektor",
@@ -1730,21 +1556,26 @@
 
     function addNotification(title, message, iconClass = 'fa-info-circle text-indigo-400') {
       const newNotif = {
-        id: 'local-' + Date.now(), title, message,
+        id: 'notif-' + Date.now(),
+        title,
+        message,
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        iconClass, server: false
+        iconClass
       };
-      systemNotifications = [newNotif, ...systemNotifications.filter(n => n.server)].slice(0, 20);
+      systemNotifications.unshift(newNotif);
+      if (systemNotifications.length > 20) systemNotifications.pop();
+      try {
+        localStorage.setItem('eugene_notifications', JSON.stringify(systemNotifications));
+        setCookie('eugene_notifications', systemNotifications, 7);
+      } catch (e) {}
       renderNotifications();
     }
+
     function renderNotifications() {
       const badge = document.getElementById('notification-badge');
       const list = document.getElementById('notification-list');
       
-      if (badge) {
-        const unread = systemNotifications.filter(n => n.server ? !n.read : true).length;
-        badge.innerText = unread > 99 ? '99+' : String(unread);
-      }
+      if (badge) badge.innerText = systemNotifications.length;
       if (!list) return;
 
       if (systemNotifications.length === 0) {
@@ -1771,451 +1602,12 @@
       if (dropdown) dropdown.classList.toggle('hidden');
     }
 
-    async function clearNotifications() {
-      try {
-        await markAllServerNotificationsRead();
-        systemNotifications = [];
-        renderNotifications();
-        showToast('Notifications marked as read.');
-      } catch (e) {
-        showToast('Could not clear notifications: ' + e.message);
-      }
-    }
-    function getCollectorIdentity() {
-      return currentUser ? String(currentUser.username || currentUser.name || '').trim() : '';
-    }
-
-    function getCollectorIdentities() {
-      if (!currentUser) return [];
-      return [currentUser.username, currentUser.name].filter(Boolean).map(v => String(v).trim().toLowerCase());
-    }
-
-    function getTimeMillis(value) {
-      if (!value) return 0;
-      if (typeof value.toMillis === 'function') return value.toMillis();
-      if (value.seconds) return value.seconds * 1000;
-      const parsed = new Date(value).getTime();
-      return Number.isFinite(parsed) ? parsed : 0;
-    }
-
-    function inboxUnreadStorageKey() {
-      return `eugene_inbox_unread_${getCollectorIdentity().toLowerCase() || 'guest'}`;
-    }
-
-    function loadInboxUnreadState() {
-      try { inboxUnreadState = JSON.parse(localStorage.getItem(inboxUnreadStorageKey()) || '{}'); }
-      catch (e) { inboxUnreadState = {}; }
-      renderInboxUnreadBadge();
-    }
-
-    function saveInboxUnreadState() {
-      try { localStorage.setItem(inboxUnreadStorageKey(), JSON.stringify(inboxUnreadState)); } catch (e) {}
-    }
-
-    function renderInboxUnreadBadge() {
-      const badge = document.getElementById('inbox-unread-nav-badge');
-      if (!badge) return;
-      const count = Object.values(inboxUnreadState).filter(v => v && v.unread).length;
-      badge.textContent = count > 99 ? '99+' : String(count);
-      badge.classList.toggle('hidden', count === 0);
-      badge.classList.toggle('flex', count > 0);
-    }
-
-    function markInboxRead(chatId) {
-      if (!chatId) return;
-      inboxUnreadState[chatId] = { lastSeen: Date.now(), unread: false };
-      saveInboxUnreadState();
-      renderInboxUnreadBadge();
-    }
-
-    function startInboxNotificationListener() {
-      if (inboxUnreadUnsubscribe) inboxUnreadUnsubscribe();
-      if (!currentUser) return;
-      loadInboxUnreadState();
-      inboxUnreadInitialized = false;
-
-      inboxUnreadUnsubscribe = db.collection('chats').where('participantUids', 'array-contains', currentUser.uid).onSnapshot(snapshot => {
-        const mine = getCollectorIdentities();
-
-        snapshot.forEach(doc => {
-          const d = doc.data() || {};
-          const participants = Array.isArray(d.participants) ? d.participants : doc.id.replace('chat-', '').split('-vs-');
-          const isMine = currentUser.isAdmin || participants.some(p => mine.includes(String(p).toLowerCase()));
-          if (!isMine) return;
-
-          const sender = String(d.lastSender || '').toLowerCase();
-          const updated = getTimeMillis(d.updatedAt);
-          const seen = Number(inboxUnreadState[doc.id]?.lastSeen || 0);
-          const incoming = sender && !mine.includes(sender);
-
-          if (incoming && updated > seen && doc.id !== currentChatContextId) {
-            const wasUnread = !!inboxUnreadState[doc.id]?.unread;
-            inboxUnreadState[doc.id] = { lastSeen: seen, unread: true };
-            if (inboxUnreadInitialized && !wasUnread) {
-              addNotification('New Inbox Message', `${d.lastSender || 'Collector'}: ${d.lastMessage || 'You received a new message.'}`, 'fa-comments text-indigo-400');
-            }
-          }
-        });
-
-        saveInboxUnreadState();
-        renderInboxUnreadBadge();
-      }, err => console.warn('Inbox listener:', err));
-    }
-
-
-    async function callServer(name, data = {}) {
-      try {
-        return await functions.httpsCallable(name)(data);
-      } catch (e) {
-        console.error(`Server function ${name} failed`, e);
-        throw new Error(e?.message || 'Server operation failed.');
-      }
-    }
-
-    function startServerAuthorityListeners() {
-      if (!currentUser) return;
-      if (serverStatsUnsubscribe) serverStatsUnsubscribe();
-      serverStatsUnsubscribe = db.collection('collectorStats').doc(currentUser.uid).onSnapshot(doc => {
-        if (doc.exists) serverStats = { ...serverStats, ...doc.data() };
-        renderCollectorHub();
-      });
-
-      if (serverNotificationsUnsubscribe) serverNotificationsUnsubscribe();
-      serverNotificationsUnsubscribe = db.collection('notifications')
-        .where('recipientUid', '==', currentUser.uid)
-        .limit(30)
-        .onSnapshot(snapshot => {
-          const rows = [];
-          snapshot.forEach(doc => rows.push({ id: doc.id, ...doc.data() }));
-          rows.sort((a,b) => {
-            const at = a.createdAt?.toMillis ? a.createdAt.toMillis() : new Date(a.createdAt || 0).getTime();
-            const bt = b.createdAt?.toMillis ? b.createdAt.toMillis() : new Date(b.createdAt || 0).getTime();
-            return bt - at;
-          });
-          systemNotifications = rows.slice(0, 20).map(n => ({
-            id: n.id, title: n.title, message: n.message,
-            time: n.createdAt?.toDate ? n.createdAt.toDate().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : 'Now',
-            iconClass: n.type === 'trade' ? 'fa-handshake text-purple-400' :
-              n.type === 'auction' ? 'fa-gavel text-amber-400' :
-              n.type === 'order' ? 'fa-receipt text-emerald-400' :
-              n.type === 'chat' ? 'fa-comments text-indigo-400' : 'fa-bell text-cyan-400',
-            server: true, read: n.read === true
-          }));
-          renderNotifications();
-        });
-    }
-
-    async function markAllServerNotificationsRead() {
-      if (!currentUser) return;
-      const snap = await db.collection('notifications').where('recipientUid', '==', currentUser.uid).limit(30).get();
-      if (snap.empty) return;
-      const batch = db.batch();
-      snap.forEach(doc => batch.update(doc.ref, { read: true, readAt: firebase.firestore.FieldValue.serverTimestamp() }));
-      await batch.commit();
-    }
-
-    function renderSmartAlerts() {
-      const el = document.getElementById('hub-alerts');
-      if (!el) return;
-      const alerts = [];
-
-      const watched = inventory.filter(c => wishlist.has(c.id));
-      watched.forEach(c => {
-        if (c.status === 'AVAILABLE') alerts.push({icon:'fa-heart text-rose-400', title:'Wishlist available', text:`${c.serial} is available now.`, action:`openCardDetailModal('${c.id}')`});
-      });
-
-      if (activeAuction) {
-        const mine = getCollectorIdentity().toLowerCase();
-        if (String(activeAuction.highBidder || '').toLowerCase() === mine) {
-          alerts.push({icon:'fa-gavel text-emerald-400', title:'You are winning', text:`${activeAuction.serial || 'Auction'} at ${formatIDR(activeAuction.currentBid || 0)}.`, action:"switchTab('auction')"});
-        }
-        const end = new Date(activeAuction.expiresAt || 0).getTime();
-        if (end && end - Date.now() > 0 && end - Date.now() < 10 * 60 * 1000) {
-          alerts.push({icon:'fa-clock text-amber-400', title:'Auction ending soon', text:`${activeAuction.serial || 'Auction'} ends in under 10 minutes.`, action:"switchTab('auction')"});
-        }
-      }
-
-      const myOrders = transactionsList.filter(t => getCollectorIdentities().includes(String(t.user_name || '').toLowerCase())).slice(0, 3);
-      myOrders.forEach(o => {
-        alerts.push({icon:'fa-receipt text-cyan-400', title:`Order ${o.status || 'PENDING'}`, text:`${o.id || 'Order'} • ${formatIDR(o.total_amount || 0)}`, action:"switchTab('history')"});
-      });
-
-      if (!alerts.length) {
-        el.innerHTML = `<div class="text-[11px] text-slate-500 py-4 text-center">No active smart alerts right now.</div>`;
-        return;
-      }
-
-      el.innerHTML = alerts.slice(0, 8).map(a => `
-        <button onclick="${a.action}" class="w-full text-left bg-slate-950 hover:bg-slate-800 border border-slate-800 rounded-xl p-2.5 flex gap-2.5 transition-all">
-          <i class="fa-solid ${a.icon} mt-0.5"></i>
-          <span class="min-w-0"><strong class="block text-[10px] text-white">${a.title}</strong><span class="block text-[10px] text-slate-400 truncate">${a.text}</span></span>
-        </button>
-      `).join('');
-    }
-
-    function collectorMetrics() {
-      const mine = getCollectorIdentities();
-      const owned = inventory.filter(c => mine.includes(String(c.owner || '').toLowerCase()));
-      const value = owned.reduce((s, c) => s + Number(c.price || 0), 0);
-      const premium = owned.filter(c => c.type === 'PREMIUM').length;
-      const standard = owned.filter(c => c.type !== 'PREMIUM').length;
-      const wishlistCount = wishlist.size;
-
-      const completedTrades = Number(serverStats.completedTrades || 0);
-      const auctionsWon = Number(serverStats.auctionWins || 0);
-      const purchases = Number(serverStats.purchases || 0);
-      const xp = Number(serverStats.xp || 0);
-      const reputation = Number(serverStats.reputation || 0);
-      const level = Number(serverStats.level || Math.max(1, Math.floor(xp / 100) + 1));
-      return { owned, value, premium, standard, wishlistCount, completedTrades, auctionsWon, purchases, xp, reputation, level };
-    }
-
-    function collectorAchievements(m) {
-      return [
-        ['FIRST CARD', 'Own your first card.', m.owned.length >= 1, 'fa-id-card'],
-        ['BETA COLLECTOR', 'Own 3 Beta cards.', m.owned.length >= 3, 'fa-layer-group'],
-        ['SERIAL HUNTER', 'Own a card with SN under 0010.', m.owned.some(c => parseInt(c.sn || '9999', 10) < 10), 'fa-fingerprint'],
-        ['TRADER', 'Complete your first trade.', m.completedTrades >= 1, 'fa-right-left'],
-        ['AUCTION HUNTER', 'Win your first auction.', m.auctionsWon >= 1, 'fa-gavel'],
-        ['FULL SET', 'Own 10 or more cards.', m.owned.length >= 10, 'fa-crown'],
-        ['WISHLIST WATCHER', 'Save 5 cards.', m.wishlistCount >= 5, 'fa-heart'],
-        ['COLLECTOR ELITE', 'Reach 1,000 XP.', m.xp >= 1000, 'fa-star']
-      ];
-    }
-
-    function renderCollectorHub() {
-      const hub = document.getElementById('view-collector-hub');
-      if (!hub) return;
-      if (!currentUser) {
-        document.getElementById('hub-profile-name').textContent = 'Log in to open Collector Hub';
-        document.getElementById('hub-profile-username').textContent = '';
-        document.getElementById('hub-card-count').textContent = '0';
-        document.getElementById('hub-collection-value').textContent = formatIDR(0);
-        return;
-      }
-
-      const m = collectorMetrics();
-      const profile = getCollectorProfile(getCollectorIdentity()) || currentUser;
-
-      document.getElementById('hub-profile-avatar').src = profile.avatarUrl || getCollectorAvatar(getCollectorIdentity());
-      document.getElementById('hub-profile-name').textContent = profile.name || getCollectorIdentity();
-      document.getElementById('hub-profile-username').textContent = profile.username ? `@${profile.username}` : `@${getCollectorIdentity()}`;
-      document.getElementById('hub-profile-bio').textContent = profile.bio || 'Collector & Trading Card Enthusiast';
-      document.getElementById('hub-profile-level').textContent = `LEVEL ${m.level}`;
-      document.getElementById('hub-collection-value').textContent = formatIDR(m.value);
-      document.getElementById('hub-card-count').textContent = m.owned.length;
-      document.getElementById('hub-completion').textContent = `${inventory.length ? Math.round((m.owned.length / inventory.length) * 100) : 0}% of catalog`;
-      document.getElementById('hub-reputation').textContent = `${m.reputation} REP • ${m.xp} XP`;
-      document.getElementById('hub-trade-count').textContent = `${m.completedTrades} completed trades • ${m.auctionsWon} auction wins`;
-      document.getElementById('hub-wishlist-count').textContent = m.wishlistCount;
-
-      const achievements = collectorAchievements(m);
-      document.getElementById('hub-achievement-count').textContent = `${achievements.filter(a => a[2]).length} / ${achievements.length}`;
-      document.getElementById('hub-achievements').innerHTML = achievements.map(a => `
-        <div class="achievement-card ${a[2] ? '' : 'locked'} bg-slate-950 border border-slate-800 rounded-2xl p-3 text-center">
-          <div class="w-9 h-9 mx-auto rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center mb-2">
-            <i class="fa-solid ${a[3]} ${a[2] ? 'text-amber-400' : 'text-slate-600'}"></i>
-          </div>
-          <p class="text-[9px] font-black text-white">${a[0]}</p>
-          <p class="text-[9px] text-slate-500 mt-1">${a[1]}</p>
-        </div>
-      `).join('');
-
-      const premiumPct = m.owned.length ? Math.round(m.premium / m.owned.length * 100) : 0;
-      const standardPct = m.owned.length ? 100 - premiumPct : 0;
-      document.getElementById('hub-portfolio-breakdown').innerHTML = `
-        <div class="flex justify-between text-[10px]"><span class="text-slate-400">Premium</span><strong class="text-amber-400">${m.premium} cards</strong></div>
-        <div class="collector-stat-bar"><span style="width:${premiumPct}%"></span></div>
-        <div class="flex justify-between text-[10px] pt-2"><span class="text-slate-400">Standard</span><strong class="text-indigo-400">${m.standard} cards</strong></div>
-        <div class="collector-stat-bar"><span style="width:${standardPct}%"></span></div>
-        <div class="flex justify-between text-[10px] pt-3 border-t border-slate-800 mt-3"><span class="text-slate-400">Average card value</span><strong class="text-emerald-400 font-mono">${formatIDR(m.owned.length ? m.value / m.owned.length : 0)}</strong></div>
-      `;
-
-      const recent = systemNotifications.slice(0, 6);
-      document.getElementById('hub-recent-activity').innerHTML = recent.length
-        ? recent.map(n => `<div class="flex gap-2.5 bg-slate-950 border border-slate-800 rounded-xl p-2.5"><i class="fa-solid ${n.iconClass} mt-0.5"></i><div class="min-w-0"><strong class="block text-[10px] text-white">${n.title}</strong><span class="block text-[10px] text-slate-500 truncate">${n.message}</span></div></div>`).join('')
-        : `<div class="text-[11px] text-slate-500 py-4 text-center">Your activity will appear here.</div>`;
-
-      const myOrders = transactionsList.filter(t => getCollectorIdentities().includes(String(t.user_name || '').toLowerCase())).slice(0, 4);
-      document.getElementById('hub-order-tracking').innerHTML = myOrders.length
-        ? myOrders.map(o => {
-            const status = String(o.status || 'PENDING').toUpperCase();
-            const steps = ['PENDING', 'APPROVED'];
-            const approved = status === 'APPROVED';
-            return `<div class="bg-slate-950 border border-slate-800 rounded-2xl p-3">
-              <div class="flex justify-between items-center"><strong class="text-xs text-white">${o.id || 'Order'}</strong><span class="text-[9px] font-black px-2 py-1 rounded-full ${approved ? 'bg-emerald-500/15 text-emerald-400' : status === 'REJECTED' ? 'bg-rose-500/15 text-rose-400' : 'bg-amber-500/15 text-amber-400'}">${status}</span></div>
-              <p class="text-[10px] text-slate-400 mt-1">${Array.isArray(o.items) ? o.items.length : 0} card(s) • ${formatIDR(o.total_amount || 0)}</p>
-              <div class="flex items-center gap-1.5 mt-3 text-[9px]">
-                <span class="${status !== 'REJECTED' ? 'text-emerald-400' : 'text-slate-600'}">● Submitted</span>
-                <span class="text-slate-700">→</span>
-                <span class="${approved ? 'text-emerald-400' : 'text-slate-600'}">● Admin Approved</span>
-                <span class="text-slate-700">→</span>
-                <span class="${approved ? 'text-cyan-400' : 'text-slate-600'}">● Card Transfer</span>
-              </div>
-            </div>`;
-          }).join('')
-        : `<div class="md:col-span-2 text-[11px] text-slate-500 py-4 text-center">No orders yet.</div>`;
-
-      renderSmartAlerts();
-    }
-
-    function snapshotWishlistPrices() {
-      if (!currentUser) return;
-      const key = `eugene_wishlist_prices_${getCollectorIdentity().toLowerCase()}`;
-      let old = {};
-      try { old = JSON.parse(localStorage.getItem(key) || '{}'); } catch (e) {}
-      const next = {};
-
-      inventory.filter(c => wishlist.has(c.id)).forEach(c => {
-        next[c.id] = { price: Number(c.price || 0), status: c.status };
-        if (old[c.id]) {
-          if (Number(c.price || 0) !== Number(old[c.id].price || 0)) {
-            addNotification('Wishlist Price Changed', `${c.serial} changed to ${formatIDR(c.price)}.`, 'fa-tag text-amber-400');
-          }
-          if (old[c.id].status !== 'AVAILABLE' && c.status === 'AVAILABLE') {
-            addNotification('Wishlist Card Available', `${c.serial} is available again.`, 'fa-heart text-rose-400');
-          }
-        }
-      });
-      try { localStorage.setItem(key, JSON.stringify(next)); } catch (e) {}
-    }
-
-    function recordAuctionAlerts(nextAuction) {
-      if (!currentUser || !nextAuction) return;
-      const mine = getCollectorIdentity().toLowerCase();
-      const previous = lastAuctionSnapshot;
-      if (previous && String(previous.highBidder || '').toLowerCase() === mine &&
-          String(nextAuction.highBidder || '').toLowerCase() !== mine &&
-          Number(nextAuction.currentBid || 0) > Number(previous.currentBid || 0)) {
-        addNotification('You were outbid!', `${nextAuction.serial || 'Auction'} is now at ${formatIDR(nextAuction.currentBid || 0)}.`, 'fa-gavel text-rose-400');
-      }
-      lastAuctionSnapshot = nextAuction;
-    }
-
-    function startAuctionAlertTimer() {
-      if (auctionAlertTimer) clearInterval(auctionAlertTimer);
-      auctionAlertTimer = setInterval(() => {
-        renderSmartAlerts();
-      }, 30000);
-    }
-
-    function openTradeOfferModal(targetUser, requestedCardId) {
-      if (!currentUser) return showToast('Please log in to send a trade offer.');
-      const target = String(targetUser || '').trim();
-      if (!target) return showToast('This card has no collector owner.');
-      const myCards = inventory.filter(c => getCollectorIdentities().includes(String(c.owner || '').toLowerCase()));
-      if (!myCards.length) return showToast('You need at least one owned card to offer in a trade.');
-
-      document.getElementById('trade-offer-target-user').value = target;
-      document.getElementById('trade-offer-requested-card').value = requestedCardId || '';
-      document.getElementById('trade-offer-target-label').textContent = `Offer one of your cards to ${target}.`;
-      document.getElementById('trade-offer-my-card').innerHTML = myCards.map(c => `<option value="${c.id}">${c.serial} — ${c.name}</option>`).join('');
-
-      const requested = inventory.find(c => c.id === requestedCardId);
-      document.getElementById('trade-offer-requested-card-preview').innerHTML = requested
-        ? `<div class="flex items-center gap-2"><img src="${requested.imgUrl}" class="w-10 h-12 object-contain rounded border border-slate-800"><div><strong class="block text-white">${requested.name}</strong><span class="text-amber-400 font-mono">${requested.serial}</span></div></div>`
-        : 'No requested card selected.';
-      document.getElementById('trade-offer-note').value = '';
-      document.getElementById('trade-offer-modal').classList.remove('hidden');
-    }
-
-    function closeTradeOfferModal() {
-      document.getElementById('trade-offer-modal')?.classList.add('hidden');
-    }
-
-    async function submitDirectTradeOffer() {
-      if (!currentUser) return showToast('Please log in first.');
-      const offeredCardId = document.getElementById('trade-offer-my-card').value;
-      const requestedCardId = document.getElementById('trade-offer-requested-card').value;
-      const note = document.getElementById('trade-offer-note').value.trim();
-      if (!offeredCardId || !requestedCardId) return showToast('Select valid cards for this offer.');
-      try {
-        await callServer('createTradeRequest', { cardId: requestedCardId, offerType: 'TRADE', offeredCardId, plusAmount: 0, notes: note });
-        closeTradeOfferModal(); showToast('Trade offer sent securely.'); switchTab('inbox');
-      } catch (e) { showToast('Trade offer error: ' + e.message); }
-    }
-    function renderTradeOfferButtonForCard(card) {
-      if (!currentUser || !card.owner) return '';
-      const mine = getCollectorIdentities();
-      if (mine.includes(String(card.owner).toLowerCase())) return '';
-      return `<button onclick="event.stopPropagation(); openTradeOfferModal('${String(card.owner).replace(/'/g, "\\'")}', '${card.id}')" class="w-full py-2 bg-purple-600 hover:bg-purple-500 text-white font-black text-[10px] rounded-xl mt-2"><i class="fa-solid fa-handshake mr-1"></i> Propose Trade</button>`;
-    }
-
-    function toggleWishlistFromDetail() {
-      if (!activeDetailCardId) return;
-      toggleWishlist(activeDetailCardId);
-      const card = inventory.find(c => c.id === activeDetailCardId);
-      const btn = document.getElementById('detail-wishlist-action');
-      if (btn && card) btn.innerHTML = `<i class="fa-solid fa-heart mr-1"></i> ${wishlist.has(card.id) ? 'Saved' : 'Wishlist'}`;
-      renderCollectorHub();
-    }
-
-    function chatFromCardDetail() {
-      const card = inventory.find(c => c.id === activeDetailCardId);
-      if (!card || !card.owner) return showToast('This card has no collector owner.');
-      openDirectChat(card.owner, `Card ${card.serial}`);
-      closeCardDetailModal();
-      switchTab('inbox');
-    }
-
-    function renderCardHistory(cardId) {
-      const el = document.getElementById('detail-card-history-list');
-      if (!el) return;
-      const card = inventory.find(c => c.id === cardId);
-      if (!card) return;
-      const events = [];
-
-      transactionsList.forEach(t => {
-        const items = Array.isArray(t.items) ? t.items : [];
-        if (items.some(i => i.id === cardId || i.serial === card.serial)) {
-          events.push({time: t.created_at, title: `Order ${t.status || 'PENDING'}`, detail: `${t.user_name || 'Collector'} • ${formatIDR(t.total_amount || 0)}`});
-        }
-      });
-
-      if (card.owner) events.push({time: '', title: 'Current ownership', detail: card.owner});
-      events.sort((a,b) => getTimeMillis(b.time) - getTimeMillis(a.time));
-
-      el.innerHTML = events.length
-        ? events.slice(0, 8).map(e => `<div class="flex justify-between gap-3 text-[10px] border-b border-slate-800/70 pb-1.5"><span class="text-slate-300">${e.title}</span><span class="text-slate-500 text-right">${e.detail}</span></div>`).join('')
-        : `<div class="text-[10px] text-slate-600">No marketplace history recorded yet.</div>`;
-    }
-
-    function markTradeRequestNotifications() {
-      if (!currentUser) return;
-      const mine = getCollectorIdentities();
-      const key = `eugene_trade_seen_${getCollectorIdentity().toLowerCase()}`;
-      let seen = {};
-      try { seen = JSON.parse(localStorage.getItem(key) || '{}'); } catch (e) {}
-
-      tradeRequestsList.forEach(t => {
-        const to = String(t.toUser || t.owner || t.targetUser || '').toLowerCase();
-        if (!mine.includes(to)) return;
-        const created = getTimeMillis(t.created_at || t.createdAt);
-        if (created > Number(seen[t.id] || 0) && String(t.status || 'PENDING').toUpperCase() === 'PENDING') {
-          addNotification('New Trade Offer', `${t.fromUser || t.requester || 'Collector'} offered ${t.offeredCardSerial || 'a card'} for ${t.requestedCardSerial || 'your card'}.`, 'fa-handshake text-purple-400');
-          seen[t.id] = created;
-        }
-      });
-      try { localStorage.setItem(key, JSON.stringify(seen)); } catch (e) {}
-    }
-
-    function markOrderStatusNotifications() {
-      if (!currentUser) return;
-      const mine = getCollectorIdentities();
-      const key = `eugene_order_status_seen_${getCollectorIdentity().toLowerCase()}`;
-      let seen = {};
-      try { seen = JSON.parse(localStorage.getItem(key) || '{}'); } catch (e) {}
-
-      transactionsList.filter(t => mine.includes(String(t.user_name || '').toLowerCase())).forEach(t => {
-        const status = String(t.status || 'PENDING').toUpperCase();
-        if (seen[t.id] && seen[t.id] === status) return;
-        if (seen[t.id] && seen[t.id] !== status) {
-          const icon = status === 'APPROVED' ? 'fa-circle-check text-emerald-400' : status === 'REJECTED' ? 'fa-circle-xmark text-rose-400' : 'fa-receipt text-amber-400';
-          addNotification(`Order ${status}`, `${t.id || 'Order'} is now ${status.toLowerCase()}.`, icon);
-        }
-        seen[t.id] = status;
-      });
-      try { localStorage.setItem(key, JSON.stringify(seen)); } catch (e) {}
+    function clearNotifications() {
+      systemNotifications = [];
+      localStorage.removeItem('eugene_notifications');
+      deleteCookie('eugene_notifications');
+      renderNotifications();
+      showToast('Notifications cleared.');
     }
 
     function searchUsersForChat() {
@@ -2298,7 +1690,6 @@
 
       const participants = [myIdent, targetIdent].sort();
       currentChatContextId = `chat-${participants.join('-vs-')}`;
-      markInboxRead(currentChatContextId);
 
       document.getElementById('chat-target-user-name').innerText = targetUserName;
       document.getElementById('chat-target-context').innerText = contextInfo;
@@ -2397,20 +1788,39 @@
     async function sendChatMessage() {
       const input = document.getElementById('chat-text-input');
       const text = input ? input.value.trim() : '';
+
       if ((!text && !chatAttachedImage) || !currentChatContextId || !currentUser) return;
+
       try {
-        await callServer('sendChatMessage', {
-          chatId: currentChatContextId,
-          targetUser: currentChatTargetUser,
-          text,
-          imgUrl: chatAttachedImage || ''
-        });
+        const batch = db.batch();
+
+        const chatDocRef = db.collection("chats").doc(currentChatContextId);
+        batch.set(chatDocRef, {
+          lastMessage: text || (chatAttachedImage ? '[Screenshot / Image]' : ''),
+          lastSender: currentUser.username || currentUser.name,
+          participants: [currentUser.username || currentUser.name, currentChatTargetUser].map(p => p.toLowerCase()),
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+
+        const msgDocRef = chatDocRef.collection("messages").doc();
+        const payload = {
+          sender: currentUser.username || currentUser.name,
+          text: text,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        if (chatAttachedImage) payload.imgUrl = chatAttachedImage;
+
+        batch.set(msgDocRef, payload);
+
+        await batch.commit();
+
         input.value = '';
         clearChatImageAttachment();
       } catch (e) {
         showToast('Error sending chat message: ' + e.message);
       }
     }
+
     function loadUserInboxThreads() {
       const container = document.getElementById('inbox-threads-list');
       if (!container) return;
@@ -2422,7 +1832,7 @@
 
       if (inboxUnsubscribe) inboxUnsubscribe();
 
-      inboxUnsubscribe = db.collection("chats").where("participantUids", "array-contains", currentUser.uid).onSnapshot(snapshot => {
+      inboxUnsubscribe = db.collection("chats").onSnapshot(snapshot => {
         if (snapshot.empty) {
           container.innerHTML = `<p class="text-xs text-slate-500 text-center py-10">No active chat threads found.</p>`;
           return;
@@ -2460,18 +1870,15 @@
           const otherUser = c.otherUser;
           const lastMsg = c.lastMessage || 'Click to view conversation';
           const isOtherAdmin = isUserAdmin(otherUser);
-          const chatKey = c.id || `chat-${String(otherUser).toLowerCase()}`;
-          const isUnread = !!inboxUnreadState[chatKey]?.unread;
           const otherUserAvatar = getCollectorAvatar(otherUser);
 
           return `
-            <div class="bg-slate-900 border ${isUnread ? 'border-indigo-500/60 bg-indigo-950/20' : (isOtherAdmin ? 'border-rose-500/30' : 'border-slate-800')} p-4 rounded-2xl flex justify-between items-center text-xs hover:border-indigo-500/40 transition-all">
+            <div class="bg-slate-900 border ${isOtherAdmin ? 'border-rose-500/30' : 'border-slate-800'} p-4 rounded-2xl flex justify-between items-center text-xs hover:border-indigo-500/40 transition-all">
               <div class="flex items-center gap-3">
                 <img src="${otherUserAvatar}" class="w-10 h-10 rounded-full object-cover border border-slate-700 bg-slate-950 shrink-0">
                 <div>
                   <div class="flex items-center gap-1.5">
-                    <p class="font-extrabold ${isUnread ? 'text-white' : 'text-slate-200'} text-sm">${otherUser}</p>
-                    ${isUnread ? `<span class="text-[9px] font-black px-1.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">NEW</span>` : ''}
+                    <p class="font-extrabold text-white text-sm">${otherUser}</p>
                     ${isOtherAdmin ? `<span class="text-[9px] font-black px-1.5 py-0.2 rounded bg-rose-500/20 text-rose-400 border border-rose-500/30"><i class="fa-solid fa-shield-halved text-[8px] mr-0.5"></i> ADMIN</span>` : ''}
                   </div>
                   <p class="text-xs text-slate-400 truncate max-w-xs sm:max-w-md mt-0.5">${lastMsg}</p>
@@ -2875,25 +2282,16 @@
     }
 
     async function fetchTradeRequests() {
-      if (!currentUser) { tradeRequestsList = []; renderTradeRequests(); return; }
       try {
-        if (currentUser.isAdmin) {
-          const snapshot = await db.collection('tradeRequests').limit(100).get();
-          tradeRequestsList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        } else {
-          const [outgoing, incoming] = await Promise.all([
-            db.collection('tradeRequests').where('proposerUid', '==', currentUser.uid).limit(100).get(),
-            db.collection('tradeRequests').where('targetOwnerUid', '==', currentUser.uid).limit(100).get()
-          ]);
-          const map = new Map();
-          [...outgoing.docs, ...incoming.docs].forEach(doc => map.set(doc.id, { id: doc.id, ...doc.data() }));
-          tradeRequestsList = [...map.values()];
-        }
-        tradeRequestsList.sort((a,b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+        const snapshot = await db.collection("tradeRequests").get();
+        tradeRequestsList = [];
+        snapshot.forEach(doc => tradeRequestsList.push({ id: doc.id, ...doc.data() }));
         renderTradeRequests();
-        renderCollectorHub();
-      } catch (e) { console.warn('Fetch trade requests error:', e); }
+      } catch (e) {
+        console.warn('Fetch trade requests error:', e);
+      }
     }
+
     function setupRealtimeSync() {
       db.collection("cards").onSnapshot((snapshot) => {
         snapshot.docChanges().forEach((change) => {
@@ -2902,48 +2300,47 @@
             const existingCard = inventory.find(i => i.id === change.doc.id);
             if (existingCard) {
               Object.assign(existingCard, {
-                name: c.name, serial: c.serial, type: c.type,
-                price: parseFloat(c.price || 0), owner: c.owner || null,
-                status: c.status || 'AVAILABLE', imgUrl: c.imgUrl,
-                edition: c.edition, sn: c.sn, tier: c.tier, printing: c.printing
+                name: c.name,
+                serial: c.serial,
+                type: c.type,
+                price: parseFloat(c.price || 0),
+                owner: c.owner || null,
+                status: c.status || 'AVAILABLE',
+                imgUrl: c.imgUrl,
+                edition: c.edition,
+                sn: c.sn,
+                tier: c.tier,
+                printing: c.printing
               });
             }
           }
         });
         updateAllViews();
-        snapshotWishlistPrices();
-        renderCollectorHub();
       });
 
-      db.collection("listings").onSnapshot(() => fetchListings());
+      db.collection("listings").onSnapshot((snapshot) => {
+        fetchListings();
+      });
+
+      db.collection("tradeRequests").onSnapshot((snapshot) => {
+        fetchTradeRequests();
+      });
 
       db.collection("system").doc("activeAuction").onSnapshot((doc) => {
-        const nextAuction = doc.exists ? doc.data() : null;
-        if (nextAuction) recordAuctionAlerts(nextAuction);
-        activeAuction = nextAuction;
+        if (doc.exists) {
+          activeAuction = doc.data();
+        } else {
+          activeAuction = null;
+        }
         renderAuctionView();
-        renderSmartAlerts();
-        renderCollectorHub();
       });
-    }
 
-    function startUserScopedRealtimeListeners() {
-      if (!currentUser) return;
-      if (tradeRequestUnsubscribe) tradeRequestUnsubscribe();
-
-      const mergeTradeSnapshots = () => fetchTradeRequests();
-      if (currentUser.isAdmin) {
-        tradeRequestUnsubscribe = db.collection('tradeRequests').limit(100).onSnapshot(mergeTradeSnapshots);
-      } else {
-        const unsubs = [
-          db.collection('tradeRequests').where('proposerUid', '==', currentUser.uid).limit(100).onSnapshot(mergeTradeSnapshots),
-          db.collection('tradeRequests').where('targetOwnerUid', '==', currentUser.uid).limit(100).onSnapshot(mergeTradeSnapshots)
-        ];
-        tradeRequestUnsubscribe = () => unsubs.forEach(u => u());
-      }
-      fetchTradeRequests();
-      fetchTransactionHistory();
-      if (currentUser.isAdmin) loadPendingTransactions();
+      db.collection("transactions").onSnapshot((snapshot) => {
+        fetchTransactionHistory();
+        if (currentUser?.isAdmin) {
+          loadPendingTransactions();
+        }
+      });
     }
 
     function updateAllViews() {
@@ -2957,8 +2354,6 @@
       updateCartTotals();
       renderAuctionView();
       renderTradeRequests();
-      renderCollectorHub();
-      renderInboxUnreadBadge();
     }
 
     function openAnalyticsPage() {
@@ -3074,15 +2469,8 @@
         if (user) {
           handleUserSession(user);
         } else {
-          if (inboxUnsubscribe) { inboxUnsubscribe(); inboxUnsubscribe = null; }
-          if (inboxUnreadUnsubscribe) { inboxUnreadUnsubscribe(); inboxUnreadUnsubscribe = null; }
-          if (serverStatsUnsubscribe) { serverStatsUnsubscribe(); serverStatsUnsubscribe = null; }
-          if (serverNotificationsUnsubscribe) { serverNotificationsUnsubscribe(); serverNotificationsUnsubscribe = null; }
           currentUser = null;
-          inboxUnreadState = {};
-          serverStats = { xp: 0, reputation: 0, completedTrades: 0, auctionWins: 0, purchases: 0, sales: 0, level: 1 };
           renderAuthHeader();
-          renderInboxUnreadBadge();
           updateAllViews();
         }
       });
@@ -3162,8 +2550,6 @@
 
     async function handleUserSession(user) {
       const email = user.email ? user.email.toLowerCase() : '';
-      let tokenResult = {};
-      try { tokenResult = await user.getIdTokenResult(true); } catch (e) {}
 
       await loadCollectorProfiles();
       const savedCustomProfile = globalCollectorProfiles[email] || localStorage.getItem(`profile_${email}`) || getCookie(`profile_${email}`);
@@ -3172,36 +2558,56 @@
         try { customData = typeof savedCustomProfile === 'object' ? savedCustomProfile : JSON.parse(savedCustomProfile); } catch (e) {}
       }
 
-      const name = customData.name || user.displayName || (email ? email.split('@')[0] : 'Eugene');
-      const username = customData.username || name.toLowerCase().replace(/\s+/g, '_');
-      const isAdmin = tokenResult.claims?.admin === true;
-      currentUser = {
-        uid: user.uid, name, username, email, isAdmin,
-        isPlusMember: false,
-        avatarUrl: customData.avatarUrl || user.photoURL || `https://api.dicebear.com/7.x/identicon/svg?seed=${email}`,
-        bio: customData.bio || (isAdmin ? 'Official Platform Admin' : 'Standard Collector'),
-        socialIg: customData.socialIg || '', socialTwitter: customData.socialTwitter || '',
-        socialTiktok: customData.socialTiktok || '', socialWeb: customData.socialWeb || ''
-      };
+      const resolvedName = user.displayName || (email ? email.split('@')[0] : "Eugene");
+      const name = customData.name || resolvedName;
+      let username = customData.username || name.toLowerCase().replace(/\s+/g, '_');
 
+      let isTaken = false;
+      for (let emailKey in globalCollectorProfiles) {
+        if (emailKey !== email) {
+          const p = globalCollectorProfiles[emailKey];
+          if (p.username?.toLowerCase() === username) {
+            isTaken = true;
+            break;
+          }
+        }
+      }
+      if (isTaken) {
+        username = `${username}_${Math.floor(100 + Math.random() * 900)}`;
+      }
+
+      const isAdmin = isUserAdmin(name) || isUserAdmin(email) || isUserAdmin(username);
+      const isPlusMember = false;
+      const avatarUrl = customData.avatarUrl || user.photoURL || `https://api.dicebear.com/7.x/identicon/svg?seed=${email}`;
+      const bio = customData.bio || (isAdmin ? "Official Platform Admin" : "Standard Collector");
+      const socialIg = customData.socialIg || '';
+      const socialTwitter = customData.socialTwitter || '';
+      const socialTiktok = customData.socialTiktok || '';
+      const socialWeb = customData.socialWeb || '';
+
+      currentUser = { name, username, email, isAdmin, isPlusMember, avatarUrl, bio, socialIg, socialTwitter, socialTiktok, socialWeb };
+
+      const profilePayload = { name, username, avatarUrl, bio, isPlusMember, socialIg, socialTwitter, socialTiktok, socialWeb };
+      localStorage.setItem(`profile_${email}`, JSON.stringify(profilePayload));
+      setCookie(`profile_${email}`, profilePayload, 30);
       try {
-        const result = await callServer('syncProfile', { ...currentUser });
-        if (result.data?.profile) currentUser = { ...currentUser, ...result.data.profile, isAdmin };
-      } catch (e) { console.warn('Server profile sync failed:', e); }
+        await db.collection("profiles").doc(email).set(profilePayload, { merge: true });
+      } catch (e) {}
 
-      closeAuthModal(); renderAuthHeader(); updateAllViews();
-      startInboxNotificationListener(); startAuctionAlertTimer(); startServerAuthorityListeners(); startUserScopedRealtimeListeners(); renderCollectorHub();
+      closeAuthModal();
+      renderAuthHeader();
+      updateAllViews();
     }
+
     async function logoutUser() {
-      if (inboxUnsubscribe) { inboxUnsubscribe(); inboxUnsubscribe = null; }
-      if (inboxUnreadUnsubscribe) { inboxUnreadUnsubscribe(); inboxUnreadUnsubscribe = null; }
-      if (serverStatsUnsubscribe) { serverStatsUnsubscribe(); serverStatsUnsubscribe = null; }
-      if (serverNotificationsUnsubscribe) { serverNotificationsUnsubscribe(); serverNotificationsUnsubscribe = null; }
-      if (auctionAlertTimer) { clearInterval(auctionAlertTimer); auctionAlertTimer = null; }
-      inboxUnreadState = {};
-      serverStats = { xp: 0, reputation: 0, completedTrades: 0, auctionWins: 0, purchases: 0, sales: 0, level: 1 };
-      await auth.signOut(); currentUser = null; renderAuthHeader(); renderInboxUnreadBadge(); switchTab('catalog'); await loadAppState(); showToast('Logged out.');
+      await auth.signOut();
+      currentUser = null;
+      renderAuthHeader();
+      switchTab('catalog');
+      await loadAppState();
+      showToast('Logged out.');
     }
+
     function openProfileManagerModal() {
       if (!currentUser) return showToast('Please log in first.');
       document.getElementById('profile-edit-name-input').value = currentUser.name || '';
@@ -3235,19 +2641,57 @@
       if (!currentUser) return;
       const newName = document.getElementById('profile-edit-name-input').value.trim() || currentUser.name;
       const rawUsername = document.getElementById('profile-edit-username-input').value.trim();
-      const newUsername = rawUsername ? rawUsername.replace(/^@/, '').toLowerCase().replace(/\s+/g, '_') : currentUser.username;
+      const newUsername = rawUsername ? rawUsername.replace(/^@/, '').toLowerCase().replace(/\s+/g, '_') : (currentUser.username || newName.toLowerCase().replace(/\s+/g, '_'));
+
+      await loadCollectorProfiles();
+      let isTaken = false;
+      for (let emailKey in globalCollectorProfiles) {
+        if (emailKey !== currentUser.email) {
+          const p = globalCollectorProfiles[emailKey];
+          if (p.username?.toLowerCase() === newUsername) {
+            isTaken = true;
+            break;
+          }
+        }
+      }
+
+      if (isTaken) {
+        return showToast(`Username @${newUsername} is already taken by another account. Please choose a different username.`);
+      }
+
       const newAvatar = document.getElementById('profile-edit-avatar-input').value.trim() || currentUser.avatarUrl;
       const newBio = document.getElementById('profile-edit-bio-input').value.trim();
       const newIg = document.getElementById('profile-edit-ig-input').value.trim();
       const newTwitter = document.getElementById('profile-edit-twitter-input').value.trim();
       const newTiktok = document.getElementById('profile-edit-tiktok-input').value.trim();
       const newWeb = document.getElementById('profile-edit-web-input').value.trim();
+
+      currentUser.name = newName;
+      currentUser.username = newUsername;
+      currentUser.avatarUrl = newAvatar;
+      currentUser.bio = newBio;
+      currentUser.socialIg = newIg;
+      currentUser.socialTwitter = newTwitter;
+      currentUser.socialTiktok = newTiktok;
+      currentUser.socialWeb = newWeb;
+      currentUser.isAdmin = isUserAdmin(newName) || isUserAdmin(currentUser.email) || isUserAdmin(newUsername);
+
+      const profilePayload = { name: newName, username: newUsername, avatarUrl: newAvatar, bio: newBio, isPlusMember: false, socialIg: newIg, socialTwitter: newTwitter, socialTiktok: newTiktok, socialWeb: newWeb };
+      localStorage.setItem(`profile_${currentUser.email}`, JSON.stringify(profilePayload));
+      setCookie(`profile_${currentUser.email}`, profilePayload, 30);
+
       try {
-        const result = await callServer('syncProfile', { name: newName, username: newUsername, avatarUrl: newAvatar, bio: newBio, socialIg: newIg, socialTwitter: newTwitter, socialTiktok: newTiktok, socialWeb: newWeb });
-        currentUser = { ...currentUser, ...(result.data?.profile || {}), isAdmin: currentUser.isAdmin };
-        closeProfileManagerModal(); renderAuthHeader(); updateAllViews(); showToast('Profile updated securely.');
-      } catch (e) { showToast('Profile update error: ' + e.message); }
+        await db.collection("profiles").doc(currentUser.email).set(profilePayload, { merge: true });
+        await loadCollectorProfiles();
+      } catch (e) {}
+
+      closeProfileManagerModal();
+      renderAuthHeader();
+      updateAllViews();
+      showToast('Profile and unique username updated!');
+      addNotification('Profile Updated', `Your unique username (@${newUsername}) and profile details were saved.`, 'fa-user-gear text-amber-400');
     }
+
     function renderCardGrid() {
       const grid = document.getElementById('card-grid');
       if (!grid) return;
@@ -3341,24 +2785,16 @@
 
     async function fetchTransactionHistory() {
       try {
-        let snapshot;
-        if (currentUser?.isAdmin) {
-          snapshot = await db.collection('transactions').orderBy('created_at', 'desc').limit(200).get();
-        } else if (currentUser) {
-          snapshot = await db.collection('transactions').where('userUid', '==', currentUser.uid).limit(100).get();
-        } else {
-          transactionsList = [];
-          renderTransactionHistoryTable();
-          return;
-        }
+        const snapshot = await db.collection("transactions").orderBy("created_at", "desc").get();
         const txList = [];
         snapshot.forEach(doc => txList.push({ id: doc.id, ...doc.data() }));
-        txList.sort((a,b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
         transactionsList = txList;
         renderTransactionHistoryTable();
-        renderCollectorHub();
-      } catch (e) { console.warn('Error fetching transactions:', e); }
+      } catch (e) {
+        console.warn('Error fetching transactions:', e);
+      }
     }
+
     function setHistoryFilter(type) {
       historyFilter = type;
       ['ALL', 'MINE', 'APPROVED'].forEach(f => {
@@ -3653,16 +3089,6 @@
         container.innerHTML = `<button disabled class="w-full py-2.5 bg-slate-950 text-slate-600 font-bold text-xs rounded-xl cursor-not-allowed">${currentLanguage === 'ID' ? 'Sudah Dimiliki' : 'Already Owned'}</button>`;
       }
 
-      if (card.owner && currentUser && !getCollectorIdentities().includes(String(card.owner).toLowerCase())) {
-        container.innerHTML += renderTradeOfferButtonForCard(card);
-      }
-
-      activeDetailCardId = card.id;
-      const wishBtn = document.getElementById('detail-wishlist-action');
-      if (wishBtn) wishBtn.innerHTML = `<i class="fa-solid fa-heart mr-1"></i> ${wishlist.has(card.id) ? 'Saved' : 'Wishlist'}`;
-      const chatBtn = document.getElementById('detail-owner-chat-action');
-      if (chatBtn) chatBtn.classList.toggle('hidden', !card.owner || (currentUser && getCollectorIdentities().includes(String(card.owner).toLowerCase())));
-      renderCardHistory(card.id);
       document.getElementById('card-detail-modal').classList.remove('hidden');
     }
 
@@ -3733,21 +3159,65 @@
     }
 
     async function submitCardListingModal() {
-      if (!currentUser) return showToast('Please log in.');
       const cardId = document.getElementById('list-card-id-target').value;
       const mode = document.getElementById('list-modal-mode').value;
       const price = parseFloat(document.getElementById('list-card-price-input').value);
-      if (!cardId || !Number.isFinite(price) || price <= 0) return showToast('Please select a valid card and price.');
-      try {
-        if (mode === 'auction') {
-          await callServer('startAuction', { cardId, startingPrice: price, durationHours: 24 });
-          closeListCardModal(); showToast('Auction started securely.'); await fetchActiveAuction(); switchTab('auction');
-        } else {
-          await callServer('createListing', { cardId, price });
-          closeListCardModal(); showToast('Card listing created securely.'); await fetchListings(); switchTab('trade');
+      const card = inventory.find(c => c.id === cardId);
+      if (!card || !price) return showToast('Please select a valid card and enter a price.');
+
+      const activeUserIdent = currentUser.username || currentUser.name;
+
+      if (mode === 'auction') {
+        const auctionData = {
+          cardId: cardId,
+          serial: card.serial,
+          name: card.name,
+          imgUrl: card.imgUrl,
+          owner: activeUserIdent,
+          startingPrice: price,
+          currentBid: price,
+          highBidder: 'None',
+          bidHistory: [],
+          expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+          created_at: new Date().toISOString()
+        };
+
+        try {
+          await db.collection("system").doc("activeAuction").set(auctionData);
+          closeListCardModal();
+          showToast(`Successfully set ${card.serial} as active QRIS auction!`);
+          addNotification('Auction Started', `Card ${card.serial} is now live in the Auction Room.`, 'fa-gavel text-emerald-400');
+          await fetchActiveAuction();
+          switchTab('auction');
+        } catch (e) {
+          showToast('Auction error: ' + e.message);
         }
-      } catch (e) { showToast('Marketplace error: ' + e.message); }
+      } else {
+        const listingId = 'list-' + cardId;
+        const listingData = {
+          cardId: cardId,
+          serial: card.serial,
+          name: card.name,
+          type: card.type,
+          imgUrl: card.imgUrl,
+          price: price,
+          seller: activeUserIdent,
+          created_at: new Date().toISOString()
+        };
+
+        try {
+          await db.collection("listings").doc(listingId).set(listingData);
+          closeListCardModal();
+          showToast(`Listed ${card.serial} in the Trading Room with QRIS support!`);
+          addNotification('Card Listed', `Published ${card.serial} for QRIS trade/sale.`, 'fa-tag text-amber-400');
+          await fetchListings();
+          switchTab('trade');
+        } catch (e) {
+          showToast('Listing error: ' + e.message);
+        }
+      }
     }
+
     function toggleTradeOfferTypeFields() {
       const typeSelect = document.getElementById('trade-req-type-select');
       const myCardContainer = document.getElementById('trade-my-card-container');
@@ -3804,46 +3274,214 @@
       const cardId = document.getElementById('trade-req-card-id').value;
       const type = document.getElementById('trade-req-type-select').value;
       let notes = document.getElementById('trade-req-notes-input').value.trim();
-      if (!cardId) return showToast('Please select a target card.');
-      let offeredCardId = null, plusAmount = 0;
+
+      if (!cardId) return showToast('Please select a target card from the dropdown.');
+
+      const card = inventory.find(c => c.id === cardId);
+      if (!card || !card.owner) return showToast('Invalid card target.');
+
+      let offeredCardId = null;
+      let offeredCardSerial = null;
+      let offeredCardName = null;
+      let plusAmount = 0;
+
       if (type === 'TRADE') {
-        offeredCardId = document.getElementById('trade-my-card-select')?.value || null;
-        if (!offeredCardId) return showToast('Please select a card from your Vault.');
-        plusAmount = Math.max(0, parseFloat(document.getElementById('trade-plus-amount-input')?.value || 0) || 0);
-      } else if (!notes) notes = 'Direct QRIS offer';
+        const myCardSelect = document.getElementById('trade-my-card-select');
+        offeredCardId = myCardSelect ? myCardSelect.value : null;
+
+        if (!offeredCardId) {
+          return showToast('Please select a card from your Vault to offer in trade.');
+        }
+
+        const offeredCardObj = inventory.find(c => c.id === offeredCardId);
+        if (offeredCardObj) {
+          offeredCardSerial = offeredCardObj.serial;
+          offeredCardName = offeredCardObj.name;
+        }
+
+        const rawPlus = parseFloat(document.getElementById('trade-plus-amount-input')?.value || 0);
+        plusAmount = isNaN(rawPlus) ? 0 : rawPlus;
+
+        const tradeSummaryStr = `Trade Card: ${offeredCardSerial || 'Card'} ${plusAmount > 0 ? '+ ' + formatIDR(plusAmount) : ''}`;
+        notes = notes ? `${tradeSummaryStr} | ${notes}` : tradeSummaryStr;
+      } else {
+        if (!notes) notes = 'Direct QRIS offer';
+      }
+
+      const activeUserIdent = currentUser.username || currentUser.name;
+      const reqId = 'treq-' + Date.now();
+      const requestData = {
+        id: reqId,
+        cardId: cardId,
+        serial: card.serial,
+        cardName: card.name,
+        cardImg: card.imgUrl,
+        targetOwner: card.owner,
+        proposer: activeUserIdent,
+        offerType: type,
+        notes: notes,
+        status: 'PENDING',
+        created_at: new Date().toISOString()
+      };
+
+      if (type === 'TRADE') {
+        requestData.offeredCardId = offeredCardId;
+        requestData.offeredCardSerial = offeredCardSerial;
+        requestData.offeredCardName = offeredCardName;
+        requestData.plusAmount = plusAmount;
+      }
+
       try {
-        await callServer('createTradeRequest', { cardId, offerType: type, offeredCardId, plusAmount, notes });
-        closeProposeTradeModal(); showToast('Trade/Buy proposal submitted securely.');
-        await fetchTradeRequests(); switchTab('trade-req');
-      } catch (e) { showToast('Error submitting trade proposal: ' + e.message); }
+        await db.collection("tradeRequests").doc(reqId).set(requestData);
+        closeProposeTradeModal();
+        showToast('QRIS Trade/Buy proposal submitted successfully!');
+        addNotification('Trade Proposal Sent', `Proposed ${type} offer to ${card.owner} for ${card.serial}.`, 'fa-handshake text-purple-400');
+        await fetchTradeRequests();
+        switchTab('trade-req');
+      } catch (e) {
+        showToast('Error submitting trade proposal: ' + e.message);
+      }
     }
+
     async function withdrawTradeRequest(reqId) {
       if (!currentUser) return showToast('Please log in.');
-      try { await callServer('tradeAction', { requestId: reqId, action: 'withdraw' }); showToast('Trade request withdrawn.'); await fetchTradeRequests(); }
-      catch (e) { showToast('Error withdrawing trade: ' + e.message); }
+      const req = tradeRequestsList.find(r => r.id === reqId);
+      if (!req) return;
+
+      const myIdent = currentUser.username || currentUser.name;
+      if (req.proposer !== currentUser.name && req.proposer !== currentUser.username && !currentUser.isAdmin) {
+        return showToast('You can only cancel/withdraw your own proposed trade requests.');
+      }
+
+      if (!confirm('Are you sure you want to cancel/withdraw this trade offer?')) return;
+
+      try {
+        await db.collection("tradeRequests").doc(reqId).delete();
+        showToast('Trade request canceled/withdrawn.');
+        addNotification('Trade Withdrawn', `Canceled trade offer for ${req.serial}.`, 'fa-rotate-left text-amber-400');
+        await fetchTradeRequests();
+      } catch (e) {
+        showToast('Error withdrawing trade: ' + e.message);
+      }
     }
+
     async function acceptTradeRequest(reqId) {
       if (!currentUser) return showToast('Please log in.');
-      if (!confirm('Accept this trade offer? The server will verify ownership and transfer cards atomically.')) return;
-      try { await callServer('tradeAction', { requestId: reqId, action: 'accept' }); showToast('Trade accepted securely.'); await loadAppState(); }
-      catch (e) { showToast('Error accepting trade: ' + e.message); }
+      const req = tradeRequestsList.find(r => r.id === reqId);
+      if (!req) return showToast('Proposal not found.');
+
+      const myIdent = currentUser.username || currentUser.name;
+      const canAccept = (req.targetOwner === currentUser.name || req.targetOwner === currentUser.username) || currentUser.isAdmin;
+      if (!canAccept) {
+        return showToast('Only the target card owner or Admin can accept this proposal.');
+      }
+
+      if (!confirm(`Accept offer from ${req.proposer} for ${req.serial}? Ownership will transfer to ${req.proposer} via QRIS settlement.`)) return;
+
+      try {
+        const batch = db.batch();
+        const cardRef = db.collection("cards").doc(req.cardId);
+        batch.update(cardRef, { owner: req.proposer, status: 'SOLD' });
+
+        if (req.offerType === 'TRADE' && req.offeredCardId) {
+          const offeredCardRef = db.collection("cards").doc(req.offeredCardId);
+          batch.update(offeredCardRef, { owner: req.targetOwner, status: 'SOLD' });
+        }
+
+        const reqRef = db.collection("tradeRequests").doc(reqId);
+        batch.update(reqRef, { status: 'ACCEPTED' });
+
+        await batch.commit();
+
+        showToast(`Trade accepted! Card ${req.serial} transferred to ${req.proposer}.`);
+        addNotification('Trade Accepted', `Card ${req.serial} transferred to ${req.proposer}.`, 'fa-check text-emerald-400');
+
+        await loadAppState();
+      } catch (e) {
+        showToast('Error accepting trade: ' + e.message);
+      }
     }
+
     async function acceptCounterOffer(reqId) {
       if (!currentUser) return showToast('Please log in.');
-      if (!confirm('Accept this counter-offer?')) return;
-      try { await callServer('tradeAction', { requestId: reqId, action: 'accept' }); showToast('Counter-offer accepted securely.'); await loadAppState(); }
-      catch (e) { showToast('Error accepting counter offer: ' + e.message); }
+      const req = tradeRequestsList.find(r => r.id === reqId);
+      if (!req) return showToast('Proposal not found.');
+
+      const myIdent = currentUser.username || currentUser.name;
+      if (req.proposer !== currentUser.name && req.proposer !== currentUser.username && !currentUser.isAdmin) {
+        return showToast('Only the original offer proposer or Admin can accept this counter offer.');
+      }
+
+      if (!confirm(`Accept counter-offer for ${req.serial}? Ownership will be updated to ${req.proposer}.`)) return;
+
+      try {
+        const batch = db.batch();
+        const cardRef = db.collection("cards").doc(req.cardId);
+        batch.update(cardRef, { owner: req.proposer, status: 'SOLD' });
+
+        if (req.offerType === 'TRADE' && req.offeredCardId) {
+          const offeredCardRef = db.collection("cards").doc(req.offeredCardId);
+          batch.update(offeredCardRef, { owner: req.targetOwner, status: 'SOLD' });
+        }
+
+        const reqRef = db.collection("tradeRequests").doc(reqId);
+        batch.update(reqRef, { status: 'ACCEPTED' });
+
+        await batch.commit();
+
+        showToast(`Counter offer accepted! Card ${req.serial} transferred to ${req.proposer}.`);
+        addNotification('Counter Offer Accepted', `Card ${req.serial} transferred to ${req.proposer}.`, 'fa-circle-check text-emerald-400');
+
+        await loadAppState();
+      } catch (e) {
+        showToast('Error accepting counter offer: ' + e.message);
+      }
     }
+
     async function rejectCounterOffer(reqId) {
       if (!currentUser) return showToast('Please log in.');
-      try { await callServer('tradeAction', { requestId: reqId, action: 'reject' }); showToast('Counter-offer rejected.'); await fetchTradeRequests(); }
-      catch (e) { showToast('Error rejecting counter offer: ' + e.message); }
+      const req = tradeRequestsList.find(r => r.id === reqId);
+      if (!req) return;
+
+      const myIdent = currentUser.username || currentUser.name;
+      if (req.proposer !== currentUser.name && req.proposer !== currentUser.username && !currentUser.isAdmin) {
+        return showToast('Only the proposer can reject this counter offer.');
+      }
+
+      if (!confirm('Reject this counter offer?')) return;
+
+      try {
+        await db.collection("tradeRequests").doc(reqId).update({ status: 'REJECTED' });
+        showToast('Counter offer rejected.');
+        addNotification('Counter Offer Rejected', `Rejected counter offer for ${req.serial}.`, 'fa-xmark text-rose-400');
+        await fetchTradeRequests();
+      } catch (e) {
+        showToast('Error rejecting counter offer: ' + e.message);
+      }
     }
+
     async function rejectTradeRequest(reqId) {
       if (!currentUser) return showToast('Please log in.');
-      try { await callServer('tradeAction', { requestId: reqId, action: 'reject' }); showToast('Trade offer rejected.'); await fetchTradeRequests(); }
-      catch (e) { showToast('Error rejecting trade: ' + e.message); }
+      const req = tradeRequestsList.find(r => r.id === reqId);
+      if (!req) return;
+
+      const myIdent = currentUser.username || currentUser.name;
+      if (req.targetOwner !== currentUser.name && req.targetOwner !== currentUser.username && !currentUser.isAdmin) {
+        return showToast('Only the card owner can reject this proposal.');
+      }
+
+      if (!confirm('Reject this trade request?')) return;
+
+      try {
+        await db.collection("tradeRequests").doc(reqId).update({ status: 'REJECTED' });
+        showToast('Trade offer rejected.');
+        addNotification('Trade Offer Rejected', `Rejected offer from ${req.proposer} for ${req.serial}.`, 'fa-xmark text-rose-400');
+        await fetchTradeRequests();
+      } catch (e) {
+        showToast('Error rejecting trade: ' + e.message);
+      }
     }
+
     function openCounterOfferModal(reqId) {
       const req = tradeRequestsList.find(r => r.id === reqId);
       if (!req) return;
@@ -3860,10 +3498,25 @@
     async function submitCounterOffer() {
       const reqId = document.getElementById('counter-req-id-target').value;
       const counterNotes = document.getElementById('counter-notes-input').value.trim();
-      if (!reqId || !counterNotes) return showToast('Invalid counter-offer details.');
-      try { await callServer('tradeAction', { requestId: reqId, action: 'counter', notes: counterNotes }); closeCounterOfferModal(); showToast('Counter-offer sent securely.'); await fetchTradeRequests(); }
-      catch (e) { showToast('Error submitting counter offer: ' + e.message); }
+      const req = tradeRequestsList.find(r => r.id === reqId);
+
+      if (!req || !counterNotes) return showToast('Invalid details.');
+
+      try {
+        await db.collection("tradeRequests").doc(reqId).update({
+          notes: counterNotes,
+          status: 'COUNTERED'
+        });
+
+        closeCounterOfferModal();
+        showToast('Counter offer sent!');
+        addNotification('Counter Offer Sent', `Submitted counter offer for ${req.serial}.`, 'fa-pen-to-square text-amber-400');
+        await fetchTradeRequests();
+      } catch (e) {
+        showToast('Error submitting counter offer: ' + e.message);
+      }
     }
+
     function renderTradeRequests() {
       const grid = document.getElementById('trade-requests-grid');
       if (!grid) return;
@@ -3929,37 +3582,142 @@
 
     async function cancelTradeListing(listingId, sellerName) {
       if (!currentUser) return;
+      const myIdent = currentUser.username || currentUser.name;
+      if (!currentUser.isAdmin && currentUser.name !== sellerName && currentUser.username !== sellerName) {
+        return showToast('Only the card owner or Admin can cancel this listing.');
+      }
+
       if (!confirm('Are you sure you want to cancel this trade listing?')) return;
+
       try {
-        await callServer('deleteListing', { listingId });
-        showToast('Trade listing canceled securely.');
+        await db.collection("listings").doc(listingId).delete();
+        showToast('Trade listing canceled.');
+        addNotification('Listing Canceled', 'Trade listing has been removed.', 'fa-ban text-rose-400');
         await fetchListings();
       } catch (e) {
         showToast('Error canceling listing: ' + e.message);
       }
     }
+
     async function cancelActiveAuction() {
-      if (!currentUser) return showToast('Please log in.');
-      if (!activeAuction) return showToast('No active auction.');
-      if (!confirm('Cancel this active auction?')) return;
-      try { await callServer('cancelAuction', {}); activeAuction = null; showToast('Auction canceled securely.'); renderAuctionView(); }
-      catch (e) { showToast('Error canceling auction: ' + e.message); }
+      if (!currentUser) return;
+      if (!activeAuction) return showToast('No active auction to cancel.');
+
+      const myIdent = currentUser.username || currentUser.name;
+      const isOwner = currentUser.name === activeAuction.owner || currentUser.username === activeAuction.owner;
+      const isAdmin = currentUser.isAdmin;
+
+      if (!isAdmin && !isOwner) {
+        return showToast('Only the card owner or Admin can cancel this auction.');
+      }
+
+      if (!confirm('Are you sure you want to cancel this active auction?')) return;
+
+      try {
+        await db.collection("system").doc("activeAuction").delete();
+        activeAuction = null;
+        showToast('Card auction canceled successfully.');
+        addNotification('Auction Canceled', 'The active card auction was terminated.', 'fa-gavel text-rose-400');
+        renderAuctionView();
+      } catch (e) {
+        showToast('Error canceling auction: ' + e.message);
+      }
     }
+
     async function placeAuctionBid() {
       if (!currentUser) return showToast('Please log in first.');
-      const bidAmount = parseFloat(document.getElementById('bid-input-amount').value);
-      if (!Number.isFinite(bidAmount) || bidAmount <= 0) return showToast('Enter a valid bid amount.');
-      try { await callServer('placeAuctionBid', { bidAmount }); document.getElementById('bid-input-amount').value = ''; showToast('Bid accepted by server.'); }
-      catch (e) { showToast('Failed to place bid: ' + e.message); }
+      if (!activeAuction) return showToast('No active auction to bid on.');
+
+      const expiresAtMs = activeAuction.expiresAt ? new Date(activeAuction.expiresAt).getTime() : null;
+      if (expiresAtMs !== null && expiresAtMs <= Date.now()) {
+        return showToast('This auction has already ended — waiting on Admin to finalize it.');
+      }
+
+      const myIdent = currentUser.username || currentUser.name;
+      if (myIdent === activeAuction.owner) {
+        return showToast("You can't bid on your own card.");
+      }
+
+      const bidInput = document.getElementById('bid-input-amount');
+      const bidAmount = parseFloat(bidInput.value);
+      const currentHighest = activeAuction.currentBid || activeAuction.startingPrice || 0;
+
+      if (!bidAmount || isNaN(bidAmount)) {
+        return showToast('Enter a valid bid amount.');
+      }
+      if (bidAmount <= currentHighest) {
+        return showToast(`Your bid must be higher than the current bid (${formatIDR(currentHighest)}).`);
+      }
+
+      try {
+        await db.collection("system").doc("activeAuction").update({
+          currentBid: bidAmount,
+          highBidder: myIdent,
+          bidHistory: firebase.firestore.FieldValue.arrayUnion({
+            bidder: myIdent,
+            amount: bidAmount,
+            at: new Date().toISOString()
+          })
+        });
+
+        bidInput.value = '';
+        showToast('Bid placed! You are the current high bidder.');
+        addNotification('Bid Placed', `You bid ${formatIDR(bidAmount)} on ${activeAuction.serial}.`, 'fa-gavel text-emerald-400');
+      } catch (e) {
+        console.error('Place bid error:', e);
+        showToast('Failed to place bid: ' + e.message);
+      }
     }
+
     async function finalizeAuctionWinner() {
       if (!currentUser?.isAdmin) return showToast('Admin permission required.');
-      if (!confirm('Finalize this auction? The server will verify the winner and transfer ownership atomically.')) return;
+      if (!activeAuction) return showToast('No active auction to finalize.');
+
+      const { cardId, serial, name, owner, currentBid, highBidder } = activeAuction;
+
+      if (!highBidder || highBidder === 'None') {
+        if (!confirm('No bids were placed on this auction. Close it without a sale?')) return;
+        try {
+          await db.collection("system").doc("activeAuction").delete();
+          activeAuction = null;
+          showToast('Auction closed with no winner.');
+          renderAuctionView();
+        } catch (e) {
+          showToast('Error closing auction: ' + e.message);
+        }
+        return;
+      }
+
+      if (!confirm(`Transfer ${serial} to ${highBidder} for ${formatIDR(currentBid)}?`)) return;
+
       try {
-        const result = await callServer('finalizeAuction', {});
-        activeAuction = null; showToast(result.data?.noWinner ? 'Auction closed with no winner.' : 'Auction finalized securely.'); await loadAppState();
-      } catch (e) { showToast('Error finalizing auction: ' + e.message); }
+        const orderRef = `AUC-${Math.floor(1000 + Math.random() * 9000)}`;
+        const batch = db.batch();
+
+        batch.update(db.collection("cards").doc(cardId), { owner: highBidder, status: 'SOLD' });
+        batch.set(db.collection("transactions").doc(orderRef), {
+          id: orderRef,
+          user_name: highBidder,
+          items: [{ id: cardId, serial, name, price: currentBid, owner: owner }],
+          total_amount: currentBid,
+          status: 'APPROVED',
+          source: 'AUCTION',
+          created_at: new Date().toISOString()
+        });
+        batch.delete(db.collection("system").doc("activeAuction"));
+
+        await batch.commit();
+        activeAuction = null;
+
+        showToast(`Auction finalized! ${serial} transferred to ${highBidder}.`);
+        addNotification('Auction Finalized', `${serial} transferred to ${highBidder} for ${formatIDR(currentBid)}.`, 'fa-flag-checkered text-emerald-400');
+        await loadAppState();
+      } catch (e) {
+        console.error('Finalize auction error:', e);
+        showToast('Error finalizing auction: ' + e.message);
+      }
     }
+
     function renderP2PListings() {
       const grid = document.getElementById('p2p-listings-grid');
       if (!grid) return;
@@ -4080,24 +3838,41 @@
     function closeCheckoutModal() { document.getElementById('checkout-modal').classList.add('hidden'); }
 
     async function submitOrderWithProof() {
-      if (!currentUser) return showToast('Please log in first.');
-      if (!cart.length) return showToast('Cart is empty.');
-      const proofImgData = document.getElementById('qris-proof-img-data').value || '';
+      if (cart.length === 0) return showToast('Cart is empty.');
+
+      const proofImgData = document.getElementById('qris-proof-img-data').value;
+      const orderRef = `ORD-${Math.floor(1000 + Math.random() * 9000)}`;
+      const subtotal = cart.reduce((s, i) => s + i.price, 0);
+      const totalAmount = subtotal * (1 + TRADE_FEE_PERCENT);
+      const activeUserIdent = currentUser ? (currentUser.username || currentUser.name) : 'Guest Collector';
+
+      const baseOrder = {
+        id: orderRef,
+        user_name: activeUserIdent,
+        items: cart,
+        total_amount: totalAmount,
+        status: 'PENDING',
+        created_at: new Date().toISOString()
+      };
+
+      if (proofImgData) {
+        baseOrder.qrisProofUrl = proofImgData;
+      }
+
       try {
-        const result = await callServer('createOrder', {
-          cardIds: cart.map(item => item.id),
-          proofUrl: proofImgData
-        });
-        showToast(`QRIS order ${result.data?.orderId || ''} submitted. Total ${formatIDR(result.data?.total || 0)}.`);
+        await db.collection("transactions").doc(orderRef).set(baseOrder);
+        showToast('QRIS Order submitted! Waiting for Admin verification.');
+        addNotification('QRIS Order Submitted', `Order reference ${orderRef} (${cart.length} cards, inc. 2% tax) sent to Admin approval queue.`, 'fa-cart-check text-emerald-400');
+
         cart = [];
         saveCartToStorage();
         updateCartTotals();
         closeCheckoutModal();
-        await fetchTransactionHistory();
       } catch (e) {
         showToast('Order error: ' + e.message);
       }
     }
+
     function refreshAdminHub() {
       loadPendingTransactions();
       showToast('Admin Hub refreshed.');
@@ -4110,7 +3885,7 @@
         return showToast('Admin access required.');
       }
 
-      ['catalog', 'dashboard', 'collector-hub', 'wishlist', 'admin', 'inventory', 'trade', 'auction', 'trade-req', 'inbox', 'holders', 'history'].forEach(t => {
+      ['catalog', 'dashboard', 'wishlist', 'admin', 'inventory', 'trade', 'auction', 'trade-req', 'inbox', 'holders', 'history'].forEach(t => {
         const view = document.getElementById(`view-${t}`);
         const nav = document.getElementById(`nav-${t}`);
         if (view) view.classList.add('hidden');
@@ -4132,7 +3907,6 @@
       }
 
       if (tabName === 'dashboard') renderOwnedCards();
-      if (tabName === 'collector-hub') renderCollectorHub();
       if (tabName === 'wishlist') renderWishlistPage();
       if (tabName === 'inventory') renderInventoryTable();
       if (tabName === 'admin') loadPendingTransactions();
@@ -4379,15 +4153,51 @@
 
     async function approveTransaction(orderId) {
       if (!currentUser?.isAdmin) return showToast('Admin access required.');
-      try { await callServer('reviewOrder', { orderId, decision: 'APPROVED' }); showToast(`Transaction ${orderId} approved securely.`); await loadAppState(); loadPendingTransactions(); }
-      catch (e) { showToast('Approval error: ' + e.message); }
+
+      try {
+        const docRef = db.collection("transactions").doc(orderId);
+        const doc = await docRef.get();
+        if (doc.exists) {
+          const order = doc.data();
+          if (Array.isArray(order.items)) {
+            const batch = db.batch();
+            for (const item of order.items) {
+              if (item.id) {
+                const cardRef = db.collection("cards").doc(item.id);
+                batch.update(cardRef, { owner: order.user_name, status: 'SOLD' });
+              }
+            }
+            batch.update(docRef, { status: 'APPROVED' });
+            await batch.commit();
+          }
+        }
+
+        showToast(`Transaction ${orderId} approved and items transferred!`);
+        addNotification('Order Approved', `Order ${orderId} approved. Card ownership assigned.`, 'fa-circle-check text-emerald-400');
+        
+        await loadAppState();
+        loadPendingTransactions();
+      } catch (e) {
+        showToast('Approval Exception: ' + e.message);
+      }
     }
+
     async function rejectTransaction(orderId) {
       if (!currentUser?.isAdmin) return showToast('Admin access required.');
-      if (!confirm(`Reject order ${orderId}?`)) return;
-      try { await callServer('reviewOrder', { orderId, decision: 'REJECTED' }); showToast(`Transaction ${orderId} rejected securely.`); fetchTransactionHistory(); loadPendingTransactions(); }
-      catch (e) { showToast('Rejection error: ' + e.message); }
+      if (!confirm(`Are you sure you want to REJECT order ${orderId}?`)) return;
+
+      try {
+        await db.collection("transactions").doc(orderId).update({ status: 'REJECTED' });
+        showToast(`Transaction ${orderId} has been rejected.`);
+        addNotification('Order Rejected', `Order ${orderId} was marked as rejected by Admin.`, 'fa-circle-xmark text-rose-400');
+        
+        fetchTransactionHistory();
+        loadPendingTransactions();
+      } catch (e) {
+        showToast('Rejection Exception: ' + e.message);
+      }
     }
+
     function toggleWishlist(cardId) {
       if (!currentUser) return showToast('Please log in to use wishlist.');
       if (wishlist.has(cardId)) wishlist.delete(cardId);
