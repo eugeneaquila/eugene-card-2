@@ -414,6 +414,50 @@ main{margin-left:264px;max-width:none!important;width:auto!important;padding:28p
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase.js"></script>
 <script src="js/index-auth.js"></script>
+
+<style>
+/* Eugene Card Premium Homepage Upgrade */
+.ec-hero {
+  position:relative;
+  overflow:hidden;
+  border-radius:28px;
+  margin:24px auto;
+  padding:80px 40px;
+  max-width:1200px;
+  background:
+    radial-gradient(circle at top right,rgba(245,158,11,.25),transparent 35%),
+    radial-gradient(circle at bottom left,rgba(99,102,241,.3),transparent 35%),
+    rgba(15,23,42,.8);
+  border:1px solid rgba(255,255,255,.12);
+  box-shadow:0 30px 80px rgba(0,0,0,.35);
+}
+.ec-hero h1 {
+  font-size:clamp(2.5rem,6vw,5rem);
+  font-weight:900;
+  letter-spacing:-.04em;
+  background:linear-gradient(90deg,#fff,#fbbf24,#a78bfa);
+  -webkit-background-clip:text;
+  color:transparent;
+}
+.ec-glow {
+  position:absolute;
+  width:300px;height:300px;
+  border-radius:50%;
+  background:rgba(245,158,11,.15);
+  filter:blur(80px);
+  right:-100px;top:-100px;
+}
+.ec-btn {
+ display:inline-flex;
+ align-items:center;
+ gap:8px;
+ padding:14px 24px;
+ border-radius:999px;
+ font-weight:700;
+ transition:.25s;
+}
+.ec-btn:hover { transform:translateY(-3px); }
+</style>
 </head>
 <body class="min-h-screen flex flex-col justify-between selection:bg-amber-500 selection:text-black relative">
 
@@ -5281,6 +5325,6 @@ main{margin-left:264px;max-width:none!important;width:auto!important;padding:28p
   </script>
 
 <script type="module" src="js/supabase.js"></script>
-<script type="module" src="js/firebase-to-supabase.js"></script>
+
 </body>
 </html>
