@@ -1,44 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Eugene Card | Marketplace</title>
-  <link rel="stylesheet" href="css/style.css">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-</head>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Eugene Card Marketplace</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+body{padding:40px;font-family:Inter,sans-serif}.top{display:flex;justify-content:space-between;align-items:center}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:24px;margin-top:30px}.item{padding:20px;background:#ffffff10;border:1px solid #ffffff18}.item img{width:100%;height:280px;object-fit:cover;border-radius:18px}
+</style></head>
 <body>
-  <header>
-    <div class="logo">Eugene Card</div>
-    <nav>
-      <a href="marketplace.html" class="active">Marketplace</a>
-      <a href="admin-command-center.html">Command Center</a>
-      <a href="analytics.html">Analytics</a>
-      <a href="revenue.html">Revenue</a>
-    </nav>
-  </header>
-
-  <main>
-    <div class="controls-bar">
-      <input type="text" id="search-input" class="search-input" placeholder="Search cards by name...">
-      <select id="rarity-filter" class="filter-select">
-        <option value="">All Rarities</option>
-        <option value="Common">Common</option>
-        <option value="Rare">Rare</option>
-        <option value="Legendary">Legendary</option>
-      </select>
-    </div>
-
-    <div id="card-container" class="card-grid">
-      <div class="skeleton"></div>
-      <div class="skeleton"></div>
-      <div class="skeleton"></div>
-    </div>
-  </main>
-
-  <div id="toast-container"></div>
-
-  <script src="js/supabase.js"></script>
-  <script src="js/app.js"></script>
-</body>
-</html>
+<div class="top"><h1>🌙 Eugene Card Marketplace</h1><a href="index.html">Home</a></div>
+<div class="glass-panel" style="padding:20px"><input id="q" placeholder="Search cards..."></div>
+<div id="cards" class="grid"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase.js"></script><script src="js/app.js"></script>
+</body></html>
