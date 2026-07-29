@@ -81,48 +81,24 @@ document.getElementById('jsonImport').addEventListener('change',e=>{
   </section>
 </div>
 
+<script src="js/auth.js"></script>
 <script>
-const ADMIN_EMAILS = ['eugene.aquila06@gmail.com','yujinybwork@gmail.com'];
-const db = window.db;
-    const auth = window.auth;
-
-const money = v => new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(Number(v||0));
-const set = (id,v) => document.getElementById(id).textContent = v;
-
-supabase.auth.onAuthStateChange(async (_event, session) => {
-const user = session?.user || null;
-  if (!user) {
-    document.getElementById('auth-state').innerHTML = '<div class="glass rounded-2xl p-4 text-sm text-rose-300">Please sign in through Eugene Card first, then open this page.</div>';
-    return;
-  }
-  let claims = {};
-  try { claims = (await user.getIdTokenResult(true)).claims || {}; } catch(e) {}
-  const isAdmin = ['eugene.aquila@gmail.com','yujinybwork@gmail.com'].includes((user.email||'').toLowerCase());
-  set('admin-status', isAdmin ? 'VERIFIED' : 'RESTRICTED');
-  document.getElementById('admin-status').className = 'text-[10px] font-black ' + (isAdmin ? 'text-emerald-400' : 'text-rose-400');
-  if (!isAdmin) {
-    document.getElementById('auth-state').innerHTML = '<div class="glass rounded-2xl p-4 text-sm text-rose-300">Admin access required.</div>';
-    return;
-  }
-  document.getElementById('auth-state').innerHTML = '<div class="glass rounded-2xl p-4 text-sm text-emerald-300">Admin session verified for ' + (user.email||user.displayName||'Admin') + '.</div>';
-
-  db.collection('cards').onSnapshot(s => {
-    const rows = s.docs.map(d => ({id:d.id,...d.data()}));
-    set('cards', rows.length.toLocaleString('en-US'));
-    set('inventory', money(rows.reduce((a,c)=>a+Number(c.price||c.baseFloorPrice||0),0)));
-    set('collectors', new Set(rows.map(c=>String(c.owner||'').trim().toLowerCase()).filter(Boolean)).size.toLocaleString('en-US'));
-    set('data-status','LIVE');
-    document.getElementById('data-status').className='text-[10px] font-black text-emerald-400';
-  }, e => {
-    set('data-status','LIMITED');
-    document.getElementById('data-status').className='text-[10px] font-black text-amber-400';
-  });
-
-  db.collection('tradeRequests').where('status','in',['PENDING','COUNTERED']).onSnapshot(s => set('trades',s.size.toLocaleString('en-US')), () => set('trades','—'));
-});
-</script>
+(async()=>{
+ const ok=await requireAdmin();
+ if(!ok) return;
+ const {data:rows}=await supabase.from("cards").select("*");
+ const cards=rows||[];
+ document.getElementById("cards").textContent=cards.length.toLocaleString();
+ document.getElementById("inventory").textContent=new Intl.NumberFormat("en-US",{style:"currency",currency:"USD",maximumFractionDigits:0}).format(cards.reduce((a,c)=>a+Number(c.price||0),0));
+ document.getElementById("collectors").textContent=new Set(cards.map(c=>c.owner).filter(Boolean)).size.toLocaleString();
+ document.getElementById("admin-status").textContent="VERIFIED";
+ document.getElementById("admin-status").className="text-[10px] font-black text-emerald-400";
+ document.getElementById("auth-state").innerHTML="<div class=\"glass rounded-2xl p-4 text-sm text-emerald-300\">Admin session verified.</div>";
+ document.getElementById("data-status").textContent="LIVE";
+})();
+</script>>
 
 <script type="module" src="js/supabase.js"></script>
-<script type="module" src="js/firebase-to-supabase.js"></script>
+
 </body>
 </html>
