@@ -18,7 +18,7 @@ async function importCards(file){
    tier:c.tier||null,
    printing:c.printing||null
  }));
- const {error}=await supabaseClient.from("cards").upsert(rows);
+ const {error}=await supabase.from("cards").upsert(rows);
  if(error) alert(error.message);
  else alert(`Imported ${rows.length} cards`);
 }
