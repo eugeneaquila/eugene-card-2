@@ -1454,7 +1454,6 @@
           inventory[idx] = { ...inventory[idx], ...cardPayload };
         }
         
-        // Push update directly to Supabase Database so everyone sees it
         if (window.supabaseClient) {
           await supabaseClient
             .from('inventory')
@@ -1468,7 +1467,6 @@
         cardPayload.id = newId;
         inventory.unshift(cardPayload);
 
-        // Insert new card live to Supabase Database
         if (window.supabaseClient) {
           await supabaseClient
             .from('inventory')
@@ -1506,15 +1504,24 @@
       showToast('Card deleted live from database.');
     }
 
-    // JSON IMPORT & EXPORT FEATURES
-    function exportInventoryJSON() {
+    // DIRECT SUPABASE BACKUP IMPORT & EXPORT
+    async function exportInventoryJSON() {
       if (!currentUser?.isAdmin) return showToast('Admin permission required.');
+
+      let exportCards = [...inventory];
+
+      if (window.supabaseClient) {
+        const { data, error } = await supabaseClient.from('inventory').select('*').order('id', { ascending: true });
+        if (!error && data) {
+          exportCards = data;
+        }
+      }
 
       const backupData = {
         exportedAt: new Date().toISOString(),
         exportedBy: currentUser.email,
-        inventoryCount: inventory.length,
-        cards: inventory
+        inventoryCount: exportCards.length,
+        cards: exportCards
       };
 
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
@@ -1525,7 +1532,7 @@
       downloadAnchor.click();
       downloadAnchor.remove();
 
-      showToast('Inventory backup exported successfully!');
+      showToast(`Exported ${exportCards.length} cards from Supabase!`);
     }
 
     async function importInventoryJSON(event) {
@@ -1538,22 +1545,35 @@
       reader.onload = async function(e) {
         try {
           const parsed = JSON.parse(e.target.result);
-          const newCards = Array.isArray(parsed.cards) ? parsed.cards : parsed;
+          const importedCards = Array.isArray(parsed.cards) ? parsed.cards : (Array.isArray(parsed) ? parsed : []);
 
-          if (window.supabaseClient && newCards.length > 0) {
-            await supabaseClient.from('inventory').upsert(newCards);
+          if (importedCards.length === 0) {
+            return showToast('Import failed: Invalid JSON format or empty card list.');
+          }
+
+          showToast(`Uploading ${importedCards.length} cards to Supabase...`);
+
+          if (window.supabaseClient) {
+            const { error } = await supabaseClient
+              .from('inventory')
+              .upsert(importedCards, { onConflict: 'id' });
+
+            if (error) throw error;
+
             await fetchDatabaseInventory();
+            addHistoryRecord('IMPORT_JSON', 'SYSTEM', `Admin imported ${importedCards.length} cards directly into Supabase.`);
+            showToast(`Successfully imported ${importedCards.length} cards to Supabase live!`);
           } else {
-            inventory = newCards;
+            inventory = importedCards;
             saveInventoryLocalCache();
             renderCardGrid();
             renderInventoryTable();
             updateRemainingCardCount();
+            showToast(`Imported ${importedCards.length} cards to local cache!`);
           }
-          addHistoryRecord('IMPORT_JSON', 'SYSTEM', `Admin imported ${newCards.length} cards into inventory.`);
-          showToast(`Imported ${newCards.length} cards into inventory live!`);
         } catch (err) {
-          showToast('Failed to parse JSON file: ' + err.message);
+          console.error('Import Error:', err);
+          showToast('Import to Supabase failed: ' + err.message);
         }
       };
 
