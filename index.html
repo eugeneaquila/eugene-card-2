@@ -114,7 +114,7 @@
           <i class="fa-solid fa-handshake text-purple-400"></i> Trade Requests
         </button>
         <button id="nav-inbox" onclick="switchTab('inbox')" class="px-3 py-1.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white flex items-center gap-1.5 whitespace-nowrap transition-all relative">
-          <i class="fa-solid fa-comments text-indigo-400"></i> Inbox
+          <i class="fa-solid fa-comments text-indigo-400"></i> Private Inbox
           <span id="unread-inbox-badge" class="w-2 h-2 rounded-full bg-indigo-500 hidden"></span>
         </button>
         <button id="nav-holders" onclick="switchTab('holders')" class="px-3 py-1.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white flex items-center gap-1.5 whitespace-nowrap transition-all">
@@ -164,7 +164,7 @@
     </div>
   </header>
 
-  <!-- CREATE AUCTION MODAL (VAULT BINDER FEATURE) -->
+  <!-- CREATE AUCTION MODAL -->
   <div id="create-auction-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-4 relative shadow-2xl">
       <button onclick="closeCreateAuctionModal()" class="absolute top-4 right-4 w-7 h-7 rounded-lg bg-slate-800 text-slate-400 hover:text-white text-xs flex items-center justify-center">
@@ -204,37 +204,37 @@
     </div>
   </div>
 
-  <!-- ADMIN SELL-BACK PROOF APPROVAL MODAL -->
-  <div id="admin-sellback-proof-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+  <!-- ADMIN PROOF APPROVAL MODAL (WITH 2% TAX BREAKDOWN) -->
+  <div id="admin-proof-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-4 relative shadow-2xl">
-      <button onclick="closeSellbackProofModal()" class="absolute top-4 right-4 w-7 h-7 rounded-lg bg-slate-800 text-slate-400 hover:text-white text-xs flex items-center justify-center">
+      <button onclick="closeAdminProofModal()" class="absolute top-4 right-4 w-7 h-7 rounded-lg bg-slate-800 text-slate-400 hover:text-white text-xs flex items-center justify-center">
         <i class="fa-solid fa-xmark"></i>
       </button>
 
       <div class="flex items-center gap-2 border-b border-slate-800 pb-3">
         <i class="fa-solid fa-upload text-amber-400"></i>
-        <h3 class="text-base font-bold text-white">Upload Transfer Receipt Proof</h3>
+        <h3 class="text-base font-bold text-white">Approve Payout (2% Tax Deducted)</h3>
       </div>
 
-      <div id="sellback-approval-summary" class="p-3 bg-slate-800/80 rounded-xl border border-slate-700 text-xs text-slate-300 space-y-1">
+      <div id="admin-approval-summary" class="p-3 bg-slate-800/80 rounded-xl border border-slate-700 text-xs text-slate-300 space-y-1">
         <!-- Dynamic Summary -->
       </div>
 
-      <form onsubmit="confirmSellbackWithProof(event)" class="space-y-3">
-        <input type="hidden" id="sellback-pending-index">
+      <form onsubmit="confirmAdminPayoutWithProof(event)" class="space-y-3">
+        <input type="hidden" id="admin-pending-index">
 
         <div>
           <label class="block text-[10px] font-bold uppercase text-slate-400">Upload Bank/E-Wallet Receipt Image (*Required)</label>
-          <input type="file" id="sellback-receipt-file" accept="image/*" required class="w-full text-xs text-slate-400 bg-slate-800 border border-slate-700 rounded-xl p-2 file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-emerald-600 file:text-white">
+          <input type="file" id="admin-receipt-file" accept="image/*" required class="w-full text-xs text-slate-400 bg-slate-800 border border-slate-700 rounded-xl p-2 file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-emerald-600 file:text-white">
         </div>
 
         <div>
-          <label class="text-[10px] font-bold text-slate-400 uppercase">Transfer Transaction Reference / Note</label>
-          <input type="text" id="sellback-tx-ref" placeholder="Ref: TRF-88291039" class="w-full mt-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500 font-mono">
+          <label class="text-[10px] font-bold text-slate-400 uppercase">Transfer Reference / Note</label>
+          <input type="text" id="admin-tx-ref" placeholder="Ref: TRF-992014" class="w-full mt-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500 font-mono">
         </div>
 
         <button type="submit" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow transition-all flex items-center justify-center gap-2">
-          <i class="fa-solid fa-check-circle"></i> Approve, Send Proof to Inbox & Ring Bell
+          <i class="fa-solid fa-check-circle"></i> Confirm Transfer & Send Payout Receipt to Inbox
         </button>
       </form>
     </div>
@@ -288,7 +288,7 @@
     </div>
   </div>
 
-  <!-- TRADE PROPOSAL MODAL -->
+  <!-- TRADE PROPOSAL MODAL (WITH PROOF ATTACHMENT) -->
   <div id="trade-proposal-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-4 relative shadow-2xl">
       <button onclick="closeTradeProposalModal()" class="absolute top-4 right-4 w-7 h-7 rounded-lg bg-slate-800 text-slate-400 hover:text-white text-xs flex items-center justify-center">
@@ -320,6 +320,11 @@
         <div>
           <label class="text-[10px] font-bold text-slate-400 uppercase">Cash Amount Add-on (IDR)</label>
           <input type="number" id="trade-cash-addon" min="0" value="0" class="w-full mt-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-purple-500 font-mono">
+        </div>
+
+        <div>
+          <label class="block text-[10px] font-bold uppercase text-slate-400">Upload Trade Attachment / Screenshot</label>
+          <input type="file" id="trade-attachment-file" accept="image/*" class="w-full text-xs text-slate-400 bg-slate-800 border border-slate-700 rounded-xl p-2 file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-purple-600 file:text-white">
         </div>
 
         <div>
@@ -661,7 +666,6 @@
       </div>
 
       <div id="auction-content" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        <!-- Dynamic Active Auctions Grid -->
       </div>
     </section>
 
@@ -669,7 +673,7 @@
     <section id="view-trade-req" class="hidden space-y-6">
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
         <h2 class="text-xl font-bold text-white uppercase"><i class="fa-solid fa-handshake text-purple-400 mr-2"></i> Active Trade Proposals</h2>
-        <p class="text-xs text-slate-400 mt-1">Review incoming and outgoing card/cash trade proposals.</p>
+        <p class="text-xs text-slate-400 mt-1">Review incoming and outgoing card/cash trade proposals with screenshot attachments.</p>
       </div>
       <div id="trade-req-content" class="space-y-3">
         <div class="bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center text-xs text-slate-400">
@@ -678,30 +682,30 @@
       </div>
     </section>
 
-    <!-- INBOX / CHAT VIEW -->
+    <!-- PRIVATE INBOX / CHAT VIEW -->
     <section id="view-inbox" class="hidden space-y-6">
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-        <h2 class="text-xl font-bold text-white uppercase"><i class="fa-solid fa-comments text-indigo-400 mr-2"></i> Messenger & Live Inbox</h2>
-        <p class="text-xs text-slate-400 mt-1">Direct message buyers, sellers, and receive official transaction receipts.</p>
+        <h2 class="text-xl font-bold text-white uppercase"><i class="fa-solid fa-comments text-indigo-400 mr-2"></i> Private Messenger & Inbox</h2>
+        <p class="text-xs text-slate-400 mt-1">Private messages strictly scoped between you and buyers/sellers.</p>
       </div>
 
       <div class="bg-slate-900 border border-slate-800 rounded-2xl grid grid-cols-1 md:grid-cols-3 min-h-[450px] overflow-hidden">
         <!-- Thread List Sidebar -->
         <div class="border-r border-slate-800 p-4 space-y-3">
-          <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Active Conversations</p>
+          <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Private Threads</p>
           <div id="chat-threads-list" class="space-y-1.5"></div>
         </div>
 
         <!-- Chat Feed Window -->
         <div class="col-span-2 flex flex-col justify-between bg-slate-950/40 p-4">
           <div id="chat-active-header" class="pb-3 border-b border-slate-800 flex items-center justify-between">
-            <span class="text-xs font-bold text-white">Select a thread to start chatting</span>
+            <span class="text-xs font-bold text-white">Select a private conversation</span>
           </div>
 
           <div id="chat-messages-body" class="flex-1 my-4 space-y-3 overflow-y-auto max-h-[300px] pr-2"></div>
 
           <form onsubmit="sendChatMessage(event)" class="pt-3 border-t border-slate-800 flex gap-2">
-            <input type="text" id="chat-input-text" placeholder="Write a message..." class="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500">
+            <input type="text" id="chat-input-text" placeholder="Write a private message..." class="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500">
             <button type="submit" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl shadow transition-all">Send</button>
           </form>
         </div>
@@ -743,7 +747,6 @@
               </div>
               <p id="profile-bio-text" class="text-xs text-slate-400 max-w-md">No bio added yet. Click customize to complete your profile.</p>
               
-              <!-- Clickable Social Media Links -->
               <div id="profile-socials-container" class="flex items-center gap-3 pt-1 text-xs"></div>
             </div>
           </div>
@@ -776,7 +779,7 @@
     <section id="view-analytics" class="hidden space-y-6">
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
         <h2 class="text-xl font-bold text-white uppercase"><i class="fa-solid fa-chart-line text-amber-400 mr-2"></i> Market Analytics</h2>
-        <p class="text-xs text-slate-400 mt-1">Platform sales volume and distribution tracking.</p>
+        <p class="text-xs text-slate-400 mt-1">Platform sales volume and tax revenue tracking.</p>
       </div>
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl">
@@ -784,8 +787,8 @@
           <p id="analytics-vol" class="text-xl font-bold font-mono text-emerald-400 mt-1">IDR 0</p>
         </div>
         <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl">
-          <p class="text-[10px] uppercase font-bold text-slate-400">Recorded Transactions</p>
-          <p id="analytics-count" class="text-xl font-bold font-mono text-blue-400 mt-1">0 Completed</p>
+          <p class="text-[10px] uppercase font-bold text-slate-400">Admin Tax Collected (2%)</p>
+          <p id="analytics-tax" class="text-xl font-bold font-mono text-amber-400 mt-1">IDR 0</p>
         </div>
         <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl">
           <p class="text-[10px] uppercase font-bold text-slate-400">Active Holders</p>
@@ -799,11 +802,11 @@
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex justify-between items-center">
         <div>
           <h2 class="text-xl font-bold text-white uppercase"><i class="fa-solid fa-shield-halved text-rose-400 mr-2"></i> Admin Hub</h2>
-          <p class="text-xs text-slate-400 mt-1">Verify payment submissions and oversee orders and sell-backs.</p>
+          <p class="text-xs text-slate-400 mt-1">Verify payment submissions and process payouts with a 2% platform tax.</p>
         </div>
       </div>
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-3">
-        <h4 class="text-xs font-bold text-slate-300 uppercase">Pending Transactions Queue (QRIS & Sell-Backs)</h4>
+        <h4 class="text-xs font-bold text-slate-300 uppercase">Pending Transactions Queue (QRIS, Trades & Sell-Backs)</h4>
         <div id="admin-orders-queue" class="space-y-2">
           <p class="text-xs text-slate-500">No pending orders waiting for manual approval.</p>
         </div>
@@ -879,7 +882,7 @@
     let currentFilter = 'ALL';
     let unreadNotifCount = 0;
     
-    // LOAD PERSISTENT INVENTORY OR FALLBACK TO INITIAL
+    // LOAD PERSISTENT INVENTORY
     let inventory = [];
     const storedInventory = localStorage.getItem('eugene_inventory_data');
     if (storedInventory) {
@@ -902,7 +905,7 @@
       try { tradeProposals = JSON.parse(storedTrades); } catch(e) {}
     }
 
-    // LOAD PERSISTENT PENDING ADMIN ORDERS (QRIS & SELL-BACKS)
+    // LOAD PERSISTENT PENDING ADMIN ORDERS
     let pendingOrders = [];
     const storedPending = localStorage.getItem('eugene_pending_orders');
     if (storedPending) {
@@ -931,17 +934,29 @@
     let activeCardForAction = null;
     let selectedOwner = null;
 
-    // Chat Inbox Threads State with LocalStorage Persistence
+    // PRIVATE CHAT THREADS
     let chatThreads = [
-      { id: 't1', user: 'Eugene', avatar: 'https://api.dicebear.com/7.x/identicon/svg?seed=Eugene', messages: [{ sender: 'Eugene', text: 'Hey! Are you open to trading card *01?' }] },
-      { id: 't2', user: 'kenneth_brilliant', avatar: 'https://api.dicebear.com/7.x/identicon/svg?seed=kenneth', messages: [{ sender: 'kenneth_brilliant', text: 'Just bought *005 via QRIS!' }] },
-      { id: 't3', user: 'andi_rende', avatar: 'https://api.dicebear.com/7.x/identicon/svg?seed=andi', messages: [{ sender: 'andi_rende', text: 'Welcome to Eugene Card Marketplace.' }] }
+      { id: 't1', user: 'Eugene', participant1: 'Eugene', participant2: 'Admin', avatar: 'https://api.dicebear.com/7.x/identicon/svg?seed=Eugene', messages: [{ sender: 'Eugene Admin', text: 'Welcome to Eugene Card Private Messenger.' }] },
+      { id: 't2', user: 'kenneth_brilliant', participant1: 'kenneth_brilliant', participant2: 'Admin', avatar: 'https://api.dicebear.com/7.x/identicon/svg?seed=kenneth', messages: [{ sender: 'kenneth_brilliant', text: 'Just bought *005 via QRIS!' }] }
     ];
     const storedChats = localStorage.getItem('eugene_chat_threads');
     if (storedChats) {
       try { chatThreads = JSON.parse(storedChats); } catch(e) {}
     }
     let activeChatThreadId = 't1';
+
+    // BROADCAST / STORAGE EVENT SYNC FOR REAL-TIME REFRESH IN OTHER TABS
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'eugene_inventory_data') {
+        try { inventory = JSON.parse(e.newValue); renderCardGrid(); renderInventoryTable(); updateRemainingCardCount(); } catch(err){}
+      }
+      if (e.key === 'eugene_chat_threads') {
+        try { chatThreads = JSON.parse(e.newValue); renderChatThreads(); } catch(err){}
+      }
+      if (e.key === 'eugene_pending_orders') {
+        try { pendingOrders = JSON.parse(e.newValue); renderAdminOrdersQueue(); } catch(err){}
+      }
+    });
 
     function saveInventoryState() {
       localStorage.setItem('eugene_inventory_data', JSON.stringify(inventory));
@@ -1111,6 +1126,7 @@
       renderUserProfileUI();
       renderCardGrid();
       renderInventoryTable();
+      renderChatThreads();
     }
 
     function returnToPreviousStatePostLogin() {
@@ -1131,6 +1147,7 @@
       currentUser = null;
       renderAuthHeader();
       renderUserProfileUI();
+      renderChatThreads();
       switchTab('catalog');
       showToast('Logged out.');
     }
@@ -1254,7 +1271,7 @@
       socialsContainer.innerHTML = socialHtml;
     }
 
-    // --- COLLECTION TAB: OWNED CARDS CANNOT BE BOUGHT ---
+    // --- COLLECTION TAB ---
     function renderCardGrid() {
       const grid = document.getElementById('card-grid');
       if (!grid) return;
@@ -1301,22 +1318,22 @@
               <!-- DIRECT ACTION BUTTONS: BUY (DISABLED IF OWNED), CART, OFFER -->
               <div class="grid grid-cols-3 gap-1 pt-1 border-t border-slate-800" onclick="event.stopPropagation()">
                 ${isOwned ? `
-                  <button disabled class="py-1.5 bg-slate-800/50 text-slate-600 cursor-not-allowed font-bold text-[10px] rounded-lg flex items-center justify-center gap-1" title="Owned card cannot be purchased">
+                  <button disabled class="py-1.5 bg-slate-800/50 text-slate-600 cursor-not-allowed font-bold text-[10px] rounded-lg flex items-center justify-center gap-1">
                     <i class="fa-solid fa-lock"></i> Owned
                   </button>
                   <button disabled class="py-1.5 bg-slate-800/50 text-slate-600 cursor-not-allowed font-bold text-[10px] rounded-lg flex items-center justify-center gap-1">
                     <i class="fa-solid fa-cart-shopping"></i> Cart
                   </button>
                 ` : `
-                  <button onclick="quickBuyCard('${card.id}')" class="py-1.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-[10px] rounded-lg transition-all flex items-center justify-center gap-1" title="Buy via QRIS">
+                  <button onclick="quickBuyCard('${card.id}')" class="py-1.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-[10px] rounded-lg transition-all flex items-center justify-center gap-1">
                     <i class="fa-solid fa-qrcode"></i> Buy
                   </button>
-                  <button onclick="toggleCart('${card.id}')" class="py-1.5 ${inCart ? 'bg-amber-500 text-slate-950 font-bold' : 'bg-slate-800 hover:bg-slate-700 text-amber-400'} text-[10px] rounded-lg border border-slate-700 transition-all flex items-center justify-center gap-1" title="Add to Cart">
+                  <button onclick="toggleCart('${card.id}')" class="py-1.5 ${inCart ? 'bg-amber-500 text-slate-950 font-bold' : 'bg-slate-800 hover:bg-slate-700 text-amber-400'} text-[10px] rounded-lg border border-slate-700 transition-all flex items-center justify-center gap-1">
                     <i class="fa-solid fa-cart-shopping"></i> ${inCart ? 'Added' : 'Cart'}
                   </button>
                 `}
 
-                <button onclick="openTradeProposalModal('${card.id}')" class="py-1.5 bg-slate-800 hover:bg-slate-700 text-purple-400 font-bold text-[10px] rounded-lg border border-slate-700 transition-all flex items-center justify-center gap-1" title="Make Trade Offer">
+                <button onclick="openTradeProposalModal('${card.id}')" class="py-1.5 bg-slate-800 hover:bg-slate-700 text-purple-400 font-bold text-[10px] rounded-lg border border-slate-700 transition-all flex items-center justify-center gap-1">
                   <i class="fa-solid fa-handshake"></i> Offer
                 </button>
               </div>
@@ -1327,7 +1344,7 @@
       }).join('');
     }
 
-    // --- AUCTION HOUSE & BINDER LAUNCH FEATURE ---
+    // --- AUCTION HOUSE FEATURE ---
     function openCreateAuctionModal(cardId) {
       if (!currentUser) return openAuthModal();
       const card = inventory.find(c => c.id === cardId);
@@ -1431,7 +1448,7 @@
       showToast(`Bid placed! New highest bid: IDR ${auc.currentBid.toLocaleString()}`);
     }
 
-    // --- TRADE PROPOSALS SYSTEM ---
+    // --- TRADE PROPOSALS SYSTEM WITH ATTACHMENTS ---
     function openTradeProposalModal(targetCardId) {
       if (!currentUser) return openAuthModal();
 
@@ -1462,6 +1479,7 @@
       const offeredId = document.getElementById('trade-offered-card-id').value;
       const cashAddon = parseInt(document.getElementById('trade-cash-addon').value || '0', 10);
       const note = document.getElementById('trade-note').value;
+      const attachmentInput = document.getElementById('trade-attachment-file');
 
       const targetCard = inventory.find(c => c.id === targetId);
       const offeredCard = inventory.find(c => c.id === offeredId);
@@ -1474,6 +1492,7 @@
         targetCard: targetCard,
         offeredCard: offeredCard || null,
         cashAddon: cashAddon,
+        hasAttachment: attachmentInput.files.length > 0,
         note: note,
         status: 'PENDING',
         timestamp: new Date().toLocaleTimeString()
@@ -1487,7 +1506,7 @@
       closeTradeProposalModal();
       switchTab('trade-req');
       renderTradeProposals();
-      showToast('Trade proposal submitted successfully!');
+      showToast('Trade proposal submitted with attachment!');
     }
 
     function renderTradeProposals() {
@@ -1505,6 +1524,7 @@
             <div class="flex items-center gap-2">
               <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${p.status === 'PENDING' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : p.status === 'ACCEPTED' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'}">${p.status}</span>
               <span class="text-xs text-slate-400">From: <strong class="text-white">${p.proposer}</strong> • ${p.timestamp}</span>
+              ${p.hasAttachment ? '<span class="text-[9px] bg-purple-950/60 text-purple-300 border border-purple-500/30 px-2 py-0.5 rounded-full"><i class="fa-solid fa-paperclip mr-1"></i> Attachment</span>' : ''}
             </div>
             <p class="text-xs text-slate-200">
               Target: <strong class="text-blue-400">${p.targetCard.name} (${p.targetCard.serial})</strong> 
@@ -1516,7 +1536,7 @@
 
           ${p.status === 'PENDING' ? `
             <div class="flex items-center gap-2 shrink-0">
-              <button onclick="acceptTradeProposal(${idx})" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow transition-all">Accept</button>
+              <button onclick="acceptTradeProposal(${idx})" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow transition-all">Accept Trade & Route to Admin</button>
               <button onclick="rejectTradeProposal(${idx})" class="px-3 py-1.5 bg-slate-800 hover:bg-rose-500/20 text-rose-400 font-bold text-xs rounded-xl border border-slate-700 transition-all">Reject</button>
             </div>
           ` : ''}
@@ -1541,15 +1561,32 @@
         }
       }
 
+      // SEND CASH PORTION DIRECTLY TO ADMIN HUB WITH 2% TAX REQUIREMENT
+      if (p.cashAddon > 0) {
+        pendingOrders.push({
+          id: `trade-payout-${Date.now()}`,
+          card: p.targetCard,
+          type: 'TRADE_PAYOUT',
+          buyer: p.proposer,
+          seller: p.targetCard.owner || 'Seller',
+          grossAmount: p.cashAddon,
+          taxAmount: p.cashAddon * 0.02,
+          payoutAmount: p.cashAddon * 0.98,
+          timestamp: new Date().toLocaleTimeString()
+        });
+        savePendingOrdersState();
+        renderAdminOrdersQueue();
+      }
+
       saveInventoryState();
       saveTradeProposalsState();
 
-      addHistoryRecord('TRADE_ACCEPTED', p.targetCard.serial, `Trade accepted! ${p.targetCard.serial} transferred to ${p.proposer}.`);
+      addHistoryRecord('TRADE_ACCEPTED', p.targetCard.serial, `Trade accepted! ${p.targetCard.serial} transferred to ${p.proposer} (2% Admin Tax applied).`);
 
       renderTradeProposals();
       renderCardGrid();
       renderInventoryTable();
-      showToast('Trade proposal accepted and card ownership updated!');
+      showToast('Trade accepted! Sent to Admin Hub for 2% tax payout processing.');
     }
 
     function rejectTradeProposal(index) {
@@ -1559,7 +1596,7 @@
       showToast('Trade proposal rejected.');
     }
 
-    // --- SELL BACK TO ADMIN FEATURE FROM VAULT ---
+    // --- SELL BACK TO ADMIN FEATURE ---
     function sellBackCardToAdmin(cardId) {
       if (!currentUser) return openAuthModal();
 
@@ -1567,6 +1604,8 @@
       if (!card) return;
 
       const floorPrice = card.baseFloorPrice || card.price || 100000;
+      const tax = floorPrice * 0.02;
+      const netPayout = floorPrice - tax;
 
       pendingOrders.push({
         id: `sellback-${Date.now()}`,
@@ -1574,71 +1613,79 @@
         type: 'SELL_BACK',
         buyer: 'Admin',
         seller: currentUser.name,
-        payoutAmount: floorPrice,
+        grossAmount: floorPrice,
+        taxAmount: tax,
+        payoutAmount: netPayout,
         timestamp: new Date().toLocaleTimeString()
       });
 
       savePendingOrdersState();
       renderAdminOrdersQueue();
 
-      addHistoryRecord('SELL_BACK_REQUEST', card.serial, `${currentUser.name} requested sell-back of ${card.serial} to Admin for IDR ${floorPrice.toLocaleString()}`);
+      addHistoryRecord('SELL_BACK_REQUEST', card.serial, `${currentUser.name} requested sell-back of ${card.serial} for IDR ${floorPrice.toLocaleString()} (Net Payout: IDR ${netPayout.toLocaleString()})`);
 
-      showToast(`Sell-back request submitted to Admin Hub for IDR ${floorPrice.toLocaleString()}!`);
+      showToast(`Sell-back request submitted! Admin will transfer IDR ${netPayout.toLocaleString()} (2% tax deducted).`);
     }
 
-    // --- ADMIN PROOF APPROVAL FOR SELL BACK WITH INBOX & BELL NOTIFICATION ---
-    function openSellbackProofModal(index) {
+    // --- ADMIN PROOF APPROVAL WITH 2% TAX & INBOX NOTIFICATION ---
+    function openAdminProofModal(index) {
       const ord = pendingOrders[index];
       if (!ord) return;
 
-      document.getElementById('sellback-pending-index').value = index;
-      document.getElementById('sellback-approval-summary').innerHTML = `
-        <p><strong>Card:</strong> ${ord.card.name} (${ord.card.serial})</p>
-        <p><strong>Seller Name:</strong> ${ord.seller}</p>
-        <p><strong>Floor Payout Amount:</strong> <span class="text-emerald-400 font-mono font-bold">IDR ${(ord.payoutAmount||0).toLocaleString()}</span></p>
+      document.getElementById('admin-pending-index').value = index;
+      document.getElementById('admin-approval-summary').innerHTML = `
+        <p><strong>Item:</strong> ${ord.card.name} (${ord.card.serial})</p>
+        <p><strong>Recipient (Seller):</strong> ${ord.seller || ord.buyer}</p>
+        <p><strong>Gross Value:</strong> IDR ${(ord.grossAmount||ord.card.price||0).toLocaleString()}</p>
+        <p><strong>Admin Tax Fee (2%):</strong> <span class="text-amber-400 font-mono">- IDR ${(ord.taxAmount||(ord.card.price*0.02)||0).toLocaleString()}</span></p>
+        <p><strong>Net Transfer Due:</strong> <span class="text-emerald-400 font-mono font-bold">IDR ${(ord.payoutAmount||(ord.card.price*0.98)||0).toLocaleString()}</span></p>
       `;
 
-      document.getElementById('admin-sellback-proof-modal').classList.remove('hidden');
+      document.getElementById('admin-proof-modal').classList.remove('hidden');
     }
 
-    function closeSellbackProofModal() {
-      document.getElementById('admin-sellback-proof-modal').classList.add('hidden');
+    function closeAdminProofModal() {
+      document.getElementById('admin-proof-modal').classList.add('hidden');
     }
 
-    function confirmSellbackWithProof(e) {
+    function confirmAdminPayoutWithProof(e) {
       e.preventDefault();
 
-      const index = parseInt(document.getElementById('sellback-pending-index').value, 10);
-      const fileInput = document.getElementById('sellback-receipt-file');
-      const txRef = document.getElementById('sellback-tx-ref').value || `REF-${Date.now().toString().slice(-6)}`;
+      const index = parseInt(document.getElementById('admin-pending-index').value, 10);
+      const fileInput = document.getElementById('admin-receipt-file');
+      const txRef = document.getElementById('admin-tx-ref').value || `REF-${Date.now().toString().slice(-6)}`;
 
       if (!fileInput.files.length) {
-        return showToast('Please select a payment receipt proof image.');
+        return showToast('Please select a transfer receipt proof image.');
       }
 
       const order = pendingOrders[index];
       const card = inventory.find(c => c.id === order.card.id);
 
-      if (card) {
-        card.status = 'AVAILABLE';
-        card.owner = 'Admin';
+      if (order.type === 'SELL_BACK') {
+        if (card) { card.status = 'AVAILABLE'; card.owner = 'Admin'; }
+      } else if (order.type === 'PURCHASE') {
+        if (card) { card.status = 'SOLD'; card.owner = order.buyer; }
       }
 
-      // SEND AUTOMATIC INBOX NOTIFICATION MESSAGE TO SELLER THREAD
-      let sellerThread = chatThreads.find(t => t.user === order.seller);
-      if (!sellerThread) {
-        sellerThread = {
+      const recipientUser = order.seller || order.buyer;
+      let targetThread = chatThreads.find(t => t.user === recipientUser || t.participant1 === recipientUser || t.participant2 === recipientUser);
+      
+      if (!targetThread) {
+        targetThread = {
           id: `t-${Date.now()}`,
-          user: order.seller,
-          avatar: `https://api.dicebear.com/7.x/identicon/svg?seed=${encodeURIComponent(order.seller)}`,
+          user: recipientUser,
+          participant1: recipientUser,
+          participant2: 'Admin',
+          avatar: `https://api.dicebear.com/7.x/identicon/svg?seed=${encodeURIComponent(recipientUser)}`,
           messages: []
         };
-        chatThreads.push(sellerThread);
+        chatThreads.push(targetThread);
       }
 
-      const msgText = `[OFFICIAL ADMIN PAYOUT RECEIPT] Your sell-back request for card ${order.card.serial} (${order.card.name}) has been approved! Payout of IDR ${(order.payoutAmount||0).toLocaleString()} transferred. Receipt Ref: ${txRef}`;
+      const msgText = `[OFFICIAL ADMIN RECEIPT] Transfer payout for card ${order.card.serial} (${order.card.name}) approved! Net Amount: IDR ${(order.payoutAmount||0).toLocaleString()} (2% system tax deducted). Ref: ${txRef}`;
       
-      sellerThread.messages.push({
+      targetThread.messages.push({
         sender: 'Eugene Admin',
         text: msgText
       });
@@ -1646,20 +1693,20 @@
       saveChatsState();
       triggerBellRingNotification(1);
 
-      addHistoryRecord('ADMIN_SELLBACK_APPROVED', order.card.serial, `Admin approved sell-back for ${order.card.serial}. Payout IDR ${(order.payoutAmount||0).toLocaleString()} sent to ${order.seller}.`);
+      addHistoryRecord('PAYOUT_APPROVED', order.card.serial, `Admin approved payout for ${order.card.serial}. Net IDR ${(order.payoutAmount||0).toLocaleString()} sent to ${recipientUser}.`);
 
       pendingOrders.splice(index, 1);
       savePendingOrdersState();
       saveInventoryState();
 
-      closeSellbackProofModal();
+      closeAdminProofModal();
       renderAdminOrdersQueue();
       renderCardGrid();
       renderInventoryTable();
       updateRemainingCardCount();
       renderChatThreads();
 
-      showToast('Payout receipt uploaded! Sent to seller Inbox and triggered notification bell.');
+      showToast('Payout receipt uploaded! Sent to private Inbox and triggered notification bell.');
     }
 
     // --- CART MANAGEMENT ---
@@ -1825,12 +1872,29 @@
       document.getElementById('holder-vault-modal').classList.add('hidden');
     }
 
-    // --- LIVE CHAT / INBOX ENGINE ---
+    // --- PRIVATE INBOX ENGINE ---
     function renderChatThreads() {
       const container = document.getElementById('chat-threads-list');
       if (!container) return;
 
-      container.innerHTML = chatThreads.map(t => `
+      if (!currentUser) {
+        container.innerHTML = `<p class="text-xs text-slate-500 text-center py-4">Please log in to view your private messages.</p>`;
+        return;
+      }
+
+      // STRICT PRIVATE FILTERING
+      const myThreads = currentUser.isAdmin ? chatThreads : chatThreads.filter(t => 
+        t.user === currentUser.name || 
+        t.participant1 === currentUser.name || 
+        t.participant2 === currentUser.name
+      );
+
+      if (myThreads.length === 0) {
+        container.innerHTML = `<p class="text-xs text-slate-500 text-center py-4">No private message conversations yet.</p>`;
+        return;
+      }
+
+      container.innerHTML = myThreads.map(t => `
         <div onclick="selectChatThread('${t.id}')" class="p-2.5 rounded-xl border border-slate-800 ${t.id === activeChatThreadId ? 'bg-indigo-950/40 border-indigo-500/50' : 'bg-slate-900 hover:bg-slate-800/60'} cursor-pointer transition-all flex items-center gap-3">
           <img src="${t.avatar}" class="w-8 h-8 rounded-full border border-slate-700">
           <div class="overflow-hidden">
@@ -1858,7 +1922,7 @@
       header.innerHTML = `
         <div class="flex items-center gap-2">
           <img src="${activeThread.avatar}" class="w-6 h-6 rounded-full">
-          <span class="text-xs font-bold text-white">${activeThread.user}</span>
+          <span class="text-xs font-bold text-white">${activeThread.user} (Private Chat)</span>
         </div>
       `;
 
@@ -2170,6 +2234,9 @@
         card: activeCardForAction,
         type: 'PURCHASE',
         buyer: currentUser.name,
+        grossAmount: activeCardForAction.price,
+        taxAmount: activeCardForAction.price * 0.02,
+        payoutAmount: activeCardForAction.price * 0.98,
         timestamp: new Date().toLocaleTimeString()
       });
 
@@ -2274,7 +2341,6 @@
 
       container.className = "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4";
       container.innerHTML = owned.map(card => {
-        const floorPrice = card.baseFloorPrice || card.price || 100000;
         return `
           <div class="card-holo-premium rounded-xl p-3 flex flex-col justify-between relative">
             <div class="w-full aspect-[4/5] bg-slate-900 rounded-lg border border-slate-800 p-1 flex flex-col justify-between mb-2 text-center overflow-hidden cursor-pointer" onclick="openCardDetailsModal('${card.id}')">
@@ -2283,15 +2349,15 @@
             <p class="text-center font-bold text-blue-400 font-mono mb-0.5 text-xs">${card.serial}</p>
             <p class="text-[11px] font-bold text-white truncate text-center mb-3">${card.name}</p>
 
-            <!-- VAULT BINDER ACTIONS: AUCTION, SELL BACK TO ADMIN & TRADE/SELL -->
+            <!-- VAULT ACTIONS -->
             <div class="grid grid-cols-3 gap-1 pt-2 border-t border-slate-800/80">
-              <button onclick="openCreateAuctionModal('${card.id}')" class="py-1.5 bg-emerald-950/60 hover:bg-emerald-900 text-emerald-300 border border-emerald-500/30 font-bold text-[10px] rounded-lg transition-all flex items-center justify-center gap-1" title="Start live auction">
+              <button onclick="openCreateAuctionModal('${card.id}')" class="py-1.5 bg-emerald-950/60 hover:bg-emerald-900 text-emerald-300 border border-emerald-500/30 font-bold text-[10px] rounded-lg transition-all flex items-center justify-center gap-1">
                 <i class="fa-solid fa-gavel"></i> Auction
               </button>
-              <button onclick="sellBackCardToAdmin('${card.id}')" class="py-1.5 bg-rose-950/60 hover:bg-rose-900 text-rose-300 border border-rose-500/30 font-bold text-[10px] rounded-lg transition-all flex items-center justify-center gap-1" title="Sell back to Admin at floor price">
+              <button onclick="sellBackCardToAdmin('${card.id}')" class="py-1.5 bg-rose-950/60 hover:bg-rose-900 text-rose-300 border border-rose-500/30 font-bold text-[10px] rounded-lg transition-all flex items-center justify-center gap-1">
                 <i class="fa-solid fa-building-columns"></i> Sell Back
               </button>
-              <button onclick="openTradeProposalModal('${card.id}')" class="py-1.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-[10px] rounded-lg transition-all flex items-center justify-center gap-1" title="List or propose trade">
+              <button onclick="openTradeProposalModal('${card.id}')" class="py-1.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-[10px] rounded-lg transition-all flex items-center justify-center gap-1">
                 <i class="fa-solid fa-right-left"></i> Trade
               </button>
             </div>
@@ -2350,11 +2416,11 @@
       inventory.forEach(c => { if(c.status === 'SOLD') vol += (c.price || 0); });
       
       const volEl = document.getElementById('analytics-vol');
-      const countEl = document.getElementById('analytics-count');
+      const taxEl = document.getElementById('analytics-tax');
       const holdersEl = document.getElementById('analytics-holders');
 
       if (volEl) volEl.innerText = `IDR ${vol.toLocaleString()}`;
-      if (countEl) countEl.innerText = `${transactionHistory.length} Recorded`;
+      if (taxEl) taxEl.innerText = `IDR ${(vol * 0.02).toLocaleString()}`;
       
       const uniqueHolders = new Set(inventory.map(c => c.owner).filter(o => o && o !== 'Unassigned')).size;
       if (holdersEl) holdersEl.innerText = `${uniqueHolders} Collectors`;
@@ -2397,49 +2463,30 @@
       }
 
       container.innerHTML = pendingOrders.map((ord, idx) => {
+        const isTradePayout = ord.type === 'TRADE_PAYOUT';
         const isSellBack = ord.type === 'SELL_BACK';
+        const netAmt = ord.payoutAmount || (ord.grossAmount ? ord.grossAmount * 0.98 : 0);
+
         return `
           <div class="bg-slate-800 p-3 rounded-xl flex items-center justify-between">
             <div>
               <div class="flex items-center gap-2">
-                <span class="text-[9px] font-bold uppercase px-2 py-0.5 rounded-full ${isSellBack ? 'bg-amber-500/20 text-amber-300' : 'bg-blue-500/20 text-blue-400'}">${isSellBack ? 'SELL BACK TO ADMIN' : 'QRIS PURCHASE'}</span>
+                <span class="text-[9px] font-bold uppercase px-2 py-0.5 rounded-full ${isTradePayout ? 'bg-purple-500/20 text-purple-300' : isSellBack ? 'bg-amber-500/20 text-amber-300' : 'bg-blue-500/20 text-blue-400'}">
+                  ${isTradePayout ? 'TRADE CASH PAYOUT (2% TAX)' : isSellBack ? 'SELL BACK (2% TAX)' : 'QRIS PURCHASE'}
+                </span>
                 <p class="text-xs font-bold text-white">${ord.card.name} (${ord.card.serial})</p>
               </div>
-              <p class="text-[10px] text-slate-400 mt-0.5">${isSellBack ? `Seller: ${ord.seller} • Payout Due: IDR ${(ord.payoutAmount||0).toLocaleString()}` : `Buyer: ${ord.buyer}`} • ${ord.timestamp}</p>
+              <p class="text-[10px] text-slate-400 mt-0.5">
+                Recipient: ${ord.seller || ord.buyer} • Net Due: <strong class="text-emerald-400 font-mono">IDR ${netAmt.toLocaleString()}</strong> • ${ord.timestamp}
+              </p>
             </div>
-            ${isSellBack ? `
-              <button onclick="openSellbackProofModal(${idx})" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-lg shadow transition-all flex items-center gap-1.5">
-                <i class="fa-solid fa-upload"></i> Upload Proof & Approve
-              </button>
-            ` : `
-              <button onclick="approveOrder(${idx})" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-lg shadow transition-all">
-                Approve Payment
-              </button>
-            `}
+
+            <button onclick="openAdminProofModal(${idx})" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-lg shadow transition-all flex items-center gap-1.5">
+              <i class="fa-solid fa-upload"></i> Upload Proof & Pay
+            </button>
           </div>
         `;
       }).join('');
-    }
-
-    function approveOrder(index) {
-      const order = pendingOrders[index];
-      const card = inventory.find(c => c.id === order.card.id);
-
-      if (card) {
-        card.status = 'SOLD';
-        card.owner = order.buyer;
-      }
-      addHistoryRecord('PURCHASE_APPROVED', order.card.serial, `QRIS order approved! ${order.card.serial} assigned to ${order.buyer}.`);
-
-      pendingOrders.splice(index, 1);
-      savePendingOrdersState();
-      saveInventoryState();
-
-      renderAdminOrdersQueue();
-      renderCardGrid();
-      renderInventoryTable();
-      updateRemainingCardCount();
-      showToast('Transaction approved and ledger updated!');
     }
 
     function deleteCard(cardId) {
