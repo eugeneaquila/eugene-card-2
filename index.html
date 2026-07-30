@@ -8,12 +8,6 @@
   <!-- Browser Tab Favicon -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='42' fill='none' stroke='%234f46e5' stroke-width='5' stroke-dasharray='210 50' transform='rotate(-45 50 50)'/><polygon points='50,18 80,35 80,68 50,85 20,68 20,35' fill='%236366f1'/><path d='M 32 42 C 38 32, 52 32, 58 40 C 62 46, 48 54, 40 60 C 35 64, 45 70, 60 62' fill='none' stroke='%23ffffff' stroke-width='4' stroke-linecap='round'/></svg>">
 
-  <!-- Google Firebase Compatibility SDKs (v10.7.1) -->
-  <script src=""></script>
-  <script src=""></script>
-  <script src=""></script>
-  <script src=""></script>
-
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -1039,7 +1033,7 @@
     <span id="toast-msg">Action completed.</span>
   </div>
 
-  <!-- JAVASCRIPT LOGIC WITH FIREBASE CONFIG -->
+  <!-- Supabase migration: Firebase legacy block disabled -->
   <script>
       apiKey: "AIzaSyCm13Nh6k6W9wsL0_OPpjKZNrbSg-pFsuA",
       authDomain: "eugene-card-marketplace.firebaseapp.com",
@@ -1050,9 +1044,9 @@
       measurementId: "G-MRPT21P9M1"
     };
 
-    const db = firebase.firestore();
-    const auth = firebase.auth();
-    const analytics = firebase.analytics();
+    const db = null; // Firebase disabled - use Supabase data layer
+    const auth = null; // Firebase disabled - use Supabase Auth
+    const analytics = null; // Firebase disabled - use analytics_events
 
     const TRADE_FEE_PERCENT = 0.02;
     const OFFICIAL_QRIS_STRING = "00020101021126610014COM.GO-JEK.WWW01189360091430419400360210G0419400360303UMI51440014ID.CO.QRIS.WWW0215ID10265490344800303UMI5204594453033605802ID5925Eugene Card, Toko Kartu &6012TORAJA UTARA61059183162070703A0163048BD9";
@@ -1856,14 +1850,14 @@
           lastMessage: text || (chatAttachedImage ? '[Screenshot / Image]' : ''),
           lastSender: currentUser.username || currentUser.name,
           participants: [currentUser.username || currentUser.name, currentChatTargetUser].map(p => p.toLowerCase()),
-          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+          updatedAt: new Date().toISOString()
         }, { merge: true });
 
         const msgDocRef = chatDocRef.collection("messages").doc();
         const payload = {
           sender: currentUser.username || currentUser.name,
           text: text,
-          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+          timestamp: new Date().toISOString()
         };
         if (chatAttachedImage) payload.imgUrl = chatAttachedImage;
 
@@ -2097,17 +2091,17 @@
 
             await batch.commit();
             processed += chunk.length;
-            updateImportProgress(processed, importedCards.length, `Batch saved to Firestore (${processed}/${importedCards.length})`);
+            updateImportProgress(processed, importedCards.length, `Batch saved to Supabase (${processed}/${importedCards.length})`);
           }
 
           await loadAppState();
           hideLoadingModal();
 
-          showToast(`Bulk imported ${importedCards.length} cards into Firestore!`);
-          addNotification('Firestore Import Success', `Imported ${importedCards.length} records into database.`, 'fa-circle-check text-emerald-400');
+          showToast(`Bulk imported ${importedCards.length} cards into Supabase!`);
+          addNotification('Supabase Import Success', `Imported ${importedCards.length} records into database.`, 'fa-circle-check text-emerald-400');
 
         } catch (err) {
-          console.error('Firestore Import Error:', err);
+          console.error('Supabase Import Error:', err);
           hideLoadingModal();
           showToast('Failed to parse or import backup JSON.');
         } finally {
@@ -2236,7 +2230,7 @@
           loadedFromDb = true;
         }
       } catch (err) {
-        console.warn('Firestore fetch exception:', err);
+        console.warn('Supabase fetch exception:', err);
       }
 
       if (!loadedFromDb || inventory.length === 0) {
@@ -2525,7 +2519,7 @@
     function closeAuthModal() { document.getElementById('auth-modal').classList.add('hidden'); }
 
     async function loginWithGoogle() {
-      const provider = new firebase.auth.GoogleAuthProvider();
+      const provider = null; // Supabase Google OAuth
       try {
         await auth.signInWithPopup(provider);
       } catch (error) {
@@ -3032,10 +3026,10 @@
       try {
         await db.collection("cards").doc(cardId).set(updatedObj, { merge: true });
         Object.assign(card, updatedObj);
-        showToast(`Saved ${updatedSerial} to Firestore!`);
+        showToast(`Saved ${updatedSerial} to Supabase!`);
       } catch (e) {
-        console.error('Firestore DB write error:', e);
-        showToast('Error saving to Firestore: ' + e.message);
+        console.error('Supabase DB write error:', e);
+        showToast('Error saving to Supabase: ' + e.message);
       }
 
       closeInventoryModal();
@@ -4125,6 +4119,8 @@
 
   <!-- Supabase marketplace services -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-init.js"></script>
+  <script src="js/supabase-firebase-compat.js"></script>
   <script src="js/supabase-init.js"></script>
   <script src="js/sellback-handler.js"></script>
 

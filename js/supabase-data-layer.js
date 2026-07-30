@@ -1,8 +1,10 @@
-/* Eugene Card - Unified Supabase Data Layer */
+/* Eugene Card - Unified Supabase Data Layer v2 */
 
+/* Auth/Profile */
 async function getCurrentUser(){
-  const {data} = await supabaseClient.auth.getUser();
-  return data.user;
+  const {data, error} = await supabaseClient.auth.getUser();
+  if(error) console.error(error);
+  return data.user || null;
 }
 
 async function getProfile(){
@@ -13,7 +15,7 @@ async function getProfile(){
     .from("profiles")
     .select("*")
     .eq("id", user.id)
-    .single();
+    .maybeSingle();
 
   if(error) console.error(error);
   return data;
@@ -24,54 +26,66 @@ async function loadMarketplace(){
   return await supabaseClient
     .from("cards")
     .select("*")
-    .eq("status","available");
-}
-
-/* Auction */
-async function loadAuctions(){
-  return await supabaseClient
-    .from("auctions")
-    .select("*, bids(*)")
     .order("created_at",{ascending:false});
 }
 
-async function placeBid(auctionId, amount){
+/* Auctions */
+async function loadAuctions(){
+  // Eugene Card currently has auctions but no bids table.
   return await supabaseClient
-    .from("bids")
+    .from("auctions")
+    .select("*")
+    .order("created_at",{ascending:false});
+}
+
+async function createAuction(payload){
+  const user = await getCurrentUser();
+  if(!user) throw new Error("Login required");
+
+  return await supabaseClient
+    .from("auctions")
     .insert({
-      auction_id: auctionId,
-      amount: amount
+      ...payload,
+      seller_id:user.id
     });
 }
 
 /* Trade */
 async function loadTradeRequests(){
+  const user = await getCurrentUser();
+  if(!user) return {data:[],error:null};
+
   return await supabaseClient
     .from("trade_requests")
+    .select("*")
+    .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
+    .order("created_at",{ascending:false});
+}
+
+async function createTradeRequest(payload){
+  const user = await getCurrentUser();
+  if(!user) throw new Error("Login required");
+
+  return await supabaseClient
+    .from("trade_requests")
+    .insert({
+      ...payload,
+      sender_id:user.id
+    });
+}
+
+/* Transactions */
+async function loadRevenue(){
+  return await supabaseClient
+    .from("transactions")
     .select("*")
     .order("created_at",{ascending:false});
 }
 
-/* Sell Back */
-async function sellBack(cardId, price){
-  return await supabaseClient
-    .from("sell_back_requests")
-    .insert({
-      card_id: cardId,
-      offer_price: price,
-      status: "pending"
-    });
-}
-
-/* Admin */
+/* Analytics */
 async function loadAdminAnalytics(){
   return await supabaseClient
-    .from("analytics")
-    .select("*");
-}
-
-async function loadRevenue(){
-  return await supabaseClient
-    .from("transactions")
-    .select("*");
+    .from("analytics_events")
+    .select("*")
+    .order("created_at",{ascending:false});
 }
