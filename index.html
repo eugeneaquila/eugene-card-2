@@ -690,14 +690,24 @@
       <div class="bg-slate-900 border border-slate-800 rounded-2xl grid grid-cols-1 md:grid-cols-3 min-h-[450px] overflow-hidden">
         <!-- Thread List Sidebar -->
         <div class="border-r border-slate-800 p-4 space-y-3">
-          <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Private Threads</p>
+          <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Search Collectors & Conversations</p>
+          
+          <!-- User Search Bar for Chat -->
+          <div class="relative">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+            <input type="text" id="chat-user-search" oninput="searchUsersForChat(this.value)" placeholder="Find collector @username or name..." class="w-full bg-slate-800 border border-slate-700 rounded-xl pl-8 pr-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
+          </div>
+
+          <div id="chat-search-results" class="space-y-1 hidden bg-slate-950/80 p-2 rounded-xl border border-slate-800 max-h-40 overflow-y-auto"></div>
+
+          <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider pt-2">Active Messages</p>
           <div id="chat-threads-list" class="space-y-1.5"></div>
         </div>
 
         <!-- Chat Feed Window -->
         <div class="col-span-2 flex flex-col justify-between bg-slate-950/40 p-4">
           <div id="chat-active-header" class="pb-3 border-b border-slate-800 flex items-center justify-between">
-            <span class="text-xs font-bold text-white">Select a private conversation</span>
+            <span class="text-xs font-bold text-white">Select a private conversation or search for a collector</span>
           </div>
 
           <div id="chat-messages-body" class="flex-1 my-4 space-y-3 overflow-y-auto max-h-[300px] pr-2"></div>
@@ -878,7 +888,7 @@ let myProfile = null;
 let currentFilter = 'ALL';
 let inventory = [];         // camelCase mirror of the `cards` table
 let wishlist = new Set();   // card ids, backed by `wishlists` table
-let shoppingCart = new Set(); // ephemeral, client-side only, cleared on checkout
+let shoppingCart = new Set(); // persistent across refresh via localStorage
 let unreadNotifCount = 0;
 let activeCardForAction = null;
 let selectedOwner = null;
@@ -887,24 +897,11 @@ let activeChatId = null;
 let chatThreadsCache = [];
 
 document.addEventListener('DOMContentLoaded', async () => {
-  if (window.supabaseClient) {
-    const { data: { session } } = await supabaseClient.auth.getSession();
-    if (session?.user) {
-      await handleSupabaseUserSession(session.user);
-    }
-    supabaseClient.auth.onAuthStateChange(async (event, session) => {
-      if (session?.user) {
-        await handleSupabaseUserSession(session.user);
-        returnToPreviousStatePostLogin();
-      } else {
-        currentUser = null;
-        myProfile = null;
-        renderAuthHeader();
-        renderUserProfileUI();
-      }
-    });
+  loadLocalCart();
+  await initAuthSession();
+  await fetchDatabaseInventory();
 
-    // Subscriptions for Real-time table changes
+  if (window.supabaseClient) {
     supabaseClient
       .channel('public:cards')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'cards' }, () => {
@@ -913,11 +910,65 @@ document.addEventListener('DOMContentLoaded', async () => {
       .subscribe();
   }
 
-  renderAuthHeader();
-  renderUserProfileUI();
-  await fetchDatabaseInventory();
-  switchTab('catalog');
+  // Preserve location or fallback to catalog without forcing reload
+  const initialTab = localStorage.getItem('eugene_current_tab') || 'catalog';
+  switchTab(initialTab);
 });
+
+// Load cart from localStorage
+function loadLocalCart() {
+  try {
+    const saved = localStorage.getItem('eugene_cart_items');
+    if (saved) {
+      shoppingCart = new Set(JSON.parse(saved));
+      updateCartBadge();
+    }
+  } catch (e) {
+    console.error('Failed to load cart', e);
+  }
+}
+
+function saveLocalCart() {
+  localStorage.setItem('eugene_cart_items', JSON.stringify(Array.from(shoppingCart)));
+  updateCartBadge();
+}
+
+function updateCartBadge() {
+  const badge = document.getElementById('cart-badge');
+  if (badge) badge.innerText = shoppingCart.size;
+}
+
+// Fixed session handling to prevent infinite reloads
+async function initAuthSession() {
+  if (!window.supabaseClient) return;
+
+  // Clean URL hash if redirected from OAuth
+  if (window.location.hash.includes('access_token')) {
+    window.history.replaceState(null, '', window.location.pathname);
+  }
+
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (session?.user) {
+    await handleSupabaseUserSession(session.user);
+  } else {
+    renderAuthHeader();
+    renderUserProfileUI();
+  }
+
+  supabaseClient.auth.onAuthStateChange(async (event, session) => {
+    if (event === 'SIGNED_IN' && session?.user) {
+      if (!currentUser || currentUser.id !== session.user.id) {
+        await handleSupabaseUserSession(session.user);
+      }
+    } else if (event === 'SIGNED_OUT') {
+      currentUser = null;
+      myProfile = null;
+      wishlist = new Set();
+      renderAuthHeader();
+      renderUserProfileUI();
+    }
+  });
+}
 
 function isAdminEmail(email) {
   if (!email) return false;
@@ -931,12 +982,12 @@ function myIdentity() {
 
 // --- AUTH ---
 function openAuthModal() {
-  localStorage.setItem('redirect_after_login_tab', getCurrentActiveTab());
   document.getElementById('auth-modal').classList.remove('hidden');
 }
 function closeAuthModal() {
   document.getElementById('auth-modal').classList.add('hidden');
 }
+
 function getCurrentActiveTab() {
   const tabs = ['catalog', 'trade', 'auction', 'trade-req', 'analytics', 'inbox', 'holders', 'history', 'dashboard', 'wishlist', 'admin', 'inventory'];
   for (const t of tabs) {
@@ -948,7 +999,6 @@ function getCurrentActiveTab() {
 
 async function loginWithGoogleSupabase() {
   try {
-    localStorage.setItem('redirect_after_login_tab', getCurrentActiveTab());
     if (!window.supabaseClient) throw new Error('Supabase client not initialized.');
     const { error } = await supabaseClient.auth.signInWithOAuth({
       provider: 'google',
@@ -975,11 +1025,6 @@ async function handleSupabaseUserSession(user) {
   };
 
   myProfile = await fetchOwnProfile();
-  if (!myProfile) {
-    await new Promise(r => setTimeout(r, 700));
-    myProfile = await fetchOwnProfile();
-  }
-
   await loadWishlist();
   renderAuthHeader();
   renderUserProfileUI();
@@ -991,17 +1036,6 @@ async function fetchOwnProfile() {
   const { data, error } = await supabaseClient.from('profiles').select('*').eq('id', currentUser.id).maybeSingle();
   if (error) { console.error(error); return null; }
   return data;
-}
-
-function returnToPreviousStatePostLogin() {
-  const savedTab = localStorage.getItem('redirect_after_login_tab') || 'catalog';
-  localStorage.removeItem('redirect_after_login_tab');
-  closeAuthModal();
-  if ((savedTab === 'admin' || savedTab === 'inventory' || savedTab === 'analytics') && !currentUser?.isAdmin) {
-    switchTab('catalog');
-  } else {
-    switchTab(savedTab);
-  }
 }
 
 async function logoutUser() {
@@ -1150,6 +1184,8 @@ function switchTab(tabName) {
   if (activeNav && !adminOnlyTabs.includes(tabName)) {
     activeNav.className = 'px-3 py-1.5 rounded-xl text-xs font-medium text-white bg-slate-700 flex items-center gap-1.5 whitespace-nowrap transition-all relative';
   }
+
+  localStorage.setItem('eugene_current_tab', tabName);
 
   if (tabName === 'wishlist') renderWishlistGrid();
   if (tabName === 'dashboard') renderVaultGrid();
@@ -1400,12 +1436,16 @@ async function sellBackCardToAdmin(cardId) {
   }
 }
 
-// --- CART + QRIS CHECKOUT (real orders via create_order RPC) ---
+// --- CART + QRIS CHECKOUT ---
 function toggleCart(cardId) {
-  if (shoppingCart.has(cardId)) { shoppingCart.delete(cardId); showToast('Removed from cart.'); }
-  else { shoppingCart.add(cardId); showToast('Added to cart!'); }
-  const badge = document.getElementById('cart-badge');
-  if (badge) badge.innerText = shoppingCart.size;
+  if (shoppingCart.has(cardId)) { 
+    shoppingCart.delete(cardId); 
+    showToast('Removed from cart.'); 
+  } else { 
+    shoppingCart.add(cardId); 
+    showToast('Added to cart!'); 
+  }
+  saveLocalCart();
   renderCardGrid();
 }
 
@@ -1501,8 +1541,7 @@ async function submitQrisPaymentProof() {
     showToast(`Order ${row?.order_id || ''} submitted — awaiting admin verification.`);
 
     pendingCheckoutIds.forEach(id => shoppingCart.delete(id));
-    const cartBadge = document.getElementById('cart-badge');
-    if (cartBadge) cartBadge.innerText = shoppingCart.size;
+    saveLocalCart();
     pendingCheckoutIds = [];
     fileInput.value = '';
     closeQrisModal();
@@ -1699,7 +1738,7 @@ async function tradeAction(id, action) {
   } catch (err) { showToast('Error: ' + err.message); }
 }
 
-// --- AUCTION (single active auction, matches start_auction's one-at-a-time model) ---
+// --- AUCTION ---
 async function renderAuctionsGrid() {
   const container = document.getElementById('auction-content');
   if (!container) return;
@@ -1805,7 +1844,7 @@ async function cancelAuctionNow() {
   } catch (err) { showToast('Error: ' + err.message); }
 }
 
-// --- HOLDERS LEADERBOARD (computed from real card ownership) ---
+// --- HOLDERS LEADERBOARD ---
 function renderHoldersLeaderboard() {
   const container = document.getElementById('holders-content');
   if (!container) return;
@@ -1863,7 +1902,7 @@ function openHolderVaultModal(ownerName) {
 }
 function closeHolderVaultModal() { document.getElementById('holder-vault-modal').classList.add('hidden'); }
 
-// --- HISTORY LEDGER (real approved transactions) ---
+// --- HISTORY LEDGER ---
 async function renderHistoryLedger() {
   const container = document.getElementById('history-content');
   if (!container) return;
@@ -1890,7 +1929,7 @@ async function renderHistoryLedger() {
     </div>`).join('');
 }
 
-// --- ANALYTICS (admin) ---
+// --- ANALYTICS ---
 async function renderAnalyticsView() {
   const [{ data: approved }] = await Promise.all([
     supabaseClient.from('transactions').select('total_amount,tax_amount').eq('status', 'APPROVED')
@@ -1907,7 +1946,7 @@ async function renderAnalyticsView() {
   if (holdersEl) holdersEl.innerText = `${uniqueHolders} Collectors`;
 }
 
-// --- ADMIN: PENDING ORDER APPROVAL ---
+// --- ADMIN: PENDING ORDERS ---
 async function renderAdminOrdersQueue() {
   const container = document.getElementById('admin-orders-queue');
   if (!container) return;
@@ -1948,7 +1987,6 @@ async function reviewOrder(orderId, decision) {
   } catch (err) { showToast('Error: ' + err.message); }
 }
 
-// --- OPEN LEGACY MODALS THAT NO LONGER APPLY (kept as harmless no-ops for onclick safety) ---
 function openAdminProofModal() { showToast('Order approvals are handled directly in the Admin Hub queue now.'); }
 function closeAdminProofModal() { document.getElementById('admin-proof-modal').classList.add('hidden'); }
 function confirmAdminPayoutWithProof(e) { e.preventDefault(); closeAdminProofModal(); }
@@ -2145,7 +2183,79 @@ async function importInventoryJSON(event) {
   event.target.value = '';
 }
 
-// --- PRIVATE INBOX / CHAT (real chats + chat_messages tables via send_chat_message RPC) ---
+// --- PRIVATE INBOX / CHAT WITH USER SEARCH ---
+async function searchUsersForChat(query) {
+  const container = document.getElementById('chat-search-results');
+  if (!query || query.trim().length < 2) {
+    container.classList.add('hidden');
+    container.innerHTML = '';
+    return;
+  }
+
+  const cleanQuery = query.toLowerCase().replace('@', '').trim();
+  const { data, error } = await supabaseClient
+    .from('profiles')
+    .select('id, name, username, avatar_url')
+    .or(`username.ilike.%${cleanQuery}%,name.ilike.%${cleanQuery}%`)
+    .limit(5);
+
+  if (error || !data || !data.length) {
+    container.innerHTML = `<p class="text-[10px] text-slate-500 p-2">No matching users found.</p>`;
+    container.classList.remove('hidden');
+    return;
+  }
+
+  container.innerHTML = data.map(u => `
+    <div onclick="startChatWithUser('${u.username}', '${u.name}')" class="flex items-center gap-2 p-2 hover:bg-slate-800 rounded-lg cursor-pointer transition-colors">
+      <img src="${u.avatar_url || `https://api.dicebear.com/7.x/identicon/svg?seed=${u.username}`}" class="w-6 h-6 rounded-full border border-slate-700">
+      <div class="truncate">
+        <p class="text-xs font-bold text-white truncate">${u.name}</p>
+        <p class="text-[10px] text-blue-400 font-mono">@${u.username}</p>
+      </div>
+    </div>
+  `).join('');
+  container.classList.remove('hidden');
+}
+
+async function startChatWithUser(targetUsername, targetName) {
+  if (!requireLogin()) return;
+  const ident = myIdentity();
+  if (targetUsername.toLowerCase() === ident) {
+    showToast("You cannot message yourself.");
+    return;
+  }
+
+  document.getElementById('chat-search-results').classList.add('hidden');
+  document.getElementById('chat-user-search').value = '';
+
+  // Check if thread already exists
+  const existing = chatThreadsCache.find(t => 
+    (t.participant_a === ident && t.participant_b === targetUsername.toLowerCase()) ||
+    (t.participant_b === ident && t.participant_a === targetUsername.toLowerCase())
+  );
+
+  if (existing) {
+    selectChatThread(existing.id);
+  } else {
+    // Create new chat session thread
+    const { data, error } = await supabaseClient.from('chats').insert({
+      participant_a: ident,
+      participant_a_display: myProfile?.name || currentUser.name,
+      participant_b: targetUsername.toLowerCase(),
+      participant_b_display: targetName,
+      last_message: 'Started new chat'
+    }).select().single();
+
+    if (error) {
+      showToast('Could not start chat: ' + error.message);
+      return;
+    }
+
+    await renderChatThreads();
+    selectChatThread(data.id);
+  }
+}
+
 async function renderChatThreads() {
   const container = document.getElementById('chat-threads-list');
   if (!container) return;
@@ -2257,7 +2367,6 @@ function showToast(msg) {
   toast.classList.remove('translate-y-20', 'opacity-0');
   setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 3000);
 }
-
   </script>
 </body>
 </html>
