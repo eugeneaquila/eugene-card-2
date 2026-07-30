@@ -788,8 +788,8 @@
         email: email,
         name: name,
         username: name.toLowerCase().replace(/\s+/g, '_'),
-        bio: 'High-end Eugene card collector and trader.',
-        instagram: '',
+        bio: 'Official owner and administrator of Eugene Card Marketplace.',
+        instagram: 'eugene_collector',
         tiktok: '',
         x: '',
         website: '',
@@ -797,8 +797,17 @@
         avatarUrl: user.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/identicon/svg?seed=${email}`
       };
 
+      // MERGE ACCOUNT STEP: Auto-reassign legacy 'Eugene' cards to logged-in profile
+      inventory.forEach(card => {
+        if (card.owner === 'Eugene') {
+          card.owner = currentUser.name;
+        }
+      });
+
       renderAuthHeader();
       renderUserProfileUI();
+      renderCardGrid();
+      renderInventoryTable();
     }
 
     function returnToPreviousStatePostLogin() {
@@ -1183,6 +1192,13 @@
             throw new Error('Invalid JSON format. Array of cards missing.');
           }
 
+          // Auto-merge legacy 'Eugene' owners upon import
+          if (currentUser) {
+            inventory.forEach(c => {
+              if (c.owner === 'Eugene') c.owner = currentUser.name;
+            });
+          }
+
           renderCardGrid();
           renderInventoryTable();
           updateRemainingCardCount();
@@ -1370,7 +1386,14 @@
         return;
       }
 
-      const owned = inventory.filter(c => c.owner === currentUser.email || c.owner === currentUser.name);
+      // Vault filter logic unifying account credentials and legacy 'Eugene' owner tags
+      const owned = inventory.filter(c => 
+        c.owner === currentUser.email || 
+        c.owner === currentUser.name || 
+        c.owner === currentUser.username ||
+        c.owner === 'Eugene'
+      );
+
       if (owned.length === 0) {
         container.innerHTML = "You don't own any cards yet. Buy cards via QRIS or propose trades to populate your vault!";
         return;
@@ -1378,7 +1401,10 @@
 
       container.className = "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4";
       container.innerHTML = owned.map(card => `
-        <div class="card-holo-premium rounded-xl p-3 flex flex-col justify-between relative">
+        <div onclick="openCardDetailsModal('${card.id}')" class="card-holo-premium rounded-xl p-3 flex flex-col justify-between relative cursor-pointer">
+          <div class="w-full aspect-[4/5] bg-slate-900 rounded-lg border border-slate-800 p-1 flex flex-col justify-between mb-2 text-center overflow-hidden">
+            <img src="${card.imgUrl}" class="w-full h-full object-contain rounded">
+          </div>
           <p class="text-center font-bold text-blue-400 font-mono mb-1 text-xs">${card.serial}</p>
           <p class="text-[11px] font-bold text-white truncate text-center">${card.name}</p>
         </div>
@@ -1454,7 +1480,7 @@
       const card = inventory.find(c => c.id === order.card.id);
       if (card) {
         card.status = 'SOLD';
-        card.owner = currentUser.email;
+        card.owner = currentUser.name;
       }
       pendingOrders.splice(index, 1);
       renderAdminOrdersQueue();
