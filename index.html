@@ -48,7 +48,7 @@
     ::-webkit-scrollbar-track { background: #030712; }
     ::-webkit-scrollbar-thumb { background: #1f2937; border-radius: 9999px; }
   </style>
-<link rel="stylesheet" href="css/ui-2.0.css">
+  <link rel="stylesheet" href="css/ui-2.0.css">
   <link rel="stylesheet" href="css/ui-3.0.css">
 </head>
 <body class="min-h-screen flex flex-col justify-between selection:bg-amber-500 selection:text-black relative">
@@ -1033,11 +1033,18 @@
     <span id="toast-msg">Action completed.</span>
   </div>
 
-  <!-- Supabase migration: Firebase legacy block disabled -->
+  <!-- Supabase marketplace services & compatibility layer -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-init.js"></script>
+  <script src="js/supabase-firebase-compat.js"></script>
+  <script src="js/sellback-handler.js"></script>
+
+  <!-- Main JavaScript Logic -->
   <script>
-    const db = null; // Firebase disabled - use Supabase data layer
-    const auth = null; // Firebase disabled - use Supabase Auth
-    const analytics = null; // Firebase disabled - use analytics_events
+    // Bind global variables to the Supabase compatibility layer
+    const db = window.db; 
+    const auth = window.auth; 
+    const analytics = null;
 
     const TRADE_FEE_PERCENT = 0.02;
     const OFFICIAL_QRIS_STRING = "00020101021126610014COM.GO-JEK.WWW01189360091430419400360210G0419400360303UMI51440014ID.CO.QRIS.WWW0215ID10265490344800303UMI5204594453033605802ID5925Eugene Card, Toko Kartu &6012TORAJA UTARA61059183162070703A0163048BD9";
@@ -2510,9 +2517,8 @@
     function closeAuthModal() { document.getElementById('auth-modal').classList.add('hidden'); }
 
     async function loginWithGoogle() {
-      const provider = null; // Supabase Google OAuth
       try {
-        await auth.signInWithPopup(provider);
+        await auth.signInWithPopup();
       } catch (error) {
         showToast('Google Login Error: ' + error.message);
       }
@@ -4107,13 +4113,5 @@
       setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 3000);
     }
   </script>
-
-  <!-- Supabase marketplace services -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/supabase-init.js"></script>
-  <script src="js/supabase-firebase-compat.js"></script>
-  <script src="js/supabase-init.js"></script>
-  <script src="js/sellback-handler.js"></script>
-
 </body>
 </html>
