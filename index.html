@@ -366,13 +366,13 @@
     document.addEventListener('DOMContentLoaded', async () => {
       // Initialize Supabase Auth state listener
       if (window.supabaseClient) {
-        // 1. Check existing session on boot
+        // Check existing session
         const { data: { session } } = await supabaseClient.auth.getSession();
         if (session?.user) {
           handleSupabaseUserSession(session.user);
         }
 
-        // 2. Register session listener
+        // Register session listener
         supabaseClient.auth.onAuthStateChange((event, session) => {
           if (session?.user) {
             handleSupabaseUserSession(session.user);
@@ -423,6 +423,7 @@
           throw new Error('Supabase client not initialized.');
         }
 
+        // Redirects back to site origin without invalid path concatenation
         const { data, error } = await supabaseClient.auth.signInWithOAuth({
           provider: 'google',
           options: {
