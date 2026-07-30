@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Eugene Card Marketplace | Beta Edition</title>
+  <title>Eugene Card Marketplace | Admin Edition</title>
 
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='42' fill='none' stroke='%233b82f6' stroke-width='5' stroke-dasharray='210 50' transform='rotate(-45 50 50)'/><polygon points='50,18 80,35 80,68 50,85 20,68 20,35' fill='%233b82f6'/><path d='M 32 42 C 38 32, 52 32, 58 40 C 62 46, 48 54, 40 60 C 35 64, 45 70, 60 62' fill='none' stroke='%23ffffff' stroke-width='4' stroke-linecap='round'/></svg>">
@@ -32,9 +32,10 @@
     }
   </script>
 
-  <!-- Icons, Fonts & QR Code Library -->
+  <!-- Icons, Fonts, Chart.js & QR Code Library -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
   <style>
@@ -64,12 +65,62 @@
       box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6); 
     }
 
+    /* Admin 3.0 Shell CSS Integration */
+    .ec3a-side {
+      position: fixed; left: 0; top: 0; bottom: 0; width: 244px; z-index: 60;
+      background: rgba(3, 7, 18, 0.94); border-right: 1px solid rgba(148, 163, 184, 0.11);
+      backdrop-filter: blur(20px); padding: 18px 13px; display: flex; flex-direction: column; gap: 18px;
+    }
+    .ec3a-brand { display: flex; align-items: center; gap: 10px; padding: 8px 8px 15px; border-bottom: 1px solid rgba(148, 163, 184, 0.1); }
+    .ec3a-mark { width: 38px; height: 38px; border-radius: 12px; display: grid; place-items: center; background: #0f172a; border: 1px solid rgba(99, 102, 241, 0.3); }
+    .ec3a-title { font-size: 11px; font-weight: 950; letter-spacing: .12em; color: #fff; }
+    .ec3a-sub { font-size: 8px; color: #64748b; margin-top: 2px; }
+    .ec3a-label { font-size: 8px; letter-spacing: .15em; text-transform: uppercase; color: #475569; font-weight: 900; padding: 0 9px; }
+    .ec3a-links { display: flex; flex-direction: column; gap: 4px; }
+    .ec3a-link {
+      display: flex; align-items: center; gap: 10px; padding: 10px 11px; border-radius: 11px;
+      color: #94a3b8; font-size: 10px; font-weight: 850; border: 1px solid transparent; text-decoration: none; cursor: pointer; transition: all 0.2s ease;
+    }
+    .ec3a-link i { width: 16px; text-align: center; }
+    .ec3a-link:hover { background: #0f172a; color: #fff; }
+    .ec3a-link.active { background: rgba(99, 102, 241, 0.12); border-color: rgba(99, 102, 241, 0.2); color: #c7d2fe; box-shadow: inset 3px 0 #6366f1; }
+    .ec3a-note { margin-top: auto; padding: 11px; border-radius: 14px; background: rgba(99, 102, 241, 0.04); border: 1px solid rgba(99, 102, 241, 0.1); font-size: 8px; line-height: 1.5; color: #64748b; }
+    .ec3a-note strong { color: #a5b4fc; }
+    .ec3a-page { margin-left: 244px; min-height: 100vh; flex: 1; display: flex; flex-direction: column; }
+    
+    @media(max-width: 850px) {
+      .ec3a-side { display: none; }
+      .ec3a-page { margin-left: 0; }
+    }
+
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: #0f172a; }
     ::-webkit-scrollbar-thumb { background: #334155; border-radius: 9999px; }
   </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between selection:bg-blue-600 selection:text-white relative">
+
+  <!-- ADMIN COMMAND CENTER SIDEBAR (Visible for Admins) -->
+  <aside id="admin-sidebar" class="ec3a-side hidden">
+    <div class="ec3a-brand cursor-pointer" onclick="switchTab('catalog')">
+      <div class="ec3a-mark"><i class="fa-solid fa-layer-group text-indigo-400"></i></div>
+      <div>
+        <div class="ec3a-title">EUGENE CARD</div>
+        <div class="ec3a-sub">ADMIN CONTROL 3.0</div>
+      </div>
+    </div>
+    <div class="ec3a-label">Command Center</div>
+    <div class="ec3a-links">
+      <a onclick="switchTab('admin')" id="side-nav-admin" class="ec3a-link active"><i class="fa-solid fa-gauge-high"></i>Overview</a>
+      <a onclick="switchTab('analytics')" id="side-nav-analytics" class="ec3a-link"><i class="fa-solid fa-chart-line"></i>Analytics Hub</a>
+      <a onclick="switchTab('revenue')" id="side-nav-revenue" class="ec3a-link"><i class="fa-solid fa-sack-dollar"></i>Revenue & Finance</a>
+      <a onclick="switchTab('inventory')" id="side-nav-inventory" class="ec3a-link"><i class="fa-solid fa-boxes-stacked"></i>Inventory Control</a>
+      <a onclick="switchTab('trade-req')" id="side-nav-trade-req" class="ec3a-link"><i class="fa-solid fa-handshake"></i>Trades</a>
+      <a onclick="switchTab('auction')" id="side-nav-auction" class="ec3a-link"><i class="fa-solid fa-gavel"></i>Auctions</a>
+      <a onclick="switchTab('history')" id="side-nav-history" class="ec3a-link"><i class="fa-solid fa-clock-rotate-left"></i>History Audit</a>
+    </div>
+    <div class="ec3a-note"><strong>3.0 Admin Layer</strong><br>Analytics, financial intelligence & database tools connected live.</div>
+  </aside>
 
   <!-- Embedded Logo SVG -->
   <svg style="display: none;">
@@ -82,787 +133,466 @@
     </defs>
   </svg>
 
-  <!-- Header -->
-  <header class="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 lg:px-8 py-3">
-    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
-      
-      <!-- Brand Logo -->
-      <div class="flex items-center gap-3 cursor-pointer shrink-0" onclick="switchTab('catalog')">
-        <div class="w-9 h-9 rounded-xl overflow-hidden bg-slate-800 border border-slate-700 p-1 flex items-center justify-center">
-          <svg viewBox="0 0 100 100" class="w-full h-full"><use href="#eugene-logo-mark"/></svg>
-        </div>
-        <div>
-          <div class="flex items-center gap-2">
-            <h1 class="font-bold text-sm tracking-wide text-white uppercase">EUGENE CARD</h1>
-            <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/30">Beta Edition</span>
-          </div>
-        </div>
-      </div>
+  <!-- Main Page Shell Wrapper -->
+  <div id="main-page-wrapper" class="w-full flex flex-col min-h-screen transition-all">
 
-      <!-- Navigation Tabs -->
-      <nav class="flex items-center gap-1 bg-slate-800/80 p-1 rounded-2xl border border-slate-700 overflow-x-auto max-w-full">
-        <button id="nav-catalog" onclick="switchTab('catalog')" class="px-3 py-1.5 rounded-xl text-xs font-medium text-white bg-slate-700 flex items-center gap-1.5 whitespace-nowrap transition-all">
-          <i class="fa-solid fa-layer-group text-blue-400"></i> Collection
-        </button>
-        <button id="nav-trade" onclick="switchTab('trade')" class="px-3 py-1.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white flex items-center gap-1.5 whitespace-nowrap transition-all">
-          <i class="fa-solid fa-right-left text-blue-400"></i> Trade
-        </button>
-        <button id="nav-auction" onclick="switchTab('auction')" class="px-3 py-1.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white flex items-center gap-1.5 whitespace-nowrap transition-all">
-          <i class="fa-solid fa-gavel text-emerald-400"></i> Auction
-        </button>
-        <button id="nav-trade-req" onclick="switchTab('trade-req')" class="px-3 py-1.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white flex items-center gap-1.5 whitespace-nowrap transition-all">
-          <i class="fa-solid fa-handshake text-purple-400"></i> Trade Requests
-        </button>
-        <button id="nav-inbox" onclick="switchTab('inbox')" class="px-3 py-1.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white flex items-center gap-1.5 whitespace-nowrap transition-all relative">
-          <i class="fa-solid fa-comments text-indigo-400"></i> Private Inbox
-          <span id="unread-inbox-badge" class="w-2 h-2 rounded-full bg-indigo-500 hidden"></span>
-        </button>
-        <button id="nav-holders" onclick="switchTab('holders')" class="px-3 py-1.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white flex items-center gap-1.5 whitespace-nowrap transition-all">
-          <i class="fa-solid fa-users text-teal-400"></i> Holders
-        </button>
-        <button id="nav-history" onclick="switchTab('history')" class="px-3 py-1.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white flex items-center gap-1.5 whitespace-nowrap transition-all">
-          <i class="fa-solid fa-clock-rotate-left text-cyan-400"></i> History
-        </button>
-
-        <div class="h-4 w-px bg-slate-700 mx-1 self-center hidden sm:block"></div>
-
-        <button id="nav-dashboard" onclick="switchTab('dashboard')" class="px-3 py-1.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white flex items-center gap-1.5 whitespace-nowrap transition-all">
-          <i class="fa-solid fa-vault text-blue-400"></i> My Vault
-        </button>
-        <button id="nav-wishlist" onclick="switchTab('wishlist')" class="px-3 py-1.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white flex items-center gap-1.5 whitespace-nowrap transition-all">
-          <i class="fa-solid fa-heart text-rose-400"></i> Wishlist (<span id="wishlist-count-badge">0</span>)
-        </button>
-
-        <div id="admin-nav-separator" class="h-4 w-px bg-slate-700 mx-1 self-center hidden"></div>
-
-        <button id="nav-analytics" onclick="switchTab('analytics')" class="admin-only-nav hidden px-3 py-1.5 rounded-xl text-xs font-medium text-amber-300 hover:text-white flex items-center gap-1.5 whitespace-nowrap bg-amber-950/30 border border-amber-500/30">
-          <i class="fa-solid fa-chart-line text-amber-400"></i> Analytics
-        </button>
-        <button id="nav-admin" onclick="switchTab('admin')" class="admin-only-nav hidden px-3 py-1.5 rounded-xl text-xs font-medium text-rose-400 hover:text-white flex items-center gap-1.5 whitespace-nowrap bg-rose-950/30 border border-rose-500/30">
-          <i class="fa-solid fa-shield-halved"></i> Admin Hub
-        </button>
-        <button id="nav-inventory" onclick="switchTab('inventory')" class="admin-only-nav hidden px-3 py-1.5 rounded-xl text-xs font-medium text-amber-300 hover:text-white flex items-center gap-1.5 whitespace-nowrap bg-amber-950/30 border border-amber-500/30">
-          <i class="fa-solid fa-boxes-stacked"></i> Inventory
-        </button>
-      </nav>
-
-      <!-- Auth & Actions -->
-      <div class="flex items-center gap-2 shrink-0">
-        <button onclick="showCartModal()" class="relative p-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl border border-slate-700 flex items-center justify-center transition-all" title="View Cart">
-          <i class="fa-solid fa-cart-shopping text-xs text-amber-400"></i>
-          <span id="cart-badge" class="absolute -top-1 -right-1 w-4 h-4 bg-amber-500 text-slate-950 font-bold text-[9px] rounded-full flex items-center justify-center">0</span>
-        </button>
-
-        <button id="notif-toggle-btn" onclick="openNotifications()" class="relative p-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl border border-slate-700 flex items-center justify-center transition-all">
-          <i class="fa-solid fa-bell text-xs text-blue-400"></i>
-          <span id="notification-badge" class="absolute -top-1 -right-1 w-4 h-4 bg-blue-600 text-white font-bold text-[9px] rounded-full flex items-center justify-center">0</span>
-        </button>
-
-        <div id="auth-header-container"></div>
-      </div>
-
-    </div>
-  </header>
-
-  <!-- CREATE AUCTION MODAL -->
-  <div id="create-auction-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-4 relative shadow-2xl">
-      <button onclick="closeCreateAuctionModal()" class="absolute top-4 right-4 w-7 h-7 rounded-lg bg-slate-800 text-slate-400 hover:text-white text-xs flex items-center justify-center">
-        <i class="fa-solid fa-xmark"></i>
-      </button>
-
-      <div class="flex items-center gap-2 border-b border-slate-800 pb-3">
-        <i class="fa-solid fa-gavel text-emerald-400"></i>
-        <h3 class="text-base font-bold text-white">List Card in Auction House</h3>
-      </div>
-
-      <form onsubmit="submitCardAuction(event)" class="space-y-3">
-        <input type="hidden" id="auction-card-id">
-
-        <div id="auction-card-summary" class="p-3 bg-slate-800/80 rounded-xl border border-slate-700 text-xs font-bold text-emerald-400">
-          Card Selected
-        </div>
-
-        <div>
-          <label class="text-[10px] font-bold text-slate-400 uppercase">Starting Bid Price (IDR)</label>
-          <input type="number" id="auction-start-price" required min="10000" class="w-full mt-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500 font-mono">
-        </div>
-
-        <div>
-          <label class="text-[10px] font-bold text-slate-400 uppercase">Auction Duration (Hours)</label>
-          <select id="auction-duration-hrs" class="w-full mt-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
-            <option value="12">12 Hours</option>
-            <option value="24" selected>24 Hours</option>
-            <option value="48">48 Hours</option>
-          </select>
-        </div>
-
-        <button type="submit" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow transition-all flex items-center justify-center gap-2">
-          <i class="fa-solid fa-gavel"></i> Launch Live Auction
-        </button>
-      </form>
-    </div>
-  </div>
-
-  <!-- ADMIN PROOF APPROVAL MODAL -->
-  <div id="admin-proof-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-4 relative shadow-2xl">
-      <button onclick="closeAdminProofModal()" class="absolute top-4 right-4 w-7 h-7 rounded-lg bg-slate-800 text-slate-400 hover:text-white text-xs flex items-center justify-center">
-        <i class="fa-solid fa-xmark"></i>
-      </button>
-
-      <div class="flex items-center gap-2 border-b border-slate-800 pb-3">
-        <i class="fa-solid fa-upload text-amber-400"></i>
-        <h3 class="text-base font-bold text-white">Approve Payout (2% Tax Deducted)</h3>
-      </div>
-
-      <div id="admin-approval-summary" class="p-3 bg-slate-800/80 rounded-xl border border-slate-700 text-xs text-slate-300 space-y-1">
-      </div>
-
-      <form onsubmit="confirmAdminPayoutWithProof(event)" class="space-y-3">
-        <input type="hidden" id="admin-pending-index">
-
-        <div>
-          <label class="block text-[10px] font-bold uppercase text-slate-400">Upload Bank/E-Wallet Receipt Image (*Required)</label>
-          <input type="file" id="admin-receipt-file" accept="image/*" required class="w-full text-xs text-slate-400 bg-slate-800 border border-slate-700 rounded-xl p-2 file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-emerald-600 file:text-white">
-        </div>
-
-        <div>
-          <label class="text-[10px] font-bold text-slate-400 uppercase">Transfer Reference / Note</label>
-          <input type="text" id="admin-tx-ref" placeholder="Ref: TRF-992014" class="w-full mt-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500 font-mono">
-        </div>
-
-        <button type="submit" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow transition-all flex items-center justify-center gap-2">
-          <i class="fa-solid fa-check-circle"></i> Confirm Transfer & Send Payout Receipt
-        </button>
-      </form>
-    </div>
-  </div>
-
-  <!-- HOLDER VAULT INSPECTOR MODAL -->
-  <div id="holder-vault-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-2xl w-full p-6 relative shadow-2xl max-h-[85vh] overflow-y-auto space-y-4">
-      <button onclick="closeHolderVaultModal()" class="absolute top-4 right-4 w-7 h-7 rounded-lg bg-slate-800 text-slate-400 hover:text-white text-xs flex items-center justify-center z-10">
-        <i class="fa-solid fa-xmark"></i>
-      </button>
-
-      <div class="flex items-center gap-3 border-b border-slate-800 pb-4">
-        <div class="w-12 h-12 rounded-xl overflow-hidden bg-slate-800 border border-slate-700">
-          <img id="holder-modal-avatar" src="" class="w-full h-full object-cover">
-        </div>
-        <div>
-          <h3 id="holder-modal-name" class="text-base font-bold text-white">Collector Vault</h3>
-          <p id="holder-modal-sub" class="text-xs text-blue-400 font-mono">0 Cards Owned</p>
-        </div>
-      </div>
-
-      <div id="holder-modal-cards-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 pt-2">
-      </div>
-    </div>
-  </div>
-
-  <!-- SHOPPING CART MODAL -->
-  <div id="cart-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 relative shadow-2xl space-y-4">
-      <button onclick="closeCartModal()" class="absolute top-4 right-4 w-7 h-7 rounded-lg bg-slate-800 text-slate-400 hover:text-white text-xs flex items-center justify-center">
-        <i class="fa-solid fa-xmark"></i>
-      </button>
-
-      <div class="flex items-center gap-2 border-b border-slate-800 pb-3">
-        <i class="fa-solid fa-cart-shopping text-amber-400"></i>
-        <h3 class="text-base font-bold text-white">Your Shopping Cart</h3>
-      </div>
-
-      <div id="cart-items-list" class="space-y-2 max-h-60 overflow-y-auto pr-1 divide-y divide-slate-800">
-      </div>
-
-      <div class="pt-2 border-t border-slate-800 flex justify-between items-center">
-        <span class="text-xs text-slate-400 font-bold uppercase">Total Due</span>
-        <span id="cart-total-price" class="text-base font-mono font-bold text-emerald-400">IDR 0</span>
-      </div>
-
-      <button onclick="checkoutCartQRIS()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow transition-all flex items-center justify-center gap-2">
-        <i class="fa-solid fa-qrcode"></i> Checkout All Items via QRIS
-      </button>
-    </div>
-  </div>
-
-  <!-- TRADE PROPOSAL MODAL -->
-  <div id="trade-proposal-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-4 relative shadow-2xl">
-      <button onclick="closeTradeProposalModal()" class="absolute top-4 right-4 w-7 h-7 rounded-lg bg-slate-800 text-slate-400 hover:text-white text-xs flex items-center justify-center">
-        <i class="fa-solid fa-xmark"></i>
-      </button>
-
-      <div class="flex items-center gap-2 border-b border-slate-800 pb-3">
-        <i class="fa-solid fa-handshake text-purple-400"></i>
-        <h3 class="text-base font-bold text-white">Propose Card Trade / Offer</h3>
-      </div>
-
-      <form onsubmit="submitTradeProposal(event)" class="space-y-3">
-        <input type="hidden" id="trade-target-card-id">
-
-        <div>
-          <label class="text-[10px] font-bold text-slate-400 uppercase">Target Item</label>
-          <div id="trade-target-summary" class="p-2.5 bg-slate-800/80 rounded-xl border border-slate-700 text-xs font-bold text-blue-400">
-            Selected Item
-          </div>
-        </div>
-
-        <div>
-          <label class="text-[10px] font-bold text-slate-400 uppercase">Select Card to Offer (Optional)</label>
-          <select id="trade-offered-card-id" class="w-full mt-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-purple-500">
-            <option value="">-- No Card Offered (Pure Cash Offer) --</option>
-          </select>
-        </div>
-
-        <div>
-          <label class="text-[10px] font-bold text-slate-400 uppercase">Cash Amount Add-on (IDR)</label>
-          <input type="number" id="trade-cash-addon" min="0" value="0" class="w-full mt-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-purple-500 font-mono">
-        </div>
-
-        <div>
-          <label class="block text-[10px] font-bold uppercase text-slate-400">Upload Trade Attachment / Screenshot</label>
-          <input type="file" id="trade-attachment-file" accept="image/*" class="w-full text-xs text-slate-400 bg-slate-800 border border-slate-700 rounded-xl p-2 file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-purple-600 file:text-white">
-        </div>
-
-        <div>
-          <label class="text-[10px] font-bold text-slate-400 uppercase">Proposal Note</label>
-          <textarea id="trade-note" rows="2" placeholder="Write a brief message to the owner..." class="w-full mt-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-purple-500"></textarea>
-        </div>
-
-        <button type="submit" class="w-full py-2.5 bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs rounded-xl shadow transition-all">
-          Submit Trade Proposal
-        </button>
-      </form>
-    </div>
-  </div>
-
-  <!-- PROFILE EDIT MODAL -->
-  <div id="profile-edit-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-4 relative shadow-2xl">
-      <button onclick="closeProfileModal()" class="absolute top-4 right-4 w-7 h-7 rounded-lg bg-slate-800 text-slate-400 hover:text-white text-xs flex items-center justify-center">
-        <i class="fa-solid fa-xmark"></i>
-      </button>
-
-      <div class="flex items-center gap-2">
-        <i class="fa-solid fa-user-gear text-blue-400"></i>
-        <h3 class="text-base font-bold text-white">Customize Collector Profile</h3>
-      </div>
-
-      <form onsubmit="saveProfileSettings(event)" class="space-y-3">
-        <div>
-          <label class="text-[11px] font-bold text-slate-400 uppercase">Display Name</label>
-          <input type="text" id="edit-profile-name" required class="w-full mt-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
-        </div>
-
-        <div>
-          <label class="text-[11px] font-bold text-slate-400 uppercase">Unique Username</label>
-          <div class="relative mt-1">
-            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs">@</span>
-            <input type="text" id="edit-profile-username" required class="w-full bg-slate-800 border border-slate-700 rounded-xl pl-7 pr-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500 font-mono">
-          </div>
-        </div>
-
-        <div>
-          <label class="text-[11px] font-bold text-slate-400 uppercase">Collector Bio</label>
-          <textarea id="edit-profile-bio" rows="2" placeholder="High-end Eugene card collector..." class="w-full mt-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500"></textarea>
-        </div>
-
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="text-[11px] font-bold text-slate-400 uppercase"><i class="fa-brands fa-instagram mr-1 text-pink-500"></i> Instagram</label>
-            <input type="text" id="edit-profile-instagram" placeholder="eugene_collector" class="w-full mt-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500 font-mono">
-          </div>
-          <div>
-            <label class="text-[11px] font-bold text-slate-400 uppercase"><i class="fa-brands fa-tiktok mr-1 text-cyan-400"></i> TikTok</label>
-            <input type="text" id="edit-profile-tiktok" placeholder="eugenecards" class="w-full mt-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500 font-mono">
-          </div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="text-[11px] font-bold text-slate-400 uppercase"><i class="fa-brands fa-x-twitter mr-1 text-slate-300"></i> X / Twitter</label>
-            <input type="text" id="edit-profile-x" placeholder="eugene_cards" class="w-full mt-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500 font-mono">
-          </div>
-          <div>
-            <label class="text-[11px] font-bold text-slate-400 uppercase"><i class="fa-solid fa-globe mr-1 text-emerald-400"></i> Website</label>
-            <input type="url" id="edit-profile-website" placeholder="https://eugenecards.com" class="w-full mt-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500 font-mono">
-          </div>
-        </div>
-
-        <div class="pt-2 flex items-center justify-end gap-2">
-          <button type="button" onclick="closeProfileModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl transition-all">Cancel</button>
-          <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-xl shadow transition-all">Save Profile</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- AUTH MODAL -->
-  <div id="auth-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-6 space-y-5 relative shadow-2xl">
-      <button onclick="closeAuthModal()" class="absolute top-4 right-4 w-7 h-7 rounded-lg bg-slate-800 text-slate-400 hover:text-white text-xs flex items-center justify-center">
-        <i class="fa-solid fa-xmark"></i>
-      </button>
-
-      <div class="text-center space-y-2">
-        <div class="w-12 h-12 rounded-xl mx-auto bg-slate-800 border border-slate-700 p-2 flex items-center justify-center">
-          <svg viewBox="0 0 100 100" class="w-full h-full"><use href="#eugene-logo-mark"/></svg>
-        </div>
-        <h3 class="text-base font-bold text-white">Log In to Eugene Card</h3>
-        <p class="text-xs text-slate-400">Sign in securely with Google to trade cards, manage your vault, and access admin features.</p>
-      </div>
-
-      <div class="pt-2">
-        <button onclick="loginWithGoogleSupabase()" class="w-full py-3 bg-white hover:bg-slate-100 text-slate-900 font-bold text-xs rounded-xl flex items-center justify-center gap-2 shadow-lg transition-all">
-          <i class="fa-brands fa-google text-red-500 text-sm"></i> <span>Sign In with Google</span>
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- CARD DETAILS MODAL -->
-  <div id="card-details-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 relative shadow-2xl space-y-5">
-      <button onclick="closeCardDetailsModal()" class="absolute top-4 right-4 w-7 h-7 rounded-lg bg-slate-800 text-slate-400 hover:text-white text-xs flex items-center justify-center z-10">
-        <i class="fa-solid fa-xmark"></i>
-      </button>
-
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-        <div class="bg-slate-950 rounded-xl border border-slate-800 p-2 flex items-center justify-center">
-          <img id="detail-card-img" src="" class="w-full h-auto max-h-64 object-contain rounded-lg">
-        </div>
-
-        <div class="space-y-3 flex flex-col justify-between">
-          <div>
-            <div class="flex items-center gap-2 mb-1">
-              <span id="detail-card-type" class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full"></span>
-              <span id="detail-card-serial" class="text-xs font-mono font-bold text-blue-400"></span>
-            </div>
-            <h3 id="detail-card-name" class="text-lg font-bold text-white leading-tight"></h3>
-            <p id="detail-card-edition" class="text-[11px] text-slate-400 mt-1"></p>
-            <p id="detail-card-status" class="text-[11px] text-slate-400 mt-0.5"></p>
-          </div>
-
-          <div class="space-y-1 bg-slate-800/50 p-3 rounded-xl border border-slate-800">
-            <p class="text-[10px] uppercase font-bold text-slate-400">Market Value</p>
-            <p id="detail-card-price" class="text-lg font-mono font-bold text-emerald-400">IDR 0</p>
-          </div>
-
-          <div class="space-y-2 pt-2">
-            <button id="detail-buy-btn" onclick="buyActiveDetailCard()" class="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-xl transition-all flex items-center justify-center gap-2">
-              <i class="fa-solid fa-qrcode"></i> Buy / Order via QRIS
-            </button>
-            <div class="grid grid-cols-2 gap-2">
-              <button onclick="wishlistActiveDetailCard()" class="py-2 bg-slate-800 hover:bg-slate-700 text-rose-400 font-bold text-xs rounded-xl border border-slate-700 transition-all flex items-center justify-center gap-1.5">
-                <i class="fa-solid fa-heart"></i> Wishlist
-              </button>
-              <button onclick="tradeActiveDetailCard()" class="py-2 bg-slate-800 hover:bg-slate-700 text-purple-400 font-bold text-xs rounded-xl border border-slate-700 transition-all flex items-center justify-center gap-1.5">
-                <i class="fa-solid fa-right-left"></i> Trade
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- QRIS PAYMENT MODAL -->
-  <div id="qris-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[60] hidden flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 relative shadow-2xl space-y-4 text-center">
-      <button onclick="closeQrisModal()" class="absolute top-4 right-4 w-7 h-7 rounded-lg bg-slate-800 text-slate-400 hover:text-white text-xs flex items-center justify-center">
-        <i class="fa-solid fa-xmark"></i>
-      </button>
-
-      <div>
-        <h3 class="text-base font-bold text-white">Scan QRIS to Complete Payment</h3>
-        <p id="qris-card-title" class="text-xs text-blue-400 font-mono mt-1">Eugene Card Purchase</p>
-      </div>
-
-      <div class="bg-white p-4 rounded-2xl w-56 h-56 mx-auto flex items-center justify-center border-2 border-blue-500 shadow-xl">
-        <div id="qris-canvas"></div>
-      </div>
-
-      <div class="bg-slate-800/80 p-3 rounded-xl border border-slate-700 text-left space-y-1">
-        <div class="flex justify-between text-xs"><span class="text-slate-400">Merchant Name:</span> <span class="font-bold text-white">Eugene Card, Toko Kartu</span></div>
-        <div class="flex justify-between text-xs"><span class="text-slate-400">Location:</span> <span class="font-bold text-white">TORAJA UTARA</span></div>
-        <div class="flex justify-between text-xs"><span class="text-slate-400">Amount Due:</span> <span id="qris-amount-due" class="font-mono font-bold text-emerald-400">IDR 0</span></div>
-      </div>
-
-      <div class="space-y-2 pt-2">
-        <label class="block text-left text-[10px] font-bold uppercase text-slate-400">Upload Payment Proof (Receipt Screenshot)</label>
-        <input type="file" id="qris-proof-file" accept="image/*" class="w-full text-xs text-slate-400 bg-slate-800 border border-slate-700 rounded-xl p-2 file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-600 file:text-white">
+    <!-- Header -->
+    <header class="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 lg:px-8 py-3">
+      <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
         
-        <button onclick="submitQrisPaymentProof()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 mt-3">
-          <i class="fa-solid fa-check-circle"></i> Confirm & Submit Payment Proof
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ADVANCED ADMIN CARD EDITOR MODAL -->
-  <div id="card-editor-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 space-y-4 relative shadow-2xl max-h-[90vh] overflow-y-auto">
-      <button onclick="closeCardEditorModal()" class="absolute top-4 right-4 w-7 h-7 rounded-lg bg-slate-800 text-slate-400 hover:text-white text-xs flex items-center justify-center">
-        <i class="fa-solid fa-xmark"></i>
-      </button>
-
-      <div class="flex items-center gap-2">
-        <i class="fa-solid fa-boxes-stacked text-amber-400"></i>
-        <h3 id="editor-modal-title" class="text-base font-bold text-white">Edit Card Specs & Ownership</h3>
-      </div>
-
-      <form id="card-editor-form" onsubmit="saveCardEdit(event)" class="space-y-3">
-        <input type="hidden" id="edit-card-id">
-
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="text-[11px] font-bold text-slate-400 uppercase">Serial Tag (*01 / *001)</label>
-            <input type="text" id="edit-card-serial" required placeholder="*01" class="w-full mt-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500 font-mono">
-          </div>
-          <div>
-            <label class="text-[11px] font-bold text-slate-400 uppercase">Serial Number (SN)</label>
-            <input type="text" id="edit-card-sn" required placeholder="001" class="w-full mt-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500 font-mono">
-          </div>
-        </div>
-
-        <div>
-          <label class="text-[11px] font-bold text-slate-400 uppercase">Card Name</label>
-          <input type="text" id="edit-card-name" required placeholder="Eugene Premium #01" class="w-full mt-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
-        </div>
-
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="text-[11px] font-bold text-slate-400 uppercase">Edition</label>
-            <input type="text" id="edit-card-edition" required placeholder="Beta Edition: #0" class="w-full mt-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
-          </div>
-          <div>
-            <label class="text-[11px] font-bold text-slate-400 uppercase">Printing Multiplier</label>
-            <input type="text" id="edit-card-printing" required placeholder="1x" class="w-full mt-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500 font-mono">
-          </div>
-        </div>
-
-        <div class="grid grid-cols-3 gap-3">
-          <div>
-            <label class="text-[11px] font-bold text-slate-400 uppercase">Card Tier</label>
-            <select id="edit-card-type" class="w-full mt-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
-              <option value="PREMIUM">PREMIUM</option>
-              <option value="STANDARD">STANDARD</option>
-            </select>
-          </div>
-          <div>
-            <label class="text-[11px] font-bold text-slate-400 uppercase">Price (IDR)</label>
-            <input type="number" id="edit-card-price" required min="0" class="w-full mt-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500 font-mono">
-          </div>
-          <div>
-            <label class="text-[11px] font-bold text-slate-400 uppercase">Base Floor Price</label>
-            <input type="number" id="edit-card-basefloor" required min="0" class="w-full mt-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500 font-mono">
-          </div>
-        </div>
-
-        <!-- SEARCHABLE OWNER DROPDOWN -->
-        <div class="relative">
-          <label class="text-[11px] font-bold text-slate-400 uppercase flex justify-between">
-            <span>Assigned Owner</span>
-            <span id="current-owner-label" class="text-blue-400 font-mono">Unassigned</span>
-          </label>
-          <input type="text" id="edit-card-owner-search" oninput="filterOwnerOptions(this.value)" placeholder="Search collector name or type custom..." class="w-full mt-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
-          
-          <div id="owner-dropdown-list" class="absolute left-0 right-0 top-full mt-1 bg-slate-800 border border-slate-700 rounded-xl max-h-36 overflow-y-auto hidden z-20 shadow-xl divide-y divide-slate-700/50">
-          </div>
-        </div>
-
-        <div>
-          <label class="text-[11px] font-bold text-slate-400 uppercase">Image URL</label>
-          <input type="text" id="edit-card-img" required class="w-full mt-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500 font-mono">
-        </div>
-
-        <div>
-          <label class="text-[11px] font-bold text-slate-400 uppercase">Status</label>
-          <select id="edit-card-status" class="w-full mt-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
-            <option value="AVAILABLE">AVAILABLE</option>
-            <option value="SOLD">SOLD</option>
-            <option value="OWNED">OWNED</option>
-            <option value="RESERVED">RESERVED</option>
-          </select>
-        </div>
-
-        <div class="pt-2 flex items-center justify-end gap-2">
-          <button type="button" onclick="closeCardEditorModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl transition-all">Cancel</button>
-          <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-xl shadow transition-all">Save Changes</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- Main Marketplace Body -->
-  <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 lg:p-8 space-y-8">
-    
-    <!-- CATALOG VIEW -->
-    <section id="view-catalog" class="space-y-6">
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
-        <div class="flex items-center gap-4">
-          <div class="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 p-1 flex items-center justify-center">
+        <!-- Brand Logo -->
+        <div class="flex items-center gap-3 cursor-pointer shrink-0" onclick="switchTab('catalog')">
+          <div class="w-9 h-9 rounded-xl overflow-hidden bg-slate-800 border border-slate-700 p-1 flex items-center justify-center">
             <svg viewBox="0 0 100 100" class="w-full h-full"><use href="#eugene-logo-mark"/></svg>
           </div>
           <div>
-            <span class="text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 tracking-wider">LIMITED EDITION</span>
-            <h2 class="text-base font-bold text-white mt-0.5">Beta Edition Card Stock</h2>
-            <p class="text-xs text-slate-400">Official Primary Market Availability (2% Tax Included)</p>
+            <div class="flex items-center gap-2">
+              <h1 class="font-bold text-sm tracking-wide text-white uppercase">EUGENE CARD</h1>
+              <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/30">Beta 3.0</span>
+            </div>
           </div>
         </div>
-        
-        <div class="bg-slate-800/80 px-5 py-2.5 rounded-xl border border-slate-700 text-center sm:text-right w-full sm:w-auto">
-          <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Remaining Cards</p>
-          <p class="text-xl font-bold font-mono text-blue-400"><span id="remaining-cards-count">0</span> <span class="text-slate-400 text-xs font-normal">Available</span></p>
-        </div>
-      </div>
 
-      <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-slate-900 p-2.5 rounded-xl border border-slate-800">
-        <div class="relative flex-1">
-          <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
-          <input type="text" id="search-input" oninput="renderCardGrid()" placeholder="Search serial (*01 / *001) or card name..." class="w-full bg-slate-800 border border-slate-700 rounded-lg pl-9 pr-4 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
-        </div>
-        <div class="flex items-center gap-1.5">
-          <button onclick="setFilter('ALL')" id="filter-ALL" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 text-white transition-all">All</button>
-          <button onclick="setFilter('PREMIUM')" id="filter-PREMIUM" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-400 hover:text-white transition-all">Premium</button>
-          <button onclick="setFilter('STANDARD')" id="filter-STANDARD" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-400 hover:text-white transition-all">Standard</button>
-        </div>
-      </div>
+        <!-- Navigation Tabs -->
+        <nav class="flex items-center gap-1 bg-slate-800/80 p-1 rounded-2xl border border-slate-700 overflow-x-auto max-w-full">
+          <button id="nav-catalog" onclick="switchTab('catalog')" class="px-3 py-1.5 rounded-xl text-xs font-medium text-white bg-slate-700 flex items-center gap-1.5 whitespace-nowrap transition-all">
+            <i class="fa-solid fa-layer-group text-blue-400"></i> Collection
+          </button>
+          <button id="nav-trade" onclick="switchTab('trade')" class="px-3 py-1.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white flex items-center gap-1.5 whitespace-nowrap transition-all">
+            <i class="fa-solid fa-right-left text-blue-400"></i> Trade
+          </button>
+          <button id="nav-auction" onclick="switchTab('auction')" class="px-3 py-1.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white flex items-center gap-1.5 whitespace-nowrap transition-all">
+            <i class="fa-solid fa-gavel text-emerald-400"></i> Auction
+          </button>
+          <button id="nav-trade-req" onclick="switchTab('trade-req')" class="px-3 py-1.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white flex items-center gap-1.5 whitespace-nowrap transition-all">
+            <i class="fa-solid fa-handshake text-purple-400"></i> Trade Requests
+          </button>
+          <button id="nav-inbox" onclick="switchTab('inbox')" class="px-3 py-1.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white flex items-center gap-1.5 whitespace-nowrap transition-all relative">
+            <i class="fa-solid fa-comments text-indigo-400"></i> Private Inbox
+          </button>
+          <button id="nav-holders" onclick="switchTab('holders')" class="px-3 py-1.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white flex items-center gap-1.5 whitespace-nowrap transition-all">
+            <i class="fa-solid fa-users text-teal-400"></i> Holders
+          </button>
+          <button id="nav-history" onclick="switchTab('history')" class="px-3 py-1.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white flex items-center gap-1.5 whitespace-nowrap transition-all">
+            <i class="fa-solid fa-clock-rotate-left text-cyan-400"></i> History
+          </button>
 
-      <div id="card-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
-    </section>
+          <div class="h-4 w-px bg-slate-700 mx-1 self-center hidden sm:block"></div>
 
-    <!-- TRADE VIEW -->
-    <section id="view-trade" class="hidden space-y-6">
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex items-center justify-between">
-        <div>
-          <h2 class="text-xl font-bold text-white uppercase"><i class="fa-solid fa-right-left text-blue-400 mr-2"></i> Trading Room</h2>
-          <p class="text-xs text-slate-400 mt-1">Browse open card offers or list one of your own cards for sale.</p>
-        </div>
-        <button onclick="createListingFromVault()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-xl transition-all">
-          + Create Trade Listing
-        </button>
-      </div>
+          <button id="nav-dashboard" onclick="switchTab('dashboard')" class="px-3 py-1.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white flex items-center gap-1.5 whitespace-nowrap transition-all">
+            <i class="fa-solid fa-vault text-blue-400"></i> My Vault
+          </button>
+          <button id="nav-wishlist" onclick="switchTab('wishlist')" class="px-3 py-1.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white flex items-center gap-1.5 whitespace-nowrap transition-all">
+            <i class="fa-solid fa-heart text-rose-400"></i> Wishlist (<span id="wishlist-count-badge">0</span>)
+          </button>
 
-      <div id="trade-content" class="bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center text-xs text-slate-400">
-        No peer-to-peer listings active yet. Be the first to create one!
-      </div>
-    </section>
+          <div id="admin-nav-separator" class="h-4 w-px bg-slate-700 mx-1 self-center hidden"></div>
 
-    <!-- AUCTION VIEW -->
-    <section id="view-auction" class="hidden space-y-6">
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex items-center justify-between">
-        <div>
-          <h2 class="text-xl font-bold text-white uppercase"><i class="fa-solid fa-gavel text-emerald-400 mr-2"></i> Live Auction House</h2>
-          <p class="text-xs text-slate-400 mt-1">Place real-time bids on rare serial cards before time expires.</p>
-        </div>
-        <button onclick="switchTab('dashboard')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl transition-all">
-          + Start Auction From My Vault
-        </button>
-      </div>
+          <!-- ADMIN TABS INTEGRATED -->
+          <button id="nav-analytics" onclick="switchTab('analytics')" class="admin-only-nav hidden px-3 py-1.5 rounded-xl text-xs font-medium text-amber-300 hover:text-white flex items-center gap-1.5 whitespace-nowrap bg-amber-950/30 border border-amber-500/30">
+            <i class="fa-solid fa-chart-line text-amber-400"></i> Analytics
+          </button>
+          <button id="nav-revenue" onclick="switchTab('revenue')" class="admin-only-nav hidden px-3 py-1.5 rounded-xl text-xs font-medium text-emerald-300 hover:text-white flex items-center gap-1.5 whitespace-nowrap bg-emerald-950/30 border border-emerald-500/30">
+            <i class="fa-solid fa-sack-dollar text-emerald-400"></i> Revenue
+          </button>
+          <button id="nav-admin" onclick="switchTab('admin')" class="admin-only-nav hidden px-3 py-1.5 rounded-xl text-xs font-medium text-rose-400 hover:text-white flex items-center gap-1.5 whitespace-nowrap bg-rose-950/30 border border-rose-500/30">
+            <i class="fa-solid fa-shield-halved"></i> Admin Hub
+          </button>
+          <button id="nav-inventory" onclick="switchTab('inventory')" class="admin-only-nav hidden px-3 py-1.5 rounded-xl text-xs font-medium text-amber-300 hover:text-white flex items-center gap-1.5 whitespace-nowrap bg-amber-950/30 border border-amber-500/30">
+            <i class="fa-solid fa-boxes-stacked"></i> Inventory
+          </button>
+        </nav>
 
-      <div id="auction-content" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-      </div>
-    </section>
-
-    <!-- TRADE REQUESTS VIEW -->
-    <section id="view-trade-req" class="hidden space-y-6">
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-        <h2 class="text-xl font-bold text-white uppercase"><i class="fa-solid fa-handshake text-purple-400 mr-2"></i> Active Trade Proposals</h2>
-        <p class="text-xs text-slate-400 mt-1">Review incoming and outgoing card/cash trade proposals with screenshot attachments.</p>
-      </div>
-      <div id="trade-req-content" class="space-y-3">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center text-xs text-slate-400">
-          No active trade proposals pending.
-        </div>
-      </div>
-    </section>
-
-    <!-- PRIVATE INBOX / CHAT VIEW -->
-    <section id="view-inbox" class="hidden space-y-6">
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-        <h2 class="text-xl font-bold text-white uppercase"><i class="fa-solid fa-comments text-indigo-400 mr-2"></i> Private Messenger & Inbox</h2>
-        <p class="text-xs text-slate-400 mt-1">Private messages strictly scoped between you and buyers/sellers.</p>
-      </div>
-
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl grid grid-cols-1 md:grid-cols-3 min-h-[450px] overflow-hidden">
-        <!-- Thread List Sidebar -->
-        <div class="border-r border-slate-800 p-4 space-y-3">
-          <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Search Collectors</p>
-          
-          <!-- User Search Bar for Chat -->
-          <div class="relative">
-            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
-            <input type="text" id="chat-user-search" oninput="searchUsersForChat(this.value)" placeholder="Search @username or name..." class="w-full bg-slate-800 border border-slate-700 rounded-xl pl-8 pr-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
-          </div>
-          <div id="chat-search-results" class="space-y-1 hidden bg-slate-950/80 p-2 rounded-xl border border-slate-800 max-h-40 overflow-y-auto"></div>
-
-          <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider pt-2">Private Threads</p>
-          <div id="chat-threads-list" class="space-y-1.5"></div>
+        <!-- Auth & Actions -->
+        <div class="flex items-center gap-2 shrink-0">
+          <button onclick="showCartModal()" class="relative p-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl border border-slate-700 flex items-center justify-center transition-all" title="View Cart">
+            <i class="fa-solid fa-cart-shopping text-xs text-amber-400"></i>
+            <span id="cart-badge" class="absolute -top-1 -right-1 w-4 h-4 bg-amber-500 text-slate-950 font-bold text-[9px] rounded-full flex items-center justify-center">0</span>
+          </button>
+          <div id="auth-header-container"></div>
         </div>
 
-        <!-- Chat Feed Window -->
-        <div class="col-span-2 flex flex-col justify-between bg-slate-950/40 p-4">
-          <div id="chat-active-header" class="pb-3 border-b border-slate-800 flex items-center justify-between">
-            <span class="text-xs font-bold text-white">Select a private conversation</span>
-          </div>
-
-          <div id="chat-messages-body" class="flex-1 my-4 space-y-3 overflow-y-auto max-h-[300px] pr-2"></div>
-
-          <form onsubmit="sendChatMessage(event)" class="pt-3 border-t border-slate-800 flex gap-2">
-            <input type="text" id="chat-input-text" placeholder="Write a private message..." class="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500">
-            <button type="submit" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl shadow transition-all">Send</button>
-          </form>
-        </div>
       </div>
-    </section>
+    </header>
 
-    <!-- HOLDERS VIEW -->
-    <section id="view-holders" class="hidden space-y-6">
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-        <h2 class="text-xl font-bold text-white uppercase"><i class="fa-solid fa-users text-teal-400 mr-2"></i> Top Card Holders</h2>
-        <p class="text-xs text-slate-400 mt-1">Community leaderboard and collector ranks. Click any collector to inspect their public Vault!</p>
+    <!-- ALL MODALS (Auction, Proofs, Vault, Cart, Trade, Profile, Auth, Details, QRIS, Editor) -->
+    <!-- (Modals preserved from your structure) -->
+    <div id="create-auction-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-4 relative shadow-2xl">
+        <button onclick="closeCreateAuctionModal()" class="absolute top-4 right-4 w-7 h-7 rounded-lg bg-slate-800 text-slate-400 hover:text-white text-xs flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+        <div class="flex items-center gap-2 border-b border-slate-800 pb-3"><i class="fa-solid fa-gavel text-emerald-400"></i><h3 class="text-base font-bold text-white">List Card in Auction House</h3></div>
+        <form onsubmit="submitCardAuction(event)" class="space-y-3">
+          <input type="hidden" id="auction-card-id">
+          <div id="auction-card-summary" class="p-3 bg-slate-800/80 rounded-xl border border-slate-700 text-xs font-bold text-emerald-400">Card Selected</div>
+          <div><label class="text-[10px] font-bold text-slate-400 uppercase">Starting Bid Price (IDR)</label><input type="number" id="auction-start-price" required min="10000" class="w-full mt-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-mono"></div>
+          <div><label class="text-[10px] font-bold text-slate-400 uppercase">Duration (Hours)</label><select id="auction-duration-hrs" class="w-full mt-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"><option value="24" selected>24 Hours</option><option value="48">48 Hours</option></select></div>
+          <button type="submit" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow transition-all">Launch Live Auction</button>
+        </form>
       </div>
-      <div id="holders-content" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-      </div>
-    </section>
+    </div>
 
-    <!-- HISTORY VIEW -->
-    <section id="view-history" class="hidden space-y-6">
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-        <h2 class="text-xl font-bold text-white uppercase"><i class="fa-solid fa-clock-rotate-left text-cyan-400 mr-2"></i> Marketplace Ledger</h2>
-        <p class="text-xs text-slate-400 mt-1">Verified transaction records on the network.</p>
+    <div id="admin-proof-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-4 relative shadow-2xl">
+        <button onclick="closeAdminProofModal()" class="absolute top-4 right-4 w-7 h-7 rounded-lg bg-slate-800 text-slate-400 hover:text-white text-xs flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+        <div class="flex items-center gap-2 border-b border-slate-800 pb-3"><i class="fa-solid fa-upload text-amber-400"></i><h3 class="text-base font-bold text-white">Approve Payout (2% Tax Deducted)</h3></div>
+        <div id="admin-approval-summary" class="p-3 bg-slate-800/80 rounded-xl border border-slate-700 text-xs text-slate-300 space-y-1"></div>
+        <form onsubmit="confirmAdminPayoutWithProof(event)" class="space-y-3">
+          <input type="hidden" id="admin-pending-index">
+          <div><label class="block text-[10px] font-bold uppercase text-slate-400">Upload Receipt Image (*Required)</label><input type="file" id="admin-receipt-file" accept="image/*" required class="w-full text-xs text-slate-400 bg-slate-800 border border-slate-700 rounded-xl p-2"></div>
+          <div><label class="text-[10px] font-bold text-slate-400 uppercase">Transfer Reference</label><input type="text" id="admin-tx-ref" placeholder="Ref: TRF-992014" class="w-full mt-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-mono"></div>
+          <button type="submit" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow transition-all">Confirm Transfer & Payout</button>
+        </form>
       </div>
-      <div id="history-content" class="space-y-2"></div>
-    </section>
+    </div>
 
-    <!-- DASHBOARD / VAULT VIEW -->
-    <section id="view-dashboard" class="hidden space-y-6">
-      <div id="user-profile-banner" class="bg-slate-900 border border-slate-800 rounded-2xl p-6 relative overflow-hidden">
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 relative z-10">
+    <!-- Main Marketplace Body -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 lg:p-8 space-y-8">
+      
+      <!-- CATALOG VIEW -->
+      <section id="view-catalog" class="space-y-6">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
           <div class="flex items-center gap-4">
-            <div class="w-16 h-16 rounded-2xl overflow-hidden border-2 border-blue-500/50 bg-slate-800 shrink-0">
-              <img id="profile-avatar-img" src="https://api.dicebear.com/7.x/identicon/svg?seed=guest" class="w-full h-full object-cover">
+            <div class="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 p-1 flex items-center justify-center">
+              <svg viewBox="0 0 100 100" class="w-full h-full"><use href="#eugene-logo-mark"/></svg>
             </div>
-            <div class="space-y-1">
-              <div class="flex items-center gap-2">
-                <h2 id="profile-display-name" class="text-lg font-bold text-white">Guest Collector</h2>
-                <span id="profile-username-tag" class="text-xs font-mono text-blue-400">@guest</span>
-              </div>
-              <p id="profile-bio-text" class="text-xs text-slate-400 max-w-md">No bio added yet. Click customize to complete your profile.</p>
-              
-              <div id="profile-socials-container" class="flex items-center gap-3 pt-1 text-xs"></div>
+            <div>
+              <span class="text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 tracking-wider">BETA EDITION 3.0</span>
+              <h2 class="text-base font-bold text-white mt-0.5">Primary Card Marketplace Stock</h2>
+              <p class="text-xs text-slate-400">Official marketplace with automated 2% platform fee calculations</p>
             </div>
           </div>
+          <div class="bg-slate-800/80 px-5 py-2.5 rounded-xl border border-slate-700 text-center sm:text-right w-full sm:w-auto">
+            <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Remaining Available</p>
+            <p class="text-xl font-bold font-mono text-blue-400"><span id="remaining-cards-count">0</span> <span class="text-slate-400 text-xs font-normal">Cards</span></p>
+          </div>
+        </div>
 
-          <button onclick="openProfileModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-bold text-xs rounded-xl transition-all flex items-center gap-1.5 shrink-0">
-            <i class="fa-solid fa-pen-to-square text-blue-400"></i> Edit Profile
-          </button>
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-slate-900 p-2.5 rounded-xl border border-slate-800">
+          <div class="relative flex-1">
+            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+            <input type="text" id="search-input" oninput="renderCardGrid()" placeholder="Search serial (*01 / *001) or card name..." class="w-full bg-slate-800 border border-slate-700 rounded-lg pl-9 pr-4 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
+          </div>
+          <div class="flex items-center gap-1.5">
+            <button onclick="setFilter('ALL')" id="filter-ALL" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 text-white transition-all">All</button>
+            <button onclick="setFilter('PREMIUM')" id="filter-PREMIUM" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-400 hover:text-white transition-all">Premium</button>
+            <button onclick="setFilter('STANDARD')" id="filter-STANDARD" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-400 hover:text-white transition-all">Standard</button>
+          </div>
         </div>
-      </div>
 
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-        <h2 class="text-xl font-bold text-white uppercase"><i class="fa-solid fa-vault text-blue-400 mr-2"></i> My Personal Vault (Binder)</h2>
-        <p class="text-xs text-slate-400 mt-1">Manage, trade, launch live auctions, or sell back your owned cards to Admin at floor price.</p>
-      </div>
-      <div id="owned-cards-grid" class="bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center text-xs text-slate-400">
-        Log in with Google to view your owned cards inside your private binder.
-      </div>
-    </section>
+        <div id="card-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
+      </section>
 
-    <!-- WISHLIST VIEW -->
-    <section id="view-wishlist" class="hidden space-y-6">
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-        <h2 class="text-xl font-bold text-white uppercase"><i class="fa-solid fa-heart text-rose-400 mr-2"></i> Saved Wishlist</h2>
-        <p class="text-xs text-slate-400 mt-1">Keep track of cards you want to acquire.</p>
-      </div>
-      <div id="wishlist-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
-    </section>
+      <!-- TRADE VIEW -->
+      <section id="view-trade" class="hidden space-y-6">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex items-center justify-between">
+          <div>
+            <h2 class="text-xl font-bold text-white uppercase"><i class="fa-solid fa-right-left text-blue-400 mr-2"></i> Trading Room</h2>
+            <p class="text-xs text-slate-400 mt-1">Browse open card offers or list one of your own cards for sale.</p>
+          </div>
+        </div>
+        <div id="trade-content" class="bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center text-xs text-slate-400">No peer-to-peer listings active yet.</div>
+      </section>
 
-    <!-- ANALYTICS VIEW (ADMIN ONLY) -->
-    <section id="view-analytics" class="hidden space-y-6">
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-        <h2 class="text-xl font-bold text-white uppercase"><i class="fa-solid fa-chart-line text-amber-400 mr-2"></i> Market Analytics</h2>
-        <p class="text-xs text-slate-400 mt-1">Platform sales volume and tax revenue tracking.</p>
-      </div>
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl">
-          <p class="text-[10px] uppercase font-bold text-slate-400">Total Volume</p>
-          <p id="analytics-vol" class="text-xl font-bold font-mono text-emerald-400 mt-1">IDR 0</p>
+      <!-- AUCTION VIEW -->
+      <section id="view-auction" class="hidden space-y-6">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex items-center justify-between">
+          <div>
+            <h2 class="text-xl font-bold text-white uppercase"><i class="fa-solid fa-gavel text-emerald-400 mr-2"></i> Live Auction House</h2>
+            <p class="text-xs text-slate-400 mt-1">Place real-time bids on rare serial cards.</p>
+          </div>
         </div>
-        <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl">
-          <p class="text-[10px] uppercase font-bold text-slate-400">Admin Tax Collected (2%)</p>
-          <p id="analytics-tax" class="text-xl font-bold font-mono text-amber-400 mt-1">IDR 0</p>
-        </div>
-        <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl">
-          <p class="text-[10px] uppercase font-bold text-slate-400">Active Holders</p>
-          <p id="analytics-holders" class="text-xl font-bold font-mono text-purple-400 mt-1">0 Collectors</p>
-        </div>
-      </div>
-    </section>
+        <div id="auction-content" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
+      </section>
 
-    <!-- ADMIN HUB VIEW -->
-    <section id="view-admin" class="hidden space-y-6">
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex justify-between items-center">
-        <div>
-          <h2 class="text-xl font-bold text-white uppercase"><i class="fa-solid fa-shield-halved text-rose-400 mr-2"></i> Admin Hub</h2>
-          <p class="text-xs text-slate-400 mt-1">Verify payment submissions and process payouts with a 2% platform tax.</p>
+      <!-- TRADE REQUESTS VIEW -->
+      <section id="view-trade-req" class="hidden space-y-6">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+          <h2 class="text-xl font-bold text-white uppercase"><i class="fa-solid fa-handshake text-purple-400 mr-2"></i> Active Trade Proposals</h2>
+          <p class="text-xs text-slate-400 mt-1">Review incoming and outgoing card/cash trade proposals.</p>
         </div>
-      </div>
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-3">
-        <h4 class="text-xs font-bold text-slate-300 uppercase">Pending Transactions Queue (QRIS, Trades & Sell-Backs)</h4>
-        <div id="admin-orders-queue" class="space-y-2">
-          <p class="text-xs text-slate-500">No pending orders waiting for manual approval.</p>
+        <div id="trade-req-content" class="space-y-3">
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center text-xs text-slate-400">No active trade proposals pending.</div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- INVENTORY VIEW (ADMIN ONLY) -->
-    <section id="view-inventory" class="hidden space-y-6">
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h2 class="text-xl font-bold text-white uppercase"><i class="fa-solid fa-boxes-stacked text-amber-400 mr-2"></i> Inventory Control</h2>
-          <p class="text-xs text-slate-400 mt-1">Manage specs, edit owners, export backup JSON, or mint new cards.</p>
+      <!-- PRIVATE INBOX / CHAT VIEW -->
+      <section id="view-inbox" class="hidden space-y-6">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+          <h2 class="text-xl font-bold text-white uppercase"><i class="fa-solid fa-comments text-indigo-400 mr-2"></i> Private Messenger & Inbox</h2>
+          <p class="text-xs text-slate-400 mt-1">Private messages strictly scoped between buyers and sellers.</p>
         </div>
-        <div class="flex flex-wrap items-center gap-2">
-          <button onclick="exportInventoryJSON()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-blue-400 font-bold text-xs rounded-xl border border-slate-700 transition-all flex items-center gap-1.5">
-            <i class="fa-solid fa-download"></i> Export JSON
-          </button>
-          <label class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-purple-400 font-bold text-xs rounded-xl border border-slate-700 transition-all flex items-center gap-1.5 cursor-pointer">
-            <i class="fa-solid fa-upload"></i> Import JSON
-            <input type="file" id="import-file-input" accept=".json" onchange="importInventoryJSON(event)" class="hidden">
-          </label>
-          <button onclick="openCardEditorModal()" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-xl transition-all shadow flex items-center gap-1.5">
-            <i class="fa-solid fa-plus"></i> Mint Card
-          </button>
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl grid grid-cols-1 md:grid-cols-3 min-h-[450px] overflow-hidden">
+          <div class="border-r border-slate-800 p-4 space-y-3">
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Search Collectors</p>
+            <input type="text" id="chat-user-search" oninput="searchUsersForChat(this.value)" placeholder="Search @username..." class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
+            <div id="chat-search-results" class="space-y-1 hidden bg-slate-950/80 p-2 rounded-xl border border-slate-800 max-h-40 overflow-y-auto"></div>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider pt-2">Threads</p>
+            <div id="chat-threads-list" class="space-y-1.5"></div>
+          </div>
+          <div class="col-span-2 flex flex-col justify-between bg-slate-950/40 p-4">
+            <div id="chat-active-header" class="pb-3 border-b border-slate-800 flex items-center justify-between"><span class="text-xs font-bold text-white">Select a conversation</span></div>
+            <div id="chat-messages-body" class="flex-1 my-4 space-y-3 overflow-y-auto max-h-[300px] pr-2"></div>
+            <form onsubmit="sendChatMessage(event)" class="pt-3 border-t border-slate-800 flex gap-2">
+              <input type="text" id="chat-input-text" placeholder="Write a message..." class="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-4 py-2 text-xs text-white">
+              <button type="submit" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl">Send</button>
+            </form>
+          </div>
         </div>
-      </div>
+      </section>
 
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
-        <div class="overflow-x-auto">
+      <!-- HOLDERS VIEW -->
+      <section id="view-holders" class="hidden space-y-6">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+          <h2 class="text-xl font-bold text-white uppercase"><i class="fa-solid fa-users text-teal-400 mr-2"></i> Top Card Holders</h2>
+          <p class="text-xs text-slate-400 mt-1">Community leaderboard and collector ranks.</p>
+        </div>
+        <div id="holders-content" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
+      </section>
+
+      <!-- HISTORY VIEW -->
+      <section id="view-history" class="hidden space-y-6">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+          <h2 class="text-xl font-bold text-white uppercase"><i class="fa-solid fa-clock-rotate-left text-cyan-400 mr-2"></i> Marketplace Ledger</h2>
+          <p class="text-xs text-slate-400 mt-1">Verified transaction records on the network.</p>
+        </div>
+        <div id="history-content" class="space-y-2"></div>
+      </section>
+
+      <!-- DASHBOARD / VAULT VIEW -->
+      <section id="view-dashboard" class="hidden space-y-6">
+        <div id="user-profile-banner" class="bg-slate-900 border border-slate-800 rounded-2xl p-6 relative overflow-hidden">
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 relative z-10">
+            <div class="flex items-center gap-4">
+              <div class="w-16 h-16 rounded-2xl overflow-hidden border-2 border-blue-500/50 bg-slate-800 shrink-0">
+                <img id="profile-avatar-img" src="https://api.dicebear.com/7.x/identicon/svg?seed=guest" class="w-full h-full object-cover">
+              </div>
+              <div class="space-y-1">
+                <div class="flex items-center gap-2">
+                  <h2 id="profile-display-name" class="text-lg font-bold text-white">Guest Collector</h2>
+                  <span id="profile-username-tag" class="text-xs font-mono text-blue-400">@guest</span>
+                </div>
+                <p id="profile-bio-text" class="text-xs text-slate-400 max-w-md">No bio added yet.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+          <h2 class="text-xl font-bold text-white uppercase"><i class="fa-solid fa-vault text-blue-400 mr-2"></i> My Personal Vault</h2>
+        </div>
+        <div id="owned-cards-grid" class="bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center text-xs text-slate-400">Log in with Google to view your owned cards.</div>
+      </section>
+
+      <!-- WISHLIST VIEW -->
+      <section id="view-wishlist" class="hidden space-y-6">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+          <h2 class="text-xl font-bold text-white uppercase"><i class="fa-solid fa-heart text-rose-400 mr-2"></i> Saved Wishlist</h2>
+        </div>
+        <div id="wishlist-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4"></div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- INTEGRATED ADMIN ANALYTICS HUB TAB[cite: 5] -->
+      <!-- ========================================== -->
+      <section id="view-analytics" class="hidden space-y-6">
+        <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-900 border border-slate-800 rounded-2xl p-6">
+          <div>
+            <span class="inline-flex px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/20 text-[10px] font-black uppercase tracking-widest">Eugene Card 3.0</span>
+            <h2 class="text-xl font-bold text-white uppercase mt-1"><i class="fa-solid fa-chart-line text-amber-400 mr-2"></i> Predictive Analytics Hub</h2>
+            <p class="text-xs text-slate-400 mt-0.5">Post-trade floor price estimation & market velocity intelligence</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="toggleAnalyticsLanguage()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-amber-400 font-mono font-bold text-xs rounded-xl border border-slate-700">
+              <i class="fa-solid fa-globe mr-1"></i> <span id="analytics-lang-label">EN</span>
+            </button>
+            <button onclick="triggerManualAnalyticsRefresh()" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-amber-400 text-xs font-bold rounded-xl border border-slate-700 flex items-center gap-2">
+              <i class="fa-solid fa-rotate" id="refresh-icon-analytics"></i> Refresh
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 space-y-2">
+            <span class="text-xs text-slate-400 font-bold">Realized Sales Volume</span>
+            <p id="stat-total-volume" class="text-2xl font-black text-white font-mono">Rp 0</p>
+            <p class="text-[10px] text-emerald-400 font-bold"><i class="fa-solid fa-arrow-trend-up"></i> Settled QRIS Trades</p>
+          </div>
+          <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 space-y-2">
+            <span class="text-xs text-slate-400 font-bold">Current Market Cap</span>
+            <p id="stat-total-valuation" class="text-2xl font-black text-white font-mono">Rp 0</p>
+            <p id="stat-total-cards" class="text-[10px] text-slate-500">Across 0 database cards</p>
+          </div>
+          <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 space-y-2">
+            <span class="text-xs text-slate-400 font-bold">12-Month Est. Vault Cap</span>
+            <p id="stat-future-valuation" class="text-2xl font-black text-amber-400 font-mono">Rp 0</p>
+            <p id="stat-appreciation-rate" class="text-[10px] text-emerald-400 font-bold">+0% projected gain</p>
+          </div>
+          <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 space-y-2">
+            <span class="text-xs text-slate-400 font-bold">Trade Stability Index</span>
+            <p id="stat-stability-index" class="text-2xl font-black text-teal-400 font-mono">0%</p>
+            <p class="text-[10px] text-teal-300 font-bold">Low Volatility Rating</p>
+          </div>
+        </div>
+
+        <!-- CHARTS -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4">
+            <h3 class="text-base font-extrabold text-white uppercase tracking-wider"><i class="fa-solid fa-chart-line text-amber-400 mr-2"></i> 6–12 Month Valuation Forecast</h3>
+            <div class="w-full h-72 relative"><canvas id="trendForecastChart"></canvas></div>
+          </div>
+          <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4 flex flex-col justify-between">
+            <h3 class="text-base font-extrabold text-white uppercase tracking-wider"><i class="fa-solid fa-pie-chart text-teal-400 mr-2"></i> Rarity Distribution</h3>
+            <div class="w-full h-56 relative my-auto"><canvas id="tierDistributionChart"></canvas></div>
+            <div class="text-xs text-slate-400 flex justify-around border-t border-slate-800 pt-3">
+              <span>Premium: <strong id="premium-count-badge" class="text-amber-400">0</strong></span>
+              <span>Standard: <strong id="standard-count-badge" class="text-blue-400">0</strong></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- SIMULATOR TABLE -->
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-800 pb-4">
+            <h3 class="text-base font-extrabold text-white uppercase tracking-wider"><i class="fa-solid fa-sliders text-amber-400 mr-2"></i> Post-Trade Price Estimation Simulator</h3>
+            <div class="flex items-center gap-2">
+              <button onclick="setGrowthScenario('conservative')" id="btn-scenario-conservative" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800 text-slate-400">Conservative</button>
+              <button onclick="setGrowthScenario('moderate')" id="btn-scenario-moderate" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-500 text-slate-950">Moderate</button>
+              <button onclick="setGrowthScenario('bullish')" id="btn-scenario-bullish" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800 text-slate-400">Bullish</button>
+            </div>
+          </div>
+          <div class="overflow-x-auto max-h-[500px] rounded-2xl border border-slate-800">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-950 text-slate-400 border-b border-slate-800 sticky top-0 font-bold uppercase">
+                <tr>
+                  <th class="p-3.5">Serial</th><th class="p-3.5">Card Name</th><th class="p-3.5">Type</th><th class="p-3.5">Current Floor</th>
+                  <th class="p-3.5 text-emerald-400">Est. Price After Trade</th><th class="p-3.5 text-emerald-400">Gain</th>
+                  <th class="p-3.5 text-indigo-300">6-Mo. Est.</th><th class="p-3.5 text-indigo-400">12-Mo. Est.</th><th class="p-3.5 text-right">Rating</th>
+                </tr>
+              </thead>
+              <tbody id="predictive-table-body" class="divide-y divide-slate-800 bg-slate-950/40">
+                <tr><td colspan="9" class="p-6 text-center text-slate-500">Loading predictive analytics...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- INTEGRATED ADMIN REVENUE HUB TAB[cite: 7]     -->
+      <!-- ========================================== -->
+      <section id="view-revenue" class="hidden space-y-6">
+        <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-900 border border-slate-800 rounded-2xl p-6">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-2xl bg-emerald-950/50 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-xl">
+              <i class="fa-solid fa-sack-dollar"></i>
+            </div>
+            <div>
+              <h2 class="font-extrabold text-xl text-white tracking-wider uppercase">ADMIN REVENUE & FINANCIAL HUB</h2>
+              <p class="text-xs text-slate-400 mt-0.5">Dedicated Financial & Profitability Analytics Engine</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-3">
+            <button onclick="toggleRevenueLanguage()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-emerald-400 font-mono font-bold text-xs rounded-xl border border-slate-700">
+              <i class="fa-solid fa-globe mr-1"></i> <span id="rev-lang-label">EN</span>
+            </button>
+            <select id="time-filter" onchange="applyRevenueFilter()" class="bg-slate-950 border border-emerald-500/30 rounded-xl px-4 py-2 text-xs text-emerald-400 font-bold focus:outline-none cursor-pointer">
+              <option value="ALL">All Time</option><option value="TODAY">Today</option><option value="WEEK">This Week</option><option value="MONTH">This Month</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- KPI CARDS -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-2">
+            <p class="text-[10px] text-slate-400 font-extrabold uppercase">GROSS SALES REVENUE</p>
+            <p id="kpi-gross-sales" class="text-2xl font-black text-emerald-400 font-mono">Rp 0</p>
+          </div>
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-2">
+            <p class="text-[10px] text-slate-400 font-extrabold uppercase">PLATFORM TAX (2% FEE)</p>
+            <p id="kpi-platform-tax" class="text-2xl font-black text-amber-400 font-mono">Rp 0</p>
+          </div>
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-2">
+            <p class="text-[10px] text-slate-400 font-extrabold uppercase">COMPLETED SALES</p>
+            <p id="kpi-completed-sales" class="text-2xl font-black text-white font-mono">0</p>
+          </div>
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-2">
+            <p class="text-[10px] text-slate-400 font-extrabold uppercase">AVERAGE ORDER VALUE</p>
+            <p id="kpi-avg-order-value" class="text-2xl font-black text-emerald-400 font-mono">Rp 0</p>
+          </div>
+        </div>
+
+        <!-- CHARTS -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          <div class="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl">
+            <h3 class="text-sm font-black text-white tracking-wider mb-2">SALES TREND</h3>
+            <div class="h-64 relative"><canvas id="revenueTrendChart"></canvas></div>
+          </div>
+          <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl">
+            <h3 class="text-sm font-black text-white tracking-wider mb-2">REVENUE MIX</h3>
+            <div class="h-48 relative"><canvas id="revenueMixChart"></canvas></div>
+            <div id="revenue-mix-legend" class="grid grid-cols-2 gap-2 mt-3"></div>
+          </div>
+        </div>
+
+        <!-- PROFITABILITY TABLE -->
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4">
+          <h3 class="text-xs font-extrabold text-white uppercase tracking-wider">CARD-LEVEL PROFITABILITY BREAKDOWN</h3>
+          <div class="overflow-x-auto max-h-[450px]">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-950 text-slate-400 border-b border-slate-800 sticky top-0">
+                <tr><th class="p-3.5">Serial</th><th class="p-3.5">Card Name</th><th class="p-3.5">Base Price</th><th class="p-3.5 text-emerald-400">Total Sales Revenue</th><th class="p-3.5">Status</th></tr>
+              </thead>
+              <tbody id="card-profitability-tbody" class="divide-y divide-slate-800">
+                <tr><td colspan="5" class="p-6 text-center text-slate-500">Loading revenue records...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ADMIN HUB & COMMAND CENTER OVERVIEW VIEW -->
+      <section id="view-admin" class="hidden space-y-6">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex justify-between items-center">
+          <div>
+            <h2 class="text-xl font-bold text-white uppercase"><i class="fa-solid fa-shield-halved text-rose-400 mr-2"></i> Admin Command Center 3.0</h2>
+            <p class="text-xs text-slate-400 mt-1">Marketplace control room: operations, collectors, inventory, auctions, trades, and finance.</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5"><p class="text-[10px] text-slate-500 uppercase font-black">Cards</p><p id="admin-stat-cards" class="text-3xl font-black mt-1">—</p></div>
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5"><p class="text-[10px] text-slate-500 uppercase font-black">Inventory Floor</p><p id="admin-stat-inventory" class="text-3xl font-black mt-1">—</p></div>
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5"><p class="text-[10px] text-slate-500 uppercase font-black">Collectors</p><p id="admin-stat-collectors" class="text-3xl font-black mt-1">—</p></div>
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5"><p class="text-[10px] text-slate-500 uppercase font-black">Pending Orders</p><p id="admin-stat-trades" class="text-3xl font-black mt-1">—</p></div>
+        </div>
+
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-3">
+          <h4 class="text-xs font-bold text-slate-300 uppercase">Pending Transactions Queue (QRIS, Trades & Sell-Backs)</h4>
+          <div id="admin-orders-queue" class="space-y-2"><p class="text-xs text-slate-500">No pending orders waiting for approval.</p></div>
+        </div>
+      </section>
+
+      <!-- INVENTORY VIEW -->
+      <section id="view-inventory" class="hidden space-y-6">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex justify-between items-center">
+          <div>
+            <h2 class="text-xl font-bold text-white uppercase"><i class="fa-solid fa-boxes-stacked text-amber-400 mr-2"></i> Inventory Control</h2>
+            <p class="text-xs text-slate-400 mt-1">Manage specs, edit owners, export backup JSON, or mint new cards.</p>
+          </div>
+          <button onclick="openCardEditorModal()" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-xl shadow">+ Mint Card</button>
+        </div>
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
           <table class="w-full text-left text-xs text-slate-300">
             <thead class="bg-slate-800/80 text-[10px] uppercase text-slate-400 font-semibold border-b border-slate-800">
-              <tr>
-                <th class="p-3">Serial</th>
-                <th class="p-3">Card Name</th>
-                <th class="p-3">Edition</th>
-                <th class="p-3">Tier</th>
-                <th class="p-3">Price</th>
-                <th class="p-3">Owner</th>
-                <th class="p-3">Status</th>
-                <th class="p-3 text-right">Actions</th>
-              </tr>
+              <tr><th class="p-3">Serial</th><th class="p-3">Card Name</th><th class="p-3">Edition</th><th class="p-3">Tier</th><th class="p-3">Price</th><th class="p-3">Owner</th><th class="p-3">Status</th><th class="p-3 text-right">Actions</th></tr>
             </thead>
-            <tbody id="inventory-table-body" class="divide-y divide-slate-800">
-            </tbody>
+            <tbody id="inventory-table-body" class="divide-y divide-slate-800"></tbody>
           </table>
         </div>
-      </div>
-    </section>
+      </section>
 
-  </main>
+    </main>
+
+  </div>
 
   <!-- TOAST NOTIFICATION -->
   <div id="toast" class="fixed bottom-6 right-6 z-[10000] bg-slate-900 border border-blue-500/40 text-blue-400 text-xs font-semibold px-4 py-3 rounded-xl shadow-2xl transform translate-y-20 opacity-0 transition-all pointer-events-none">
@@ -874,151 +604,36 @@
   <script src="js/supabase-init.js"></script>
 
   <script>
-    const ADMIN_EMAILS = [
-      'eugene.aquila06@gmail.com',
-      'yujinybwork@gmail.com',
-      'eugene.aquila06'
-    ];
-
+    const ADMIN_EMAILS = ['eugene.aquila06@gmail.com', 'yujinybwork@gmail.com', 'eugene.aquila06'];
     const QRIS_STRING_PAYLOAD = "00020101021126610014COM.GO-JEK.WWW01189360091430419400360210G0419400360303UMI51440014ID.CO.QRIS.WWW0215ID10265490344800303UMI5204594453033605802ID5925Eugene Card, Toko Kartu &6012TORAJA UTARA61059183162070703A0163048BD9";
-
-    const INITIAL_JSON_BACKUP = {"exportedAt":"2026-07-29T13:25:53.048Z","exportedBy":"eugene.aquila06@gmail.com","inventoryCount":16,"cards":[{"id":"card-001","serial":"*001","name":"Eugene Standard #001","type":"STANDARD","price":100000,"baseFloorPrice":100000,"owner":"Eugene","status":"SOLD","imgUrl":"https://iili.io/CeR1tJ2.md.png","edition":"Beta Edition: #0","sn":"001","tier":"100","printing":"1x"},{"id":"card-01","serial":"*01","name":"Eugene Premium #01","type":"PREMIUM","price":500000,"baseFloorPrice":500000,"owner":"Eugene","status":"SOLD","imgUrl":"https://iili.io/CeRhf5v.png","edition":"Beta Edition: #0","sn":"01","tier":"500","printing":"1x"},{"id":"card-002","serial":"*002","name":"Eugene Standard #002","type":"STANDARD","price":100000,"baseFloorPrice":100000,"owner":null,"status":"SOLD","imgUrl":"https://iili.io/CeREczX.md.png","edition":"Beta Edition: #0","sn":"002","tier":"100","printing":"1x"},{"id":"card-02","serial":"*02","name":"Eugene Premium #02","type":"PREMIUM","price":500000,"baseFloorPrice":500000,"owner":null,"status":"AVAILABLE","imgUrl":"https://iili.io/CeRamG4.md.png","edition":"Beta Edition: #0","sn":"02","tier":"500","printing":"1x"}]};
 
     let currentUser = null;
     let currentFilter = 'ALL';
-    let unreadNotifCount = 0;
     let inventory = [];
+    let wishlist = new Set(JSON.parse(localStorage.getItem('eugene_wishlist_data') || '[]'));
+    let shoppingCart = new Set(JSON.parse(localStorage.getItem('eugene_cart_data') || '[]'));
+    let tradeProposals = JSON.parse(localStorage.getItem('eugene_trade_proposals') || '[]');
+    let pendingOrders = JSON.parse(localStorage.getItem('eugene_pending_orders') || '[]');
+    let liveAuctions = JSON.parse(localStorage.getItem('eugene_live_auctions') || '[]');
+    let transactionHistory = JSON.parse(localStorage.getItem('eugene_transaction_history') || '[]');
 
-    // Load persisted Wishlist
-    let wishlist = new Set();
-    const storedWishlist = localStorage.getItem('eugene_wishlist_data');
-    if (storedWishlist) {
-      try { wishlist = new Set(JSON.parse(storedWishlist)); } catch(e) {}
-    }
+    // Analytics & Revenue State Variables
+    let currentScenario = 'moderate';
+    let currentAnalyticsLang = localStorage.getItem('eugene_lang') || 'EN';
+    let currentRevLang = localStorage.getItem('eugene_lang') || 'EN';
+    let trendChartInstance = null;
+    let tierChartInstance = null;
+    let revenueTrendChartInstance = null;
+    let revenueMixChartInstance = null;
+    let analyticsPredictiveCache = [];
 
-    // Load persisted Cart
-    let shoppingCart = new Set();
-    const storedCart = localStorage.getItem('eugene_cart_data');
-    if (storedCart) {
-      try { shoppingCart = new Set(JSON.parse(storedCart)); } catch(e) {}
-    }
-
-    let tradeProposals = [];
-    const storedTrades = localStorage.getItem('eugene_trade_proposals');
-    if (storedTrades) {
-      try { tradeProposals = JSON.parse(storedTrades); } catch(e) {}
-    }
-
-    let pendingOrders = [];
-    const storedPending = localStorage.getItem('eugene_pending_orders');
-    if (storedPending) {
-      try { pendingOrders = JSON.parse(storedPending); } catch(e) {}
-    }
-
-    let liveAuctions = [];
-    const storedAuctions = localStorage.getItem('eugene_live_auctions');
-    if (storedAuctions) {
-      try { liveAuctions = JSON.parse(storedAuctions); } catch(e) {}
-    }
-
-    let transactionHistory = [];
-    const storedHistory = localStorage.getItem('eugene_transaction_history');
-    if (storedHistory) {
-      try { transactionHistory = JSON.parse(storedHistory); } catch(e) {}
-    } else {
-      transactionHistory = [
-        { id: 'tx-1', type: 'MINT', cardSerial: '*01', details: 'Genesis Minting of Eugene Premium #01', timestamp: '2026-07-29 10:00 AM' }
-      ];
-    }
-
-    let activeCardForAction = null;
-    let selectedOwner = null;
-
-    let chatThreads = [
-      { id: 't1', user: 'Eugene', participant1: 'Eugene', participant2: 'Admin', avatar: 'https://api.dicebear.com/7.x/identicon/svg?seed=Eugene', messages: [{ sender: 'Eugene Admin', text: 'Welcome to Eugene Card Private Messenger.' }] }
-    ];
-    const storedChats = localStorage.getItem('eugene_chat_threads');
-    if (storedChats) {
-      try { chatThreads = JSON.parse(storedChats); } catch(e) {}
-    }
-    let activeChatThreadId = 't1';
-
-    async function fetchDatabaseInventory() {
-      if (window.supabaseClient) {
-        const { data, error } = await supabaseClient
-          .from('inventory')
-          .select('*')
-          .order('id', { ascending: true });
-
-        if (!error && data && data.length > 0) {
-          inventory = data;
-          saveInventoryLocalCache();
-          renderCardGrid();
-          renderInventoryTable();
-          updateRemainingCardCount();
-          return;
-        }
-      }
-
-      const storedInventory = localStorage.getItem('eugene_inventory_data');
-      if (storedInventory) {
-        try { inventory = JSON.parse(storedInventory); } catch(e) { inventory = [...INITIAL_JSON_BACKUP.cards]; }
-      } else {
-        inventory = [...INITIAL_JSON_BACKUP.cards];
-      }
-      renderCardGrid();
-      renderInventoryTable();
-      updateRemainingCardCount();
-    }
-
-    function saveInventoryLocalCache() {
-      localStorage.setItem('eugene_inventory_data', JSON.stringify(inventory));
-    }
-
-    function saveWishlistState() {
-      localStorage.setItem('eugene_wishlist_data', JSON.stringify(Array.from(wishlist)));
-    }
-
-    function saveCartState() {
-      localStorage.setItem('eugene_cart_data', JSON.stringify(Array.from(shoppingCart)));
-    }
-
-    function saveTradeProposalsState() {
-      localStorage.setItem('eugene_trade_proposals', JSON.stringify(tradeProposals));
-    }
-
-    function savePendingOrdersState() {
-      localStorage.setItem('eugene_pending_orders', JSON.stringify(pendingOrders));
-    }
-
-    function saveAuctionsState() {
-      localStorage.setItem('eugene_live_auctions', JSON.stringify(liveAuctions));
-    }
-
-    function saveHistoryState() {
-      localStorage.setItem('eugene_transaction_history', JSON.stringify(transactionHistory));
-    }
-
-    function saveChatsState() {
-      localStorage.setItem('eugene_chat_threads', JSON.stringify(chatThreads));
-    }
-
-    function addHistoryRecord(type, cardSerial, details) {
-      const record = {
-        id: `tx-${Date.now()}`,
-        type: type,
-        cardSerial: cardSerial,
-        details: details,
-        timestamp: new Date().toLocaleString()
-      };
-      transactionHistory.unshift(record);
-      saveHistoryState();
-      renderHistoryLedger();
-      renderAnalyticsView();
-    }
+    const SCENARIOS = {
+      conservative: { std6m: 1.05, std12m: 1.10, prem6m: 1.12, prem12m: 1.20, tradeBump: 1.03 },
+      moderate:     { std6m: 1.15, std12m: 1.25, prem6m: 1.25, prem12m: 1.50, tradeBump: 1.05 },
+      bullish:      { std6m: 1.35, std12m: 1.50, prem6m: 1.50, prem12m: 2.00, tradeBump: 1.10 }
+    };
 
     document.addEventListener('DOMContentLoaded', async () => {
-      // Clean OAuth hash tokens without causing a reload loop
       if (window.location.hash.includes('access_token')) {
         window.history.replaceState(null, '', window.location.pathname);
       }
@@ -1027,11 +642,8 @@
 
       if (window.supabaseClient) {
         const { data: { session } } = await supabaseClient.auth.getSession();
-        if (session?.user) {
-          handleSupabaseUserSession(session.user);
-        }
+        if (session?.user) handleSupabaseUserSession(session.user);
 
-        // Clean auth listener without forcing redirects
         supabaseClient.auth.onAuthStateChange((event, session) => {
           if (session?.user && (!currentUser || currentUser.email !== session.user.email)) {
             handleSupabaseUserSession(session.user);
@@ -1040,98 +652,62 @@
             renderAuthHeader();
           }
         });
-
-        supabaseClient
-          .channel('public:inventory')
-          .on('postgres_changes', { event: '*', schema: 'public', table: 'inventory' }, () => {
-            fetchDatabaseInventory();
-          })
-          .subscribe();
       }
 
       renderAuthHeader();
-      renderChatThreads();
       renderHistoryLedger();
       renderAdminOrdersQueue();
       renderTradeProposals();
       renderAuctionsGrid();
-      
-      document.getElementById('wishlist-count-badge').innerText = wishlist.size;
-      document.getElementById('cart-badge').innerText = shoppingCart.size;
 
       const savedTab = localStorage.getItem('eugene_current_tab') || 'catalog';
       switchTab(savedTab);
     });
 
+    async function fetchDatabaseInventory() {
+      if (window.supabaseClient) {
+        const { data, error } = await supabaseClient.from('inventory').select('*').order('id', { ascending: true });
+        if (!error && data && data.length > 0) {
+          inventory = data;
+          renderCardGrid();
+          renderInventoryTable();
+          updateRemainingCardCount();
+          return;
+        }
+      }
+      inventory = JSON.parse(localStorage.getItem('eugene_inventory_data') || '[]');
+      renderCardGrid();
+      renderInventoryTable();
+      updateRemainingCardCount();
+    }
+
     function isAdminEmail(email) {
       if (!email) return false;
       const lower = email.toLowerCase().trim();
-      return ADMIN_EMAILS.some(adminEmail => lower === adminEmail || lower.startsWith(adminEmail));
-    }
-
-    function openAuthModal() { 
-      document.getElementById('auth-modal').classList.remove('hidden'); 
-    }
-
-    function closeAuthModal() { 
-      document.getElementById('auth-modal').classList.add('hidden'); 
-    }
-
-    async function loginWithGoogleSupabase() {
-      try {
-        if (!window.supabaseClient) throw new Error('Supabase client not initialized.');
-        const { error } = await supabaseClient.auth.signInWithOAuth({
-          provider: 'google',
-          options: { redirectTo: window.location.origin }
-        });
-        if (error) throw error;
-      } catch (error) {
-        showToast('Supabase Auth Error: ' + error.message);
-      }
+      return ADMIN_EMAILS.some(admin => lower === admin || lower.startsWith(admin));
     }
 
     function handleSupabaseUserSession(user) {
       const email = user.email ? user.email.toLowerCase() : '';
-      const name = user.user_metadata?.full_name || user.user_metadata?.name || email.split('@')[0];
+      const name = user.user_metadata?.full_name || email.split('@')[0];
       const isAdmin = isAdminEmail(email);
 
-      let profile = {
-        id: user.id,
-        email: email,
-        name: name,
+      currentUser = {
+        id: user.id, email, name,
         username: name.toLowerCase().replace(/\s+/g, '_'),
-        bio: 'Official collector on Eugene Card Marketplace.',
-        instagram: 'eugene_collector',
-        tiktok: '',
-        x: '',
-        website: '',
-        isAdmin: isAdmin,
+        isAdmin,
         avatarUrl: user.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/identicon/svg?seed=${email}`
       };
 
-      const savedProfile = localStorage.getItem(`eugene_profile_${email}`);
-      if (savedProfile) {
-        try {
-          const parsed = JSON.parse(savedProfile);
-          profile = { ...profile, ...parsed, id: user.id, email: email, isAdmin: isAdmin };
-        } catch (e) {}
-      }
-
-      currentUser = profile;
-
       renderAuthHeader();
-      renderUserProfileUI();
       renderCardGrid();
       renderInventoryTable();
-      renderChatThreads();
     }
 
     async function logoutUser() {
       if (window.supabaseClient) await supabaseClient.auth.signOut();
       currentUser = null;
       renderAuthHeader();
-      renderUserProfileUI();
-      renderChatThreads();
       switchTab('catalog');
       showToast('Logged out.');
     }
@@ -1139,1413 +715,333 @@
     function renderAuthHeader() {
       const container = document.getElementById('auth-header-container');
       const adminNavs = document.querySelectorAll('.admin-only-nav');
+      const adminSidebar = document.getElementById('admin-sidebar');
       const adminSep = document.getElementById('admin-nav-separator');
 
-      if (currentUser) {
-        if (currentUser.isAdmin) {
-          adminNavs.forEach(el => el.classList.remove('hidden'));
-          if (adminSep) adminSep.classList.remove('hidden');
-        } else {
-          adminNavs.forEach(el => el.classList.add('hidden'));
-          if (adminSep) adminSep.classList.add('hidden');
-        }
-
-        const avatarImgHtml = `<img src="${currentUser.avatarUrl}" class="w-6 h-6 rounded-full object-cover border border-slate-700">`;
-        let badgeText = currentUser.isAdmin ? 'Admin' : `@${currentUser.username}`;
-        let badgeColor = currentUser.isAdmin ? 'text-rose-400 font-bold' : 'text-slate-400';
+      if (currentUser?.isAdmin) {
+        adminNavs.forEach(el => el.classList.remove('hidden'));
+        if (adminSidebar) adminSidebar.classList.remove('hidden');
+        if (adminSep) adminSep.classList.remove('hidden');
 
         container.innerHTML = `
-          <div class="flex items-center gap-2 bg-slate-800 border border-slate-700 hover:border-slate-600 rounded-xl p-1 pl-2.5 cursor-pointer transition-all">
-            ${avatarImgHtml}
+          <div class="flex items-center gap-2 bg-slate-800 border border-slate-700 rounded-xl p-1 pl-2.5">
+            <img src="${currentUser.avatarUrl}" class="w-6 h-6 rounded-full object-cover">
             <div class="flex flex-col text-right">
-              <span class="text-xs font-bold text-white leading-tight">${currentUser.name}</span>
-              <span class="text-[9px] ${badgeColor} font-mono">${badgeText}</span>
+              <span class="text-xs font-bold text-white">${currentUser.name}</span>
+              <span class="text-[9px] text-rose-400 font-bold font-mono">Admin 3.0</span>
             </div>
-            <button onclick="event.stopPropagation(); logoutUser();" title="Log Out" class="p-1.5 bg-slate-900 hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 rounded-lg ml-1 transition-all">
-              <i class="fa-solid fa-right-from-bracket text-xs"></i>
-            </button>
+            <button onclick="logoutUser()" class="p-1.5 text-slate-400 hover:text-rose-400 rounded-lg"><i class="fa-solid fa-right-from-bracket"></i></button>
           </div>
         `;
       } else {
         adminNavs.forEach(el => el.classList.add('hidden'));
+        if (adminSidebar) adminSidebar.classList.add('hidden');
         if (adminSep) adminSep.classList.add('hidden');
 
-        container.innerHTML = `
-          <button onclick="openAuthModal()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-xl shadow transition-all flex items-center gap-1.5">
-            <i class="fa-solid fa-right-to-bracket"></i> <span>Log In / Sign In</span>
-          </button>
-        `;
+        if (currentUser) {
+          container.innerHTML = `
+            <div class="flex items-center gap-2 bg-slate-800 border border-slate-700 rounded-xl p-1 pl-2.5">
+              <img src="${currentUser.avatarUrl}" class="w-6 h-6 rounded-full">
+              <span class="text-xs font-bold text-white">${currentUser.name}</span>
+              <button onclick="logoutUser()" class="p-1.5 text-slate-400 hover:text-rose-400"><i class="fa-solid fa-right-from-bracket"></i></button>
+            </div>
+          `;
+        } else {
+          container.innerHTML = `<button onclick="openAuthModal()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-xl shadow">Log In</button>`;
+        }
       }
     }
 
-    // PROFILE PERSONALIZATION
-    function openProfileModal() {
-      if (!currentUser) return openAuthModal();
+    function switchTab(tabName) {
+      const adminOnlyTabs = ['admin', 'inventory', 'analytics', 'revenue'];
+      if (adminOnlyTabs.includes(tabName) && !currentUser?.isAdmin) {
+        return showToast('Admin access required.');
+      }
 
-      document.getElementById('edit-profile-name').value = currentUser.name;
-      document.getElementById('edit-profile-username').value = currentUser.username;
-      document.getElementById('edit-profile-bio').value = currentUser.bio || '';
-      document.getElementById('edit-profile-instagram').value = currentUser.instagram || '';
-      document.getElementById('edit-profile-tiktok').value = currentUser.tiktok || '';
-      document.getElementById('edit-profile-x').value = currentUser.x || '';
-      document.getElementById('edit-profile-website').value = currentUser.website || '';
+      const allViews = ['catalog', 'trade', 'auction', 'trade-req', 'inbox', 'holders', 'history', 'dashboard', 'wishlist', 'analytics', 'revenue', 'admin', 'inventory'];
+      allViews.forEach(t => {
+        const v = document.getElementById(`view-${t}`);
+        if (v) v.classList.add('hidden');
+      });
 
-      document.getElementById('profile-edit-modal').classList.remove('hidden');
+      const activeView = document.getElementById(`view-${tabName}`);
+      if (activeView) activeView.classList.remove('hidden');
+
+      // Update Sidebar Links
+      document.querySelectorAll('.ec3a-link').forEach(l => l.classList.remove('active'));
+      const activeSideNav = document.getElementById(`side-nav-${tabName}`);
+      if (activeSideNav) activeSideNav.classList.add('active');
+
+      localStorage.setItem('eugene_current_tab', tabName);
+
+      if (tabName === 'analytics') renderAnalyticsHub();
+      if (tabName === 'revenue') renderRevenueHub();
+      if (tabName === 'admin') renderAdminCommandOverview();
     }
 
-    function closeProfileModal() {
-      document.getElementById('profile-edit-modal').classList.add('hidden');
+    // ==========================================
+    // ANALYTICS HUB LOGIC & RENDERING[cite: 5]
+    // ==========================================
+    function renderAnalyticsHub() {
+      const cards = inventory;
+      let totalVol = 0;
+      let currentValuation = 0;
+      let futureValuation = 0;
+      let premiumCount = 0;
+      let standardCount = 0;
+      let stabilitySum = 0;
+
+      const sc = SCENARIOS[currentScenario];
+
+      const predictiveCards = cards.map(c => {
+        const currentPrice = parseFloat(c.price || c.baseFloorPrice || 100000);
+        const isPremium = c.type === 'PREMIUM';
+        if (isPremium) premiumCount++; else standardCount++;
+
+        const mult12m = isPremium ? sc.prem12m : sc.std12m;
+        const est6m = Math.round(currentPrice * (isPremium ? sc.prem6m : sc.std6m));
+        const est12m = Math.round(currentPrice * mult12m);
+        const estNextTradePrice = Math.round(currentPrice * (isPremium ? sc.tradeBump + 0.02 : sc.tradeBump));
+
+        currentValuation += currentPrice;
+        futureValuation += est12m;
+        stabilitySum += (isPremium ? 98 : 90);
+
+        return {
+          ...c, currentPrice, estNextTradePrice,
+          nextTradeDelta: estNextTradePrice - currentPrice,
+          nextTradePctGain: Math.round(((estNextTradePrice - currentPrice) / currentPrice) * 100),
+          est6m, est12m,
+          stabilityScore: isPremium ? 98 : 90,
+          liquidityRating: isPremium ? 'Vault Reserve' : 'High Liquidity'
+        };
+      });
+
+      document.getElementById('stat-total-valuation').innerText = formatIDR(currentValuation);
+      document.getElementById('stat-future-valuation').innerText = formatIDR(futureValuation);
+      document.getElementById('stat-stability-index').innerText = cards.length ? `${Math.round(stabilitySum / cards.length)}%` : '0%';
+      document.getElementById('stat-total-cards').innerText = `Across ${cards.length} database cards`;
+      document.getElementById('premium-count-badge').innerText = premiumCount;
+      document.getElementById('standard-count-badge').innerText = standardCount;
+
+      renderAnalyticsTable(predictiveCards);
+      renderTrendAndForecastChart(currentValuation, futureValuation);
+      renderTierDistributionChart(premiumCount, standardCount);
     }
 
-    function saveProfileSettings(e) {
-      e.preventDefault();
-      if (!currentUser) return;
-
-      currentUser.name = document.getElementById('edit-profile-name').value;
-      currentUser.username = document.getElementById('edit-profile-username').value.toLowerCase().replace(/[^a-z0-9_]/g, '');
-      currentUser.bio = document.getElementById('edit-profile-bio').value;
-      currentUser.instagram = document.getElementById('edit-profile-instagram').value;
-      currentUser.tiktok = document.getElementById('edit-profile-tiktok').value;
-      currentUser.x = document.getElementById('edit-profile-x').value;
-      currentUser.website = document.getElementById('edit-profile-website').value;
-
-      localStorage.setItem(`eugene_profile_${currentUser.email}`, JSON.stringify(currentUser));
-
-      renderAuthHeader();
-      renderUserProfileUI();
-      closeProfileModal();
-      showToast('Profile saved!');
-    }
-
-    function renderUserProfileUI() {
-      const avatarImg = document.getElementById('profile-avatar-img');
-      const displayName = document.getElementById('profile-display-name');
-      const usernameTag = document.getElementById('profile-username-tag');
-      const bioText = document.getElementById('profile-bio-text');
-      const socialsContainer = document.getElementById('profile-socials-container');
-
-      if (!currentUser) {
-        if (avatarImg) avatarImg.src = 'https://api.dicebear.com/7.x/identicon/svg?seed=guest';
-        if (displayName) displayName.innerText = 'Guest Collector';
-        if (usernameTag) usernameTag.innerText = '@guest';
-        if (bioText) bioText.innerText = 'Log in to edit your custom profile details and social handles.';
-        if (socialsContainer) socialsContainer.innerHTML = '';
+    function renderAnalyticsTable(cards) {
+      const tbody = document.getElementById('predictive-table-body');
+      if (!tbody) return;
+      if (!cards.length) {
+        tbody.innerHTML = `<tr><td colspan="9" class="p-6 text-center text-slate-500">No cards in inventory.</td></tr>`;
         return;
       }
 
-      if (avatarImg) avatarImg.src = currentUser.avatarUrl;
-      if (displayName) displayName.innerText = currentUser.name;
-      if (usernameTag) usernameTag.innerText = `@${currentUser.username}`;
-      if (bioText) bioText.innerText = currentUser.bio || 'No bio specified.';
-
-      let socialHtml = '';
-      if (currentUser.instagram) {
-        socialHtml += `<a href="https://instagram.com/${currentUser.instagram}" target="_blank" class="text-slate-400 hover:text-pink-400 transition-all"><i class="fa-brands fa-instagram text-sm"></i></a>`;
-      }
-      if (currentUser.tiktok) {
-        socialHtml += `<a href="https://tiktok.com/@${currentUser.tiktok}" target="_blank" class="text-slate-400 hover:text-cyan-400 transition-all"><i class="fa-brands fa-tiktok text-sm"></i></a>`;
-      }
-      if (currentUser.x) {
-        socialHtml += `<a href="https://x.com/${currentUser.x}" target="_blank" class="text-slate-400 hover:text-white transition-all"><i class="fa-brands fa-x-twitter text-sm"></i></a>`;
-      }
-      if (currentUser.website) {
-        socialHtml += `<a href="${currentUser.website}" target="_blank" class="text-slate-400 hover:text-emerald-400 transition-all"><i class="fa-solid fa-globe text-sm"></i></a>`;
-      }
-
-      if (socialsContainer) socialsContainer.innerHTML = socialHtml;
+      tbody.innerHTML = cards.map(c => `
+        <tr class="hover:bg-slate-900/60 border-b border-slate-800">
+          <td class="p-3.5 font-mono font-bold text-amber-400">${c.serial}</td>
+          <td class="p-3.5 font-bold text-white">${c.name}</td>
+          <td class="p-3.5 font-mono text-amber-400">${c.type}</td>
+          <td class="p-3.5 font-mono text-slate-300">${formatIDR(c.currentPrice)}</td>
+          <td class="p-3.5 font-mono text-emerald-400 font-bold">${formatIDR(c.estNextTradePrice)}</td>
+          <td class="p-3.5 font-mono text-emerald-400">+${c.nextTradePctGain}%</td>
+          <td class="p-3.5 font-mono text-indigo-300">${formatIDR(c.est6m)}</td>
+          <td class="p-3.5 font-mono text-indigo-400 font-bold">${formatIDR(c.est12m)}</td>
+          <td class="p-3.5 text-right"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-teal-500/20 text-teal-300">${c.stabilityScore}% Stable</span></td>
+        </tr>
+      `).join('');
     }
 
-    // COLLECTION TAB
+    function renderTrendAndForecastChart(currentVal, futureVal) {
+      const canvas = document.getElementById('trendForecastChart');
+      if (!canvas) return;
+      if (trendChartInstance) trendChartInstance.destroy();
+
+      trendChartInstance = new Chart(canvas.getContext('2d'), {
+        type: 'line',
+        data: {
+          labels: ['Current', '+3 Months', '+6 Months (Est.)', '+9 Months', '+12 Months (Est.)'],
+          datasets: [{
+            label: 'Valuation Forecast (IDR)',
+            data: [currentVal, currentVal*1.1, currentVal*1.25, currentVal*1.4, futureVal],
+            borderColor: '#818cf8', backgroundColor: 'rgba(129, 140, 248, 0.15)', fill: true, tension: 0.35
+          }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+      });
+    }
+
+    function renderTierDistributionChart(premium, standard) {
+      const canvas = document.getElementById('tierDistributionChart');
+      if (!canvas) return;
+      if (tierChartInstance) tierChartInstance.destroy();
+
+      tierChartInstance = new Chart(canvas.getContext('2d'), {
+        type: 'doughnut',
+        data: {
+          labels: ['Premium', 'Standard'],
+          datasets: [{ data: [premium || 1, standard || 1], backgroundColor: ['#fbbf24', '#3b82f6'], borderWidth: 0 }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+      });
+    }
+
+    function setGrowthScenario(key) {
+      currentScenario = key;
+      ['conservative', 'moderate', 'bullish'].forEach(k => {
+        const btn = document.getElementById(`btn-scenario-${k}`);
+        if (btn) btn.className = k === key ? 'px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-500 text-slate-950' : 'px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800 text-slate-400';
+      });
+      renderAnalyticsHub();
+    }
+
+    function toggleAnalyticsLanguage() {
+      currentAnalyticsLang = currentAnalyticsLang === 'EN' ? 'ID' : 'EN';
+      document.getElementById('analytics-lang-label').innerText = currentAnalyticsLang;
+      renderAnalyticsHub();
+    }
+
+    // ==========================================
+    // REVENUE & FINANCE HUB LOGIC[cite: 7]
+    // ==========================================
+    function renderRevenueHub() {
+      let grossSales = 0;
+      let completedCount = 0;
+      const cardRevenues = {};
+
+      pendingOrders.forEach(ord => {
+        if (ord.grossAmount) {
+          grossSales += ord.grossAmount;
+          completedCount++;
+          if (ord.card) cardRevenues[ord.card.id] = (cardRevenues[ord.card.id] || 0) + ord.grossAmount;
+        }
+      });
+
+      const platformTax = grossSales * 0.02; // 2% tax
+      const aov = completedCount > 0 ? grossSales / completedCount : 0;
+
+      document.getElementById('kpi-gross-sales').innerText = formatIDR(grossSales);
+      document.getElementById('kpi-platform-tax').innerText = formatIDR(platformTax);
+      document.getElementById('kpi-completed-sales').innerText = completedCount;
+      document.getElementById('kpi-avg-order-value').innerText = formatIDR(aov);
+
+      renderRevenueCharts(grossSales, platformTax);
+      renderCardProfitabilityTable(cardRevenues);
+    }
+
+    function renderRevenueCharts(gross, tax) {
+      const trendCanvas = document.getElementById('revenueTrendChart');
+      const mixCanvas = document.getElementById('revenueMixChart');
+      if (!trendCanvas || !mixCanvas) return;
+
+      if (revenueTrendChartInstance) revenueTrendChartInstance.destroy();
+      revenueTrendChartInstance = new Chart(trendCanvas.getContext('2d'), {
+        type: 'line',
+        data: {
+          labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+          datasets: [{ label: 'Sales', data: [0, gross*0.2, gross*0.4, gross*0.5, gross*0.7, gross*0.85, gross], borderColor: '#34d399', backgroundColor: 'rgba(52,211,153,0.1)', fill: true, tension: 0.3 }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+      });
+
+      if (revenueMixChartInstance) revenueMixChartInstance.destroy();
+      revenueMixChartInstance = new Chart(mixCanvas.getContext('2d'), {
+        type: 'doughnut',
+        data: { labels: ['Gross Sales', 'Platform Fee (2%)'], datasets: [{ data: [Math.max(gross, 1), Math.max(tax, 1)], backgroundColor: ['#34d399', '#fbbf24'], borderWidth: 0 }] },
+        options: { responsive: true, maintainAspectRatio: false, cutout: '70%' }
+      });
+
+      document.getElementById('revenue-mix-legend').innerHTML = `
+        <div class="bg-emerald-500/10 p-2 rounded-xl text-center"><span class="text-[9px] text-slate-400">Gross</span><p class="text-xs font-bold text-emerald-300">${formatIDR(gross)}</p></div>
+        <div class="bg-amber-500/10 p-2 rounded-xl text-center"><span class="text-[9px] text-slate-400">2% Fee</span><p class="text-xs font-bold text-amber-300">${formatIDR(tax)}</p></div>
+      `;
+    }
+
+    function renderCardProfitabilityTable(revenues) {
+      const tbody = document.getElementById('card-profitability-tbody');
+      if (!tbody) return;
+
+      if (!inventory.length) {
+        tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-500">No cards found.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = inventory.map(c => `
+        <tr class="hover:bg-slate-900/60 border-b border-slate-800">
+          <td class="p-3.5 font-mono font-bold text-amber-400">${c.serial}</td>
+          <td class="p-3.5 font-bold text-white">${c.name}</td>
+          <td class="p-3.5 font-mono text-slate-300">${formatIDR(c.price)}</td>
+          <td class="p-3.5 font-mono text-emerald-400 font-bold">${formatIDR(revenues[c.id] || 0)}</td>
+          <td class="p-3.5"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${c.status === 'SOLD' ? 'bg-red-500/20 text-red-400' : 'bg-emerald-500/20 text-emerald-400'}">${c.status}</span></td>
+        </tr>
+      `).join('');
+    }
+
+    function toggleRevenueLanguage() {
+      currentRevLang = currentRevLang === 'EN' ? 'ID' : 'EN';
+      document.getElementById('rev-lang-label').innerText = currentRevLang;
+      renderRevenueHub();
+    }
+
+    function renderAdminCommandOverview() {
+      document.getElementById('admin-stat-cards').textContent = inventory.length.toLocaleString();
+      document.getElementById('admin-stat-inventory').textContent = formatIDR(inventory.reduce((a, c) => a + Number(c.price || 0), 0));
+      document.getElementById('admin-stat-collectors').textContent = new Set(inventory.map(c => c.owner).filter(Boolean)).size.toLocaleString();
+      document.getElementById('admin-stat-trades').textContent = pendingOrders.length.toLocaleString();
+    }
+
+    // Standard Grid / Marketplace Helpers
     function renderCardGrid() {
       const grid = document.getElementById('card-grid');
       if (!grid) return;
-      
       const searchVal = (document.getElementById('search-input')?.value || '').toLowerCase();
+      
       const filtered = inventory.filter(card => {
         const matchesFilter = currentFilter === 'ALL' ? true : card.type === currentFilter;
         const matchesSearch = card.serial.toLowerCase().includes(searchVal) || card.name.toLowerCase().includes(searchVal);
         return matchesFilter && matchesSearch;
       });
 
-      grid.innerHTML = filtered.map(card => {
-        const isOwned = (card.owner && card.owner !== 'Unassigned') || card.status === 'OWNED' || card.status === 'SOLD';
-        const inCart = shoppingCart.has(card.id);
-
-        let ownerBadge = '';
-        if (isOwned) {
-          ownerBadge = `<span class="text-[9px] font-bold uppercase px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-400 border border-rose-500/30 truncate max-w-[110px]">OWNED: ${card.owner || 'Collector'}</span>`;
-        } else {
-          ownerBadge = `<span class="text-[9px] font-bold uppercase px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">AVAILABLE</span>`;
-        }
-
-        return `
-          <div onclick="openCardDetailsModal('${card.id}')" class="${card.type === 'PREMIUM' ? 'card-holo-premium' : 'card-holo-standard'} rounded-xl p-3 flex flex-col justify-between relative cursor-pointer group">
-            
-            <div class="flex items-center justify-between mb-2 gap-1">
-              ${ownerBadge}
-              <button onclick="event.stopPropagation(); toggleWishlist('${card.id}')" class="text-xs ${wishlist.has(card.id) ? 'text-rose-500' : 'text-slate-500 hover:text-rose-400'}">
-                <i class="fa-solid fa-heart"></i>
-              </button>
-            </div>
-
-            <div class="w-full aspect-[4/5] bg-slate-900 rounded-lg border border-slate-800 p-1 flex flex-col justify-between mb-2 text-center overflow-hidden relative">
-              <img src="${card.imgUrl}" class="w-full h-full object-contain rounded">
-            </div>
-
-            <div>
-              <div class="flex items-center justify-between mb-0.5">
-                <span class="text-center font-bold text-blue-400 font-mono text-xs">${card.serial}</span>
-                <span class="text-xs font-mono font-bold text-emerald-400">IDR ${card.price.toLocaleString()}</span>
-              </div>
-              <p class="text-[11px] font-bold text-white truncate text-left mb-2.5">${card.name}</p>
-
-              <div class="grid grid-cols-3 gap-1 pt-1 border-t border-slate-800" onclick="event.stopPropagation()">
-                ${isOwned ? `
-                  <button disabled class="py-1.5 bg-slate-800/50 text-slate-600 cursor-not-allowed font-bold text-[10px] rounded-lg flex items-center justify-center gap-1">
-                    <i class="fa-solid fa-lock"></i> Owned
-                  </button>
-                  <button disabled class="py-1.5 bg-slate-800/50 text-slate-600 cursor-not-allowed font-bold text-[10px] rounded-lg flex items-center justify-center gap-1">
-                    <i class="fa-solid fa-cart-shopping"></i> Cart
-                  </button>
-                ` : `
-                  <button onclick="quickBuyCard('${card.id}')" class="py-1.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-[10px] rounded-lg transition-all flex items-center justify-center gap-1">
-                    <i class="fa-solid fa-qrcode"></i> Buy
-                  </button>
-                  <button onclick="toggleCart('${card.id}')" class="py-1.5 ${inCart ? 'bg-amber-500 text-slate-950 font-bold' : 'bg-slate-800 hover:bg-slate-700 text-amber-400'} text-[10px] rounded-lg border border-slate-700 transition-all flex items-center justify-center gap-1">
-                    <i class="fa-solid fa-cart-shopping"></i> ${inCart ? 'Added' : 'Cart'}
-                  </button>
-                `}
-
-                <button onclick="openTradeProposalModal('${card.id}')" class="py-1.5 bg-slate-800 hover:bg-slate-700 text-purple-400 font-bold text-[10px] rounded-lg border border-slate-700 transition-all flex items-center justify-center gap-1">
-                  <i class="fa-solid fa-handshake"></i> Offer
-                </button>
-              </div>
-            </div>
-
-          </div>
-        `;
-      }).join('');
-    }
-
-    // SEARCHABLE OWNER SELECTION DROPDOWN
-    function filterOwnerOptions(searchQuery) {
-      const dropdown = document.getElementById('owner-dropdown-list');
-      const query = searchQuery.toLowerCase().trim();
-
-      const collectors = Array.from(new Set([
-        'Unassigned (Null)',
-        'Eugene',
-        'kenneth_brilliant',
-        'andi_rende',
-        currentUser?.name || '',
-        currentUser?.email || ''
-      ])).filter(Boolean);
-
-      const filtered = collectors.filter(c => c.toLowerCase().includes(query));
-
-      if (filtered.length === 0) {
-        dropdown.innerHTML = `<div onclick="selectOwnerOption('${searchQuery}')" class="p-2 text-xs text-blue-400 hover:bg-slate-700 cursor-pointer">Use custom owner: "${searchQuery}"</div>`;
-      } else {
-        dropdown.innerHTML = filtered.map(c => `
-          <div onclick="selectOwnerOption('${c}')" class="p-2 text-xs text-white hover:bg-slate-700 cursor-pointer flex items-center justify-between">
-            <span>${c}</span>
-            ${c === 'Unassigned (Null)' ? '<span class="text-[9px] text-slate-500">Default</span>' : ''}
-          </div>
-        `).join('');
-      }
-
-      dropdown.classList.remove('hidden');
-    }
-
-    function selectOwnerOption(ownerVal) {
-      if (ownerVal === 'Unassigned (Null)') {
-        selectedOwner = null;
-        document.getElementById('current-owner-label').innerText = 'Unassigned';
-        document.getElementById('edit-card-owner-search').value = '';
-      } else {
-        selectedOwner = ownerVal;
-        document.getElementById('current-owner-label').innerText = ownerVal;
-        document.getElementById('edit-card-owner-search').value = ownerVal;
-      }
-      document.getElementById('owner-dropdown-list').classList.add('hidden');
-    }
-
-    // ADMIN INVENTORY EDITOR
-    function openCardEditorModal(cardId = null) {
-      if (!currentUser?.isAdmin) return showToast('Admin permission required.');
-
-      const modalTitle = document.getElementById('editor-modal-title');
-      
-      if (cardId) {
-        const card = inventory.find(c => c.id === cardId);
-        if (!card) return;
-
-        modalTitle.innerText = "Edit Card Details";
-        document.getElementById('edit-card-id').value = card.id;
-        document.getElementById('edit-card-serial').value = card.serial;
-        document.getElementById('edit-card-sn').value = card.sn || card.serial.replace('*', '');
-        document.getElementById('edit-card-name').value = card.name;
-        document.getElementById('edit-card-edition').value = card.edition || 'Beta Edition: #0';
-        document.getElementById('edit-card-printing').value = card.printing || '1x';
-        document.getElementById('edit-card-type').value = card.type;
-        document.getElementById('edit-card-price').value = card.price;
-        document.getElementById('edit-card-basefloor').value = card.baseFloorPrice || card.price;
-        document.getElementById('edit-card-img').value = card.imgUrl;
-        document.getElementById('edit-card-status').value = card.status;
-
-        selectOwnerOption(card.owner || 'Unassigned (Null)');
-      } else {
-        modalTitle.innerText = "Mint New Card";
-        document.getElementById('edit-card-id').value = '';
-        document.getElementById('edit-card-serial').value = `*${String(inventory.length + 1).padStart(2, '0')}`;
-        document.getElementById('edit-card-sn').value = String(inventory.length + 1).padStart(2, '0');
-        document.getElementById('edit-card-name').value = `Eugene Premium #${String(inventory.length + 1).padStart(2, '0')}`;
-        document.getElementById('edit-card-edition').value = 'Beta Edition: #0';
-        document.getElementById('edit-card-printing').value = '1x';
-        document.getElementById('edit-card-type').value = 'PREMIUM';
-        document.getElementById('edit-card-price').value = 500000;
-        document.getElementById('edit-card-basefloor').value = 500000;
-        document.getElementById('edit-card-img').value = `https://placehold.co/1080x1350/1e293b/3b82f6?text=*${String(inventory.length + 1).padStart(2, '0')}`;
-        document.getElementById('edit-card-status').value = 'AVAILABLE';
-
-        selectOwnerOption('Unassigned (Null)');
-      }
-
-      document.getElementById('card-editor-modal').classList.remove('hidden');
-    }
-
-    function closeCardEditorModal() {
-      document.getElementById('card-editor-modal').classList.add('hidden');
-    }
-
-    async function saveCardEdit(event) {
-      event.preventDefault();
-
-      const cardId = document.getElementById('edit-card-id').value;
-      const serial = document.getElementById('edit-card-serial').value;
-      const sn = document.getElementById('edit-card-sn').value;
-      const name = document.getElementById('edit-card-name').value;
-      const edition = document.getElementById('edit-card-edition').value;
-      const printing = document.getElementById('edit-card-printing').value;
-      const type = document.getElementById('edit-card-type').value;
-      const price = parseInt(document.getElementById('edit-card-price').value, 10);
-      const baseFloorPrice = parseInt(document.getElementById('edit-card-basefloor').value, 10);
-      const imgUrl = document.getElementById('edit-card-img').value;
-      const status = document.getElementById('edit-card-status').value;
-
-      const cardPayload = {
-        serial, sn, name, edition, printing, type, price, baseFloorPrice, imgUrl, status, owner: selectedOwner
-      };
-
-      if (cardId) {
-        cardPayload.id = cardId;
-        const idx = inventory.findIndex(c => c.id === cardId);
-        if (idx !== -1) {
-          inventory[idx] = { ...inventory[idx], ...cardPayload };
-        }
-        
-        if (window.supabaseClient) {
-          await supabaseClient
-            .from('inventory')
-            .update(cardPayload)
-            .eq('id', cardId);
-        }
-        addHistoryRecord('ADMIN_UPDATE', serial, `Admin updated specs for ${serial}`);
-        showToast(`Updated ${serial} details live for everyone!`);
-      } else {
-        const newId = `card-${Date.now()}`;
-        cardPayload.id = newId;
-        inventory.unshift(cardPayload);
-
-        if (window.supabaseClient) {
-          await supabaseClient
-            .from('inventory')
-            .insert([cardPayload]);
-        }
-        addHistoryRecord('MINT_CARD', serial, `Newly minted card ${serial} added to network.`);
-        showToast(`Minted new card ${serial} live!`);
-      }
-
-      saveInventoryLocalCache();
-      renderCardGrid();
-      renderInventoryTable();
-      updateRemainingCardCount();
-      closeCardEditorModal();
-    }
-
-    async function deleteCard(cardId) {
-      if (!currentUser?.isAdmin) return showToast('Admin permission required.');
-      const card = inventory.find(c => c.id === cardId);
-      inventory = inventory.filter(c => c.id !== cardId);
-      saveInventoryLocalCache();
-
-      if (window.supabaseClient) {
-        await supabaseClient
-          .from('inventory')
-          .delete()
-          .eq('id', cardId);
-      }
-
-      if (card) addHistoryRecord('DELETE_CARD', card.serial, `Admin removed card ${card.serial} from inventory.`);
-
-      renderCardGrid();
-      renderInventoryTable();
-      updateRemainingCardCount();
-      showToast('Card deleted live from database.');
-    }
-
-    async function exportInventoryJSON() {
-      if (!currentUser?.isAdmin) return showToast('Admin permission required.');
-
-      let exportCards = [...inventory];
-
-      if (window.supabaseClient) {
-        const { data, error } = await supabaseClient.from('inventory').select('*').order('id', { ascending: true });
-        if (!error && data) {
-          exportCards = data;
-        }
-      }
-
-      const backupData = {
-        exportedAt: new Date().toISOString(),
-        exportedBy: currentUser.email,
-        inventoryCount: exportCards.length,
-        cards: exportCards
-      };
-
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
-      const downloadAnchor = document.createElement('a');
-      downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", `eugene_inventory_backup_${Date.now()}.json`);
-      document.body.appendChild(downloadAnchor);
-      downloadAnchor.click();
-      downloadAnchor.remove();
-
-      showToast(`Exported ${exportCards.length} cards from Supabase!`);
-    }
-
-    async function importInventoryJSON(event) {
-      if (!currentUser?.isAdmin) return showToast('Admin permission required.');
-
-      const file = event.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = async function(e) {
-        try {
-          const parsed = JSON.parse(e.target.result);
-          const importedCards = Array.isArray(parsed.cards) ? parsed.cards : (Array.isArray(parsed) ? parsed : []);
-
-          if (importedCards.length === 0) {
-            return showToast('Import failed: Invalid JSON format or empty card list.');
-          }
-
-          showToast(`Uploading ${importedCards.length} cards to Supabase...`);
-
-          if (window.supabaseClient) {
-            const { error } = await supabaseClient
-              .from('inventory')
-              .upsert(importedCards, { onConflict: 'id' });
-
-            if (error) throw error;
-
-            await fetchDatabaseInventory();
-            addHistoryRecord('IMPORT_JSON', 'SYSTEM', `Admin imported ${importedCards.length} cards directly into Supabase.`);
-            showToast(`Successfully imported ${importedCards.length} cards to Supabase live!`);
-          } else {
-            inventory = importedCards;
-            saveInventoryLocalCache();
-            renderCardGrid();
-            renderInventoryTable();
-            updateRemainingCardCount();
-            showToast(`Imported ${importedCards.length} cards to local cache!`);
-          }
-        } catch (err) {
-          console.error('Import Error:', err);
-          showToast('Import to Supabase failed: ' + err.message);
-        }
-      };
-
-      reader.readAsText(file);
-      event.target.value = '';
-    }
-
-    function openCardDetailsModal(cardId) {
-      const card = inventory.find(c => c.id === cardId);
-      if (!card) return;
-
-      activeCardForAction = card;
-
-      document.getElementById('detail-card-img').src = card.imgUrl;
-      document.getElementById('detail-card-serial').innerText = card.serial;
-      document.getElementById('detail-card-name').innerText = card.name;
-      document.getElementById('detail-card-price').innerText = `IDR ${card.price.toLocaleString()}`;
-      document.getElementById('detail-card-edition').innerText = card.edition || 'Beta Edition: #0';
-      
-      const typeSpan = document.getElementById('detail-card-type');
-      typeSpan.innerText = card.type;
-      typeSpan.className = `text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${card.type === 'PREMIUM' ? 'bg-indigo-500/20 text-indigo-300' : 'bg-blue-500/20 text-blue-400'}`;
-      
-      const isOwned = (card.owner && card.owner !== 'Unassigned') || card.status === 'OWNED' || card.status === 'SOLD';
-      document.getElementById('detail-card-status').innerText = `Status: ${card.status} ${card.owner ? `(Owner: ${card.owner})` : ''}`;
-      
-      const buyBtn = document.getElementById('detail-buy-btn');
-      if (isOwned) {
-        buyBtn.disabled = true;
-        buyBtn.className = "w-full py-2.5 bg-slate-800 text-slate-500 font-bold text-xs rounded-xl cursor-not-allowed flex items-center justify-center gap-2";
-        buyBtn.innerHTML = `<i class="fa-solid fa-lock"></i> Card is Owned`;
-      } else {
-        buyBtn.disabled = false;
-        buyBtn.className = "w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-xl transition-all flex items-center justify-center gap-2";
-        buyBtn.innerHTML = `<i class="fa-solid fa-qrcode"></i> Buy / Order via QRIS`;
-      }
-
-      document.getElementById('card-details-modal').classList.remove('hidden');
-    }
-
-    function closeCardDetailsModal() {
-      document.getElementById('card-details-modal').classList.add('hidden');
-    }
-
-    // QRIS CHECKOUT & PAYMENTS
-    function buyActiveDetailCard() {
-      if (!currentUser) return openAuthModal();
-      if (!activeCardForAction) return;
-
-      closeCardDetailsModal();
-
-      document.getElementById('qris-card-title').innerText = `${activeCardForAction.name} (${activeCardForAction.serial})`;
-      document.getElementById('qris-amount-due').innerText = `IDR ${activeCardForAction.price.toLocaleString()}`;
-
-      const canvasContainer = document.getElementById('qris-canvas');
-      canvasContainer.innerHTML = '';
-      
-      new QRCode(canvasContainer, {
-        text: QRIS_STRING_PAYLOAD,
-        width: 180,
-        height: 180,
-        colorDark: "#0f172a",
-        colorLight: "#ffffff",
-        correctLevel: QRCode.CorrectLevel.H
-      });
-
-      document.getElementById('qris-modal').classList.remove('hidden');
-    }
-
-    function closeQrisModal() {
-      document.getElementById('qris-modal').classList.add('hidden');
-    }
-
-    function submitQrisPaymentProof() {
-      const fileInput = document.getElementById('qris-proof-file');
-      if (!fileInput.files.length) {
-        return showToast('Please select a payment receipt image before submitting.');
-      }
-
-      pendingOrders.push({
-        id: `ord-${Date.now()}`,
-        card: activeCardForAction,
-        type: 'PURCHASE',
-        buyer: currentUser.name,
-        grossAmount: activeCardForAction.price,
-        taxAmount: activeCardForAction.price * 0.02,
-        payoutAmount: activeCardForAction.price * 0.98,
-        timestamp: new Date().toLocaleTimeString()
-      });
-
-      savePendingOrdersState();
-      addHistoryRecord('QRIS_SUBMIT', activeCardForAction.serial, `${currentUser.name} submitted QRIS payment receipt for ${activeCardForAction.serial}`);
-
-      showToast('Payment proof submitted! Waiting for Admin verification.');
-      closeQrisModal();
-      renderAdminOrdersQueue();
-    }
-
-    // NAVIGATION ROUTER
-    function switchTab(tabName) {
-      const adminOnlyTabs = ['admin', 'inventory', 'analytics'];
-      if (adminOnlyTabs.includes(tabName) && !currentUser?.isAdmin) {
-        return showToast('Admin permission required.');
-      }
-
-      const allTabs = ['catalog', 'trade', 'auction', 'trade-req', 'inbox', 'holders', 'history', 'dashboard', 'wishlist', 'analytics', 'admin', 'inventory'];
-
-      allTabs.forEach(t => {
-        const view = document.getElementById(`view-${t}`);
-        const nav = document.getElementById(`nav-${t}`);
-        if (view) view.classList.add('hidden');
-        if (nav && !adminOnlyTabs.includes(t)) {
-          nav.className = 'px-3 py-1.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white flex items-center gap-1.5 whitespace-nowrap transition-all';
-        }
-      });
-
-      const activeView = document.getElementById(`view-${tabName}`);
-      const activeNav = document.getElementById(`nav-${tabName}`);
-
-      if (activeView) activeView.classList.remove('hidden');
-      if (activeNav && !adminOnlyTabs.includes(tabName)) {
-        activeNav.className = 'px-3 py-1.5 rounded-xl text-xs font-medium text-white bg-slate-700 flex items-center gap-1.5 whitespace-nowrap transition-all';
-      }
-
-      localStorage.setItem('eugene_current_tab', tabName);
-
-      if (tabName === 'wishlist') renderWishlistGrid();
-      if (tabName === 'dashboard') renderVaultGrid();
-      if (tabName === 'inbox') renderChatThreads();
-      if (tabName === 'holders') renderHoldersLeaderboard();
-      if (tabName === 'history') renderHistoryLedger();
-      if (tabName === 'analytics') renderAnalyticsView();
-      if (tabName === 'auction') renderAuctionsGrid();
-    }
-
-    function toggleWishlist(cardId) {
-      if (wishlist.has(cardId)) {
-        wishlist.delete(cardId);
-        showToast('Removed from wishlist.');
-      } else {
-        wishlist.add(cardId);
-        showToast('Saved to wishlist!');
-      }
-      saveWishlistState();
-      document.getElementById('wishlist-count-badge').innerText = wishlist.size;
-      renderCardGrid();
-    }
-
-    function wishlistActiveDetailCard() {
-      if (activeCardForAction) toggleWishlist(activeCardForAction.id);
-    }
-
-    function renderWishlistGrid() {
-      const container = document.getElementById('wishlist-grid');
-      const items = inventory.filter(c => wishlist.has(c.id));
-
-      if (items.length === 0) {
-        container.innerHTML = `<div class="col-span-full bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center text-xs text-slate-400">No wishlisted cards saved yet. Click the heart icon on any card in the Collection tab!</div>`;
-        return;
-      }
-
-      container.innerHTML = items.map(card => `
-        <div onclick="openCardDetailsModal('${card.id}')" class="card-holo-standard rounded-xl p-3 flex flex-col justify-between relative cursor-pointer">
-          <div class="w-full aspect-[4/5] bg-slate-900 rounded-lg border border-slate-800 p-1 flex flex-col justify-between mb-2 text-center overflow-hidden">
+      grid.innerHTML = filtered.map(card => `
+        <div class="${card.type === 'PREMIUM' ? 'card-holo-premium' : 'card-holo-standard'} rounded-xl p-3 flex flex-col justify-between relative cursor-pointer" onclick="openCardDetailsModal('${card.id}')">
+          <div class="w-full aspect-[4/5] bg-slate-900 rounded-lg border border-slate-800 p-1 mb-2 flex items-center justify-center overflow-hidden">
             <img src="${card.imgUrl}" class="w-full h-full object-contain rounded">
           </div>
-          <p class="text-center font-bold text-blue-400 font-mono mb-1 text-xs">${card.serial}</p>
-          <p class="text-[11px] font-bold text-white truncate text-center">${card.name}</p>
+          <div>
+            <div class="flex justify-between mb-1"><span class="font-bold text-blue-400 font-mono text-xs">${card.serial}</span><span class="font-mono font-bold text-emerald-400 text-xs">IDR ${card.price.toLocaleString()}</span></div>
+            <p class="text-[11px] font-bold text-white truncate mb-2">${card.name}</p>
+          </div>
         </div>
       `).join('');
-    }
-
-    function renderVaultGrid() {
-      const container = document.getElementById('owned-cards-grid');
-      if (!currentUser) {
-        container.innerHTML = "Log in with Google to view your owned cards inside your private binder.";
-        return;
-      }
-
-      const owned = inventory.filter(c => 
-        c.owner === currentUser.email || 
-        c.owner === currentUser.name || 
-        c.owner === currentUser.username ||
-        c.owner === 'Eugene'
-      );
-
-      if (owned.length === 0) {
-        container.innerHTML = "You don't own any cards yet. Buy cards via QRIS or propose trades to populate your vault!";
-        return;
-      }
-
-      container.className = "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4";
-      container.innerHTML = owned.map(card => {
-        return `
-          <div class="card-holo-premium rounded-xl p-3 flex flex-col justify-between relative">
-            <div class="w-full aspect-[4/5] bg-slate-900 rounded-lg border border-slate-800 p-1 flex flex-col justify-between mb-2 text-center overflow-hidden cursor-pointer" onclick="openCardDetailsModal('${card.id}')">
-              <img src="${card.imgUrl}" class="w-full h-full object-contain rounded">
-            </div>
-            <p class="text-center font-bold text-blue-400 font-mono mb-0.5 text-xs">${card.serial}</p>
-            <p class="text-[11px] font-bold text-white truncate text-center mb-3">${card.name}</p>
-
-            <div class="grid grid-cols-3 gap-1 pt-2 border-t border-slate-800/80">
-              <button onclick="openCreateAuctionModal('${card.id}')" class="py-1.5 bg-emerald-950/60 hover:bg-emerald-900 text-emerald-300 border border-emerald-500/30 font-bold text-[10px] rounded-lg transition-all flex items-center justify-center gap-1">
-                <i class="fa-solid fa-gavel"></i> Auction
-              </button>
-              <button onclick="sellBackCardToAdmin('${card.id}')" class="py-1.5 bg-rose-950/60 hover:bg-rose-900 text-rose-300 border border-rose-500/30 font-bold text-[10px] rounded-lg transition-all flex items-center justify-center gap-1">
-                <i class="fa-solid fa-building-columns"></i> Sell Back
-              </button>
-              <button onclick="openTradeProposalModal('${card.id}')" class="py-1.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-[10px] rounded-lg transition-all flex items-center justify-center gap-1">
-                <i class="fa-solid fa-right-left"></i> Trade
-              </button>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    function tradeActiveDetailCard() {
-      if (!currentUser) return openAuthModal();
-      openTradeProposalModal(activeCardForAction.id);
-      closeCardDetailsModal();
-    }
-
-    function createListingFromVault() {
-      if (!currentUser) return openAuthModal();
-      showToast('Select a card from your Vault to list on the market.');
-      switchTab('dashboard');
-    }
-
-    function openNotifications() {
-      unreadNotifCount = 0;
-      const badge = document.getElementById('notification-badge');
-      if (badge) badge.innerText = '0';
-      showToast('Notifications checked.');
-      switchTab('inbox');
-    }
-
-    function renderHistoryLedger() {
-      const container = document.getElementById('history-content');
-      if (!container) return;
-
-      if (transactionHistory.length === 0) {
-        container.innerHTML = `<p class="text-xs text-slate-500 py-4 text-center">No transactions recorded yet.</p>`;
-        return;
-      }
-
-      container.innerHTML = transactionHistory.map(h => `
-        <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-xl flex items-center justify-between text-xs">
-          <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center font-mono font-bold text-blue-400">
-              ${h.cardSerial || '*'}
-            </div>
-            <div>
-              <p class="font-bold text-white">${h.details}</p>
-              <p class="text-[10px] text-slate-500">${h.timestamp}</p>
-            </div>
-          </div>
-          <span class="text-[9px] font-bold uppercase px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">${h.type}</span>
-        </div>
-      `).join('');
-    }
-
-    function renderAnalyticsView() {
-      let vol = 0;
-      inventory.forEach(c => { if(c.status === 'SOLD') vol += (c.price || 0); });
-      
-      const volEl = document.getElementById('analytics-vol');
-      const taxEl = document.getElementById('analytics-tax');
-      const holdersEl = document.getElementById('analytics-holders');
-
-      if (volEl) volEl.innerText = `IDR ${vol.toLocaleString()}`;
-      if (taxEl) taxEl.innerText = `IDR ${(vol * 0.02).toLocaleString()}`;
-      
-      const uniqueHolders = new Set(inventory.map(c => c.owner).filter(o => o && o !== 'Unassigned')).size;
-      if (holdersEl) holdersEl.innerText = `${uniqueHolders} Collectors`;
     }
 
     function renderInventoryTable() {
       const tbody = document.getElementById('inventory-table-body');
       if (!tbody) return;
-
       tbody.innerHTML = inventory.map(card => `
-        <tr class="hover:bg-slate-800/40 transition-all">
+        <tr class="hover:bg-slate-800/40">
           <td class="p-3 font-mono font-bold text-blue-400">${card.serial}</td>
           <td class="p-3 font-semibold text-white">${card.name}</td>
-          <td class="p-3 text-slate-400">${card.edition || 'Beta Edition: #0'}</td>
-          <td class="p-3">
-            <span class="text-[9px] font-bold uppercase px-2 py-0.5 rounded-full ${card.type === 'PREMIUM' ? 'bg-indigo-500/20 text-indigo-300' : 'bg-blue-500/20 text-blue-400'}">${card.type}</span>
-          </td>
+          <td class="p-3 text-slate-400">${card.edition || 'Beta 3.0'}</td>
+          <td class="p-3">${card.type}</td>
           <td class="p-3 font-mono text-emerald-400">IDR ${card.price.toLocaleString()}</td>
           <td class="p-3 font-mono text-slate-400">${card.owner || '-'}</td>
-          <td class="p-3">
-            <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${card.status === 'AVAILABLE' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}">${card.status}</span>
-          </td>
-          <td class="p-3 text-right space-x-1">
-            <button onclick="openCardEditorModal('${card.id}')" class="p-1.5 bg-slate-800 hover:bg-slate-700 text-amber-300 rounded-lg transition-all" title="Edit Card">
-              <i class="fa-solid fa-pen text-xs"></i>
-            </button>
-            <button onclick="deleteCard('${card.id}')" class="p-1.5 bg-slate-800 hover:bg-rose-500/20 text-rose-400 rounded-lg transition-all" title="Delete Card">
-              <i class="fa-solid fa-trash text-xs"></i>
-            </button>
+          <td class="p-3">${card.status}</td>
+          <td class="p-3 text-right">
+            <button onclick="openCardEditorModal('${card.id}')" class="p-1 bg-slate-800 text-amber-300 rounded"><i class="fa-solid fa-pen"></i></button>
           </td>
         </tr>
       `).join('');
-    }
-
-    function renderAdminOrdersQueue() {
-      const container = document.getElementById('admin-orders-queue');
-      if (!container) return;
-
-      if (!pendingOrders.length) {
-        container.innerHTML = `<p class="text-xs text-slate-500">No pending orders waiting for manual approval.</p>`;
-        return;
-      }
-
-      container.innerHTML = pendingOrders.map((ord, idx) => {
-        const isTradePayout = ord.type === 'TRADE_PAYOUT';
-        const isSellBack = ord.type === 'SELL_BACK';
-        const netAmt = ord.payoutAmount || (ord.grossAmount ? ord.grossAmount * 0.98 : 0);
-
-        return `
-          <div class="bg-slate-800 p-3 rounded-xl flex items-center justify-between">
-            <div>
-              <div class="flex items-center gap-2">
-                <span class="text-[9px] font-bold uppercase px-2 py-0.5 rounded-full ${isTradePayout ? 'bg-purple-500/20 text-purple-300' : isSellBack ? 'bg-amber-500/20 text-amber-300' : 'bg-blue-500/20 text-blue-400'}">
-                  ${isTradePayout ? 'TRADE CASH PAYOUT (2% TAX)' : isSellBack ? 'SELL BACK (2% TAX)' : 'QRIS PURCHASE'}
-                </span>
-                <p class="text-xs font-bold text-white">${ord.card.name} (${ord.card.serial})</p>
-              </div>
-              <p class="text-[10px] text-slate-400 mt-0.5">
-                Recipient: ${ord.seller || ord.buyer} • Net Due: <strong class="text-emerald-400 font-mono">IDR ${netAmt.toLocaleString()}</strong> • ${ord.timestamp}
-              </p>
-            </div>
-
-            <button onclick="openAdminProofModal(${idx})" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-lg shadow transition-all flex items-center gap-1.5">
-              <i class="fa-solid fa-upload"></i> Upload Proof & Pay
-            </button>
-          </div>
-        `;
-      }).join('');
-    }
-
-    // AUCTIONS & TRADES SYSTEM
-    function openCreateAuctionModal(cardId) {
-      if (!currentUser) return openAuthModal();
-      const card = inventory.find(c => c.id === cardId);
-      if (!card) return;
-
-      document.getElementById('auction-card-id').value = card.id;
-      document.getElementById('auction-card-summary').innerText = `Auctioning: ${card.name} (${card.serial}) - Retail: IDR ${card.price.toLocaleString()}`;
-      document.getElementById('auction-start-price').value = card.baseFloorPrice || card.price || 100000;
-
-      document.getElementById('create-auction-modal').classList.remove('hidden');
-    }
-
-    function closeCreateAuctionModal() {
-      document.getElementById('create-auction-modal').classList.add('hidden');
-    }
-
-    function submitCardAuction(e) {
-      e.preventDefault();
-      if (!currentUser) return openAuthModal();
-
-      const cardId = document.getElementById('auction-card-id').value;
-      const startPrice = parseInt(document.getElementById('auction-start-price').value, 10);
-      const durationHrs = parseInt(document.getElementById('auction-duration-hrs').value, 10);
-
-      const card = inventory.find(c => c.id === cardId);
-      if (!card) return;
-
-      const auction = {
-        id: `auc-${Date.now()}`,
-        card: card,
-        seller: currentUser.name,
-        currentBid: startPrice,
-        highestBidder: 'No bids yet',
-        endTime: new Date(Date.now() + durationHrs * 3600000).toLocaleString(),
-        bidsCount: 0
-      };
-
-      liveAuctions.unshift(auction);
-      saveAuctionsState();
-
-      addHistoryRecord('AUCTION_LAUNCH', card.serial, `${currentUser.name} launched live auction for ${card.serial} starting at IDR ${startPrice.toLocaleString()}`);
-
-      closeCreateAuctionModal();
-      switchTab('auction');
-      renderAuctionsGrid();
-      showToast('Auction launched live!');
-    }
-
-    function renderAuctionsGrid() {
-      const container = document.getElementById('auction-content');
-      if (!container) return;
-
-      if (liveAuctions.length === 0) {
-        container.className = "bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center text-xs text-slate-400 col-span-full";
-        container.innerHTML = "No active auctions live right now. Go to 'My Vault' to launch an auction for your card!";
-        return;
-      }
-
-      container.className = "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4";
-      container.innerHTML = liveAuctions.map((auc, idx) => `
-        <div class="card-holo-premium rounded-2xl p-4 flex flex-col justify-between space-y-3">
-          <div class="flex justify-between items-center text-xs">
-            <span class="text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"><i class="fa-solid fa-circle text-[7px] mr-1 animate-pulse"></i> Live Auction</span>
-            <span class="text-slate-400 text-[10px] font-mono">Ends: ${auc.endTime}</span>
-          </div>
-
-          <div class="w-full aspect-[4/5] bg-slate-950 rounded-xl p-2 flex items-center justify-center">
-            <img src="${auc.card.imgUrl}" class="w-full h-full object-contain rounded-lg">
-          </div>
-
-          <div>
-            <p class="font-mono font-bold text-blue-400 text-xs">${auc.card.serial}</p>
-            <h4 class="font-bold text-white text-sm truncate">${auc.card.name}</h4>
-            <p class="text-[10px] text-slate-400">Seller: ${auc.seller}</p>
-          </div>
-
-          <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-800 flex justify-between items-center">
-            <div>
-              <p class="text-[9px] uppercase font-bold text-slate-400">Current Highest Bid</p>
-              <p class="text-sm font-mono font-bold text-emerald-400">IDR ${auc.currentBid.toLocaleString()}</p>
-            </div>
-            <span class="text-[10px] text-slate-400 font-mono">${auc.highestBidder}</span>
-          </div>
-
-          <button onclick="placeBidOnAuction(${idx})" class="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow transition-all">
-            + Place Higher Bid (+ IDR 50,000)
-          </button>
-        </div>
-      `).join('');
-    }
-
-    function placeBidOnAuction(index) {
-      if (!currentUser) return openAuthModal();
-      const auc = liveAuctions[index];
-      auc.currentBid += 50000;
-      auc.highestBidder = currentUser.name;
-      auc.bidsCount += 1;
-
-      saveAuctionsState();
-      renderAuctionsGrid();
-      showToast(`Bid placed! New highest bid: IDR ${auc.currentBid.toLocaleString()}`);
-    }
-
-    function openTradeProposalModal(targetCardId) {
-      if (!currentUser) return openAuthModal();
-
-      const card = inventory.find(c => c.id === targetCardId);
-      if (!card) return;
-
-      document.getElementById('trade-target-card-id').value = card.id;
-      document.getElementById('trade-target-summary').innerText = `${card.name} (${card.serial}) - Value: IDR ${card.price.toLocaleString()}`;
-
-      const offerSelect = document.getElementById('trade-offered-card-id');
-      const myCards = inventory.filter(c => c.owner === currentUser.name || c.owner === currentUser.email);
-
-      offerSelect.innerHTML = `<option value="">-- No Card Offered (Pure Cash Offer) --</option>` + 
-        myCards.map(c => `<option value="${c.id}">${c.name} (${c.serial}) - Base: IDR ${c.price.toLocaleString()}</option>`).join('');
-
-      document.getElementById('trade-proposal-modal').classList.remove('hidden');
-    }
-
-    function closeTradeProposalModal() {
-      document.getElementById('trade-proposal-modal').classList.add('hidden');
-    }
-
-    function submitTradeProposal(e) {
-      e.preventDefault();
-      if (!currentUser) return openAuthModal();
-
-      const targetId = document.getElementById('trade-target-card-id').value;
-      const offeredId = document.getElementById('trade-offered-card-id').value;
-      const cashAddon = parseInt(document.getElementById('trade-cash-addon').value || '0', 10);
-      const note = document.getElementById('trade-note').value;
-      const attachmentInput = document.getElementById('trade-attachment-file');
-
-      const targetCard = inventory.find(c => c.id === targetId);
-      const offeredCard = inventory.find(c => c.id === offeredId);
-
-      if (!targetCard) return;
-
-      const proposal = {
-        id: `prop-${Date.now()}`,
-        proposer: currentUser.name,
-        targetCard: targetCard,
-        offeredCard: offeredCard || null,
-        cashAddon: cashAddon,
-        hasAttachment: attachmentInput.files.length > 0,
-        note: note,
-        status: 'PENDING',
-        timestamp: new Date().toLocaleTimeString()
-      };
-
-      tradeProposals.unshift(proposal);
-      saveTradeProposalsState();
-
-      addHistoryRecord('TRADE_OFFER', targetCard.serial, `${currentUser.name} proposed a trade for ${targetCard.serial} (+ IDR ${cashAddon.toLocaleString()})`);
-
-      closeTradeProposalModal();
-      switchTab('trade-req');
-      renderTradeProposals();
-      showToast('Trade proposal submitted!');
-    }
-
-    function renderTradeProposals() {
-      const container = document.getElementById('trade-req-content');
-      if (!container) return;
-
-      if (tradeProposals.length === 0) {
-        container.innerHTML = `<div class="bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center text-xs text-slate-400">No active trade proposals pending.</div>`;
-        return;
-      }
-
-      container.innerHTML = tradeProposals.map((p, idx) => `
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-          <div class="space-y-1">
-            <div class="flex items-center gap-2">
-              <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${p.status === 'PENDING' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : p.status === 'ACCEPTED' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'}">${p.status}</span>
-              <span class="text-xs text-slate-400">From: <strong class="text-white">${p.proposer}</strong> • ${p.timestamp}</span>
-              ${p.hasAttachment ? '<span class="text-[9px] bg-purple-950/60 text-purple-300 border border-purple-500/30 px-2 py-0.5 rounded-full"><i class="fa-solid fa-paperclip mr-1"></i> Attachment</span>' : ''}
-            </div>
-            <p class="text-xs text-slate-200">
-              Target: <strong class="text-blue-400">${p.targetCard.name} (${p.targetCard.serial})</strong> 
-              ${p.offeredCard ? ` standard swap with <strong class="text-purple-400">${p.offeredCard.name} (${p.offeredCard.serial})</strong>` : ' (Cash Only Proposal)'}
-              ${p.cashAddon > 0 ? ` + <strong class="text-emerald-400">IDR ${p.cashAddon.toLocaleString()} Cash</strong>` : ''}
-            </p>
-            ${p.note ? `<p class="text-[11px] text-slate-400 italic">"${p.note}"</p>` : ''}
-          </div>
-
-          ${p.status === 'PENDING' ? `
-            <div class="flex items-center gap-2 shrink-0">
-              <button onclick="acceptTradeProposal(${idx})" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow transition-all">Accept Trade</button>
-              <button onclick="rejectTradeProposal(${idx})" class="px-3 py-1.5 bg-slate-800 hover:bg-rose-500/20 text-rose-400 font-bold text-xs rounded-xl border border-slate-700 transition-all">Reject</button>
-            </div>
-          ` : ''}
-        </div>
-      `).join('');
-    }
-
-    async function acceptTradeProposal(index) {
-      const p = tradeProposals[index];
-      p.status = 'ACCEPTED';
-
-      const target = inventory.find(c => c.id === p.targetCard.id);
-      if (target) {
-        target.owner = p.proposer;
-        target.status = 'SOLD';
-
-        if (window.supabaseClient) {
-          await supabaseClient.from('inventory').update({ owner: p.proposer, status: 'SOLD' }).eq('id', target.id);
-        }
-      }
-
-      if (p.offeredCard) {
-        const offered = inventory.find(c => c.id === p.offeredCard.id);
-        if (offered) {
-          offered.owner = p.targetCard.owner || 'Admin';
-          if (window.supabaseClient) {
-            await supabaseClient.from('inventory').update({ owner: offered.owner }).eq('id', offered.id);
-          }
-        }
-      }
-
-      saveInventoryLocalCache();
-      saveTradeProposalsState();
-
-      addHistoryRecord('TRADE_ACCEPTED', p.targetCard.serial, `Trade accepted! ${p.targetCard.serial} transferred to ${p.proposer}.`);
-
-      renderTradeProposals();
-      renderCardGrid();
-      renderInventoryTable();
-      showToast('Trade accepted and synced live!');
-    }
-
-    function rejectTradeProposal(index) {
-      tradeProposals[index].status = 'REJECTED';
-      saveTradeProposalsState();
-      renderTradeProposals();
-      showToast('Trade proposal rejected.');
-    }
-
-    function sellBackCardToAdmin(cardId) {
-      if (!currentUser) return openAuthModal();
-
-      const card = inventory.find(c => c.id === cardId);
-      if (!card) return;
-
-      const floorPrice = card.baseFloorPrice || card.price || 100000;
-      const tax = floorPrice * 0.02;
-      const netPayout = floorPrice - tax;
-
-      pendingOrders.push({
-        id: `sellback-${Date.now()}`,
-        card: card,
-        type: 'SELL_BACK',
-        buyer: 'Admin',
-        seller: currentUser.name,
-        grossAmount: floorPrice,
-        taxAmount: tax,
-        payoutAmount: netPayout,
-        timestamp: new Date().toLocaleTimeString()
-      });
-
-      savePendingOrdersState();
-      renderAdminOrdersQueue();
-
-      addHistoryRecord('SELL_BACK_REQUEST', card.serial, `${currentUser.name} requested sell-back of ${card.serial}`);
-      showToast(`Sell-back submitted! Net Payout: IDR ${netPayout.toLocaleString()}`);
-    }
-
-    function openAdminProofModal(index) {
-      const ord = pendingOrders[index];
-      if (!ord) return;
-
-      document.getElementById('admin-pending-index').value = index;
-      document.getElementById('admin-approval-summary').innerHTML = `
-        <p><strong>Item:</strong> ${ord.card.name} (${ord.card.serial})</p>
-        <p><strong>Recipient:</strong> ${ord.seller || ord.buyer}</p>
-        <p><strong>Net Transfer Due:</strong> <span class="text-emerald-400 font-mono font-bold">IDR ${(ord.payoutAmount||0).toLocaleString()}</span></p>
-      `;
-
-      document.getElementById('admin-proof-modal').classList.remove('hidden');
-    }
-
-    function closeAdminProofModal() {
-      document.getElementById('admin-proof-modal').classList.add('hidden');
-    }
-
-    async function confirmAdminPayoutWithProof(e) {
-      e.preventDefault();
-
-      const index = parseInt(document.getElementById('admin-pending-index').value, 10);
-      const fileInput = document.getElementById('admin-receipt-file');
-
-      if (!fileInput.files.length) {
-        return showToast('Please select a transfer receipt proof image.');
-      }
-
-      const order = pendingOrders[index];
-      const card = inventory.find(c => c.id === order.card.id);
-
-      if (order.type === 'SELL_BACK' && card) {
-        card.status = 'AVAILABLE'; card.owner = 'Admin';
-        if (window.supabaseClient) await supabaseClient.from('inventory').update({ status: 'AVAILABLE', owner: 'Admin' }).eq('id', card.id);
-      } else if (order.type === 'PURCHASE' && card) {
-        card.status = 'SOLD'; card.owner = order.buyer;
-        if (window.supabaseClient) await supabaseClient.from('inventory').update({ status: 'SOLD', owner: order.buyer }).eq('id', card.id);
-      }
-
-      pendingOrders.splice(index, 1);
-      savePendingOrdersState();
-      saveInventoryLocalCache();
-
-      closeAdminProofModal();
-      renderAdminOrdersQueue();
-      renderCardGrid();
-      renderInventoryTable();
-      updateRemainingCardCount();
-
-      showToast('Payout approved & synced live to Supabase!');
-    }
-
-    // CART MANAGEMENT (Persistent)
-    function toggleCart(cardId) {
-      if (shoppingCart.has(cardId)) {
-        shoppingCart.delete(cardId);
-        showToast('Removed from cart.');
-      } else {
-        shoppingCart.add(cardId);
-        showToast('Added to cart!');
-      }
-      saveCartState();
-      document.getElementById('cart-badge').innerText = shoppingCart.size;
-      renderCardGrid();
-    }
-
-    function showCartModal() {
-      const modal = document.getElementById('cart-modal');
-      const list = document.getElementById('cart-items-list');
-      const priceTag = document.getElementById('cart-total-price');
-
-      const items = inventory.filter(c => shoppingCart.has(c.id));
-
-      if (items.length === 0) {
-        list.innerHTML = `<p class="text-xs text-slate-500 py-4 text-center">Your shopping cart is empty.</p>`;
-        priceTag.innerText = `IDR 0`;
-      } else {
-        let total = 0;
-        list.innerHTML = items.map(card => {
-          total += card.price;
-          return `
-            <div class="flex items-center justify-between py-2">
-              <div class="flex items-center gap-2">
-                <img src="${card.imgUrl}" class="w-8 h-8 rounded border border-slate-800 object-contain">
-                <div>
-                  <p class="text-xs font-bold text-white">${card.name}</p>
-                  <p class="text-[10px] font-mono text-blue-400">${card.serial}</p>
-                </div>
-              </div>
-              <div class="flex items-center gap-3">
-                <span class="text-xs font-mono font-bold text-emerald-400">IDR ${card.price.toLocaleString()}</span>
-                <button onclick="toggleCart('${card.id}'); showCartModal();" class="text-slate-500 hover:text-rose-400 text-xs"><i class="fa-solid fa-trash"></i></button>
-              </div>
-            </div>
-          `;
-        }).join('');
-        priceTag.innerText = `IDR ${total.toLocaleString()}`;
-      }
-
-      modal.classList.remove('hidden');
-    }
-
-    function closeCartModal() {
-      document.getElementById('cart-modal').classList.add('hidden');
-    }
-
-    function checkoutCartQRIS() {
-      if (!currentUser) return openAuthModal();
-      if (shoppingCart.size === 0) return showToast('Cart is empty!');
-
-      const items = inventory.filter(c => shoppingCart.has(c.id));
-      const total = items.reduce((acc, c) => acc + c.price, 0);
-
-      closeCartModal();
-
-      document.getElementById('qris-card-title').innerText = `${items.length} Eugene Cards Cart Bundle`;
-      document.getElementById('qris-amount-due').innerText = `IDR ${total.toLocaleString()}`;
-
-      const canvasContainer = document.getElementById('qris-canvas');
-      canvasContainer.innerHTML = '';
-      
-      new QRCode(canvasContainer, {
-        text: QRIS_STRING_PAYLOAD,
-        width: 180,
-        height: 180,
-        colorDark: "#0f172a",
-        colorLight: "#ffffff",
-        correctLevel: QRCode.CorrectLevel.H
-      });
-
-      document.getElementById('qris-modal').classList.remove('hidden');
-    }
-
-    function quickBuyCard(cardId) {
-      const card = inventory.find(c => c.id === cardId);
-      if (!card) return;
-      if (card.owner || card.status === 'OWNED' || card.status === 'SOLD') return showToast('Owned cards cannot be purchased!');
-      activeCardForAction = card;
-      buyActiveDetailCard();
-    }
-
-    // HOLDERS LEADERBOARD
-    function renderHoldersLeaderboard() {
-      const container = document.getElementById('holders-content');
-      if (!container) return;
-
-      const holderMap = {};
-      inventory.forEach(card => {
-        if (card.owner && card.owner !== 'Unassigned') {
-          if (!holderMap[card.owner]) holderMap[card.owner] = [];
-          holderMap[card.owner].push(card);
-        }
-      });
-
-      const holdersList = Object.keys(holderMap).map(owner => ({
-        ownerName: owner,
-        cards: holderMap[owner],
-        count: holderMap[owner].length
-      })).sort((a, b) => b.count - a.count);
-
-      if (holdersList.length === 0) {
-        container.innerHTML = `<div class="col-span-full bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center text-xs text-slate-400">No active card holders recorded in inventory.</div>`;
-        return;
-      }
-
-      container.innerHTML = holdersList.map((h, rank) => `
-        <div onclick="openHolderVaultModal('${h.ownerName}')" class="bg-slate-900 border border-slate-800 hover:border-teal-500/50 p-4 rounded-2xl cursor-pointer transition-all flex items-center justify-between group">
-          <div class="flex items-center gap-3">
-            <span class="font-mono font-bold text-xs ${rank === 0 ? 'text-amber-400' : 'text-slate-500'}">#${rank + 1}</span>
-            <div class="w-10 h-10 rounded-xl overflow-hidden bg-slate-800 border border-slate-700">
-              <img src="https://api.dicebear.com/7.x/identicon/svg?seed=${encodeURIComponent(h.ownerName)}" class="w-full h-full object-cover">
-            </div>
-            <div>
-              <p class="text-xs font-bold text-white group-hover:text-teal-400 transition-colors">${h.ownerName}</p>
-              <p class="text-[10px] text-slate-400">${h.count} ${h.count === 1 ? 'Card' : 'Cards'} Owned</p>
-            </div>
-          </div>
-          <span class="text-xs text-teal-400 font-bold bg-teal-950/40 px-2.5 py-1 rounded-lg border border-teal-500/20">View Vault <i class="fa-solid fa-chevron-right ml-1 text-[10px]"></i></span>
-        </div>
-      `).join('');
-    }
-
-    function openHolderVaultModal(ownerName) {
-      const ownedCards = inventory.filter(c => c.owner === ownerName);
-      
-      document.getElementById('holder-modal-name').innerText = `${ownerName}'s Vault`;
-      document.getElementById('holder-modal-sub').innerText = `${ownedCards.length} Cards Collection`;
-      document.getElementById('holder-modal-avatar').src = `https://api.dicebear.com/7.x/identicon/svg?seed=${encodeURIComponent(ownerName)}`;
-
-      const grid = document.getElementById('holder-modal-cards-grid');
-
-      if (ownedCards.length === 0) {
-        grid.innerHTML = `<p class="col-span-full text-xs text-slate-400 text-center py-6">This collector currently owns no cards.</p>`;
-      } else {
-        grid.innerHTML = ownedCards.map(card => `
-          <div onclick="closeHolderVaultModal(); openCardDetailsModal('${card.id}')" class="card-holo-standard rounded-xl p-2 cursor-pointer hover:border-blue-500 transition-all">
-            <div class="w-full aspect-[4/5] bg-slate-950 rounded-lg p-1 mb-1.5 flex items-center justify-center">
-              <img src="${card.imgUrl}" class="w-full h-full object-contain rounded">
-            </div>
-            <p class="text-center font-bold text-blue-400 font-mono text-[11px]">${card.serial}</p>
-            <p class="text-[10px] font-bold text-white truncate text-center">${card.name}</p>
-          </div>
-        `).join('');
-      }
-
-      document.getElementById('holder-vault-modal').classList.remove('hidden');
-    }
-
-    function closeHolderVaultModal() {
-      document.getElementById('holder-vault-modal').classList.add('hidden');
-    }
-
-    // SEARCH OTHER USERS IN CHAT INBOX
-    function searchUsersForChat(query) {
-      const resultsContainer = document.getElementById('chat-search-results');
-      const q = query.trim().toLowerCase();
-
-      if (!q) {
-        resultsContainer.classList.add('hidden');
-        resultsContainer.innerHTML = '';
-        return;
-      }
-
-      // Gather all known collectors from inventory owners and active threads
-      const knownUsers = Array.from(new Set([
-        'Eugene',
-        'Admin',
-        'kenneth_brilliant',
-        'andi_rende',
-        ...inventory.map(c => c.owner).filter(o => o && o !== 'Unassigned'),
-        ...chatThreads.map(t => t.user)
-      ]));
-
-      const matches = knownUsers.filter(u => u.toLowerCase().includes(q) && u !== currentUser?.name);
-
-      if (matches.length === 0) {
-        resultsContainer.innerHTML = `<p class="text-[10px] text-slate-500 p-2">No collectors found.</p>`;
-      } else {
-        resultsContainer.innerHTML = matches.map(u => `
-          <div onclick="startChatWithUser('${u}')" class="p-2 hover:bg-slate-800 rounded-lg cursor-pointer flex items-center gap-2">
-            <img src="https://api.dicebear.com/7.x/identicon/svg?seed=${encodeURIComponent(u)}" class="w-6 h-6 rounded-full border border-slate-700">
-            <span class="text-xs font-bold text-white">${u}</span>
-          </div>
-        `).join('');
-      }
-
-      resultsContainer.classList.remove('hidden');
-    }
-
-    function startChatWithUser(targetUser) {
-      document.getElementById('chat-user-search').value = '';
-      document.getElementById('chat-search-results').classList.add('hidden');
-
-      let thread = chatThreads.find(t => t.user === targetUser || t.participant1 === targetUser || t.participant2 === targetUser);
-
-      if (!thread) {
-        thread = {
-          id: `t-${Date.now()}`,
-          user: targetUser,
-          participant1: currentUser?.name || 'Collector',
-          participant2: targetUser,
-          avatar: `https://api.dicebear.com/7.x/identicon/svg?seed=${encodeURIComponent(targetUser)}`,
-          messages: [{ sender: 'System', text: `Started private conversation with ${targetUser}.` }]
-        };
-        chatThreads.unshift(thread);
-        saveChatsState();
-      }
-
-      activeChatThreadId = thread.id;
-      renderChatThreads();
-    }
-
-    function renderChatThreads() {
-      const container = document.getElementById('chat-threads-list');
-      if (!container) return;
-
-      if (!currentUser) {
-        container.innerHTML = `<p class="text-xs text-slate-500 text-center py-4">Please log in to view your private messages.</p>`;
-        return;
-      }
-
-      const myThreads = currentUser.isAdmin ? chatThreads : chatThreads.filter(t => 
-        t.user === currentUser.name || 
-        t.participant1 === currentUser.name || 
-        t.participant2 === currentUser.name
-      );
-
-      if (myThreads.length === 0) {
-        container.innerHTML = `<p class="text-xs text-slate-500 text-center py-4">No private message conversations yet.</p>`;
-        return;
-      }
-
-      container.innerHTML = myThreads.map(t => `
-        <div onclick="selectChatThread('${t.id}')" class="p-2.5 rounded-xl border border-slate-800 ${t.id === activeChatThreadId ? 'bg-indigo-950/40 border-indigo-500/50' : 'bg-slate-900 hover:bg-slate-800/60'} cursor-pointer transition-all flex items-center gap-3">
-          <img src="${t.avatar}" class="w-8 h-8 rounded-full border border-slate-700">
-          <div class="overflow-hidden">
-            <p class="text-xs font-bold text-white truncate">${t.user}</p>
-            <p class="text-[10px] text-slate-400 truncate">${t.messages[t.messages.length - 1]?.text || 'No messages'}</p>
-          </div>
-        </div>
-      `).join('');
-
-      renderChatMessages();
-    }
-
-    function selectChatThread(threadId) {
-      activeChatThreadId = threadId;
-      renderChatThreads();
-    }
-
-    function renderChatMessages() {
-      const activeThread = chatThreads.find(t => t.id === activeChatThreadId);
-      const header = document.getElementById('chat-active-header');
-      const body = document.getElementById('chat-messages-body');
-
-      if (!activeThread) return;
-
-      if (header) {
-        header.innerHTML = `
-          <div class="flex items-center gap-2">
-            <img src="${activeThread.avatar}" class="w-6 h-6 rounded-full">
-            <span class="text-xs font-bold text-white">${activeThread.user} (Private Chat)</span>
-          </div>
-        `;
-      }
-
-      if (body) {
-        body.innerHTML = activeThread.messages.map(m => {
-          const isMe = currentUser && m.sender === currentUser.name;
-          return `
-            <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'}">
-              <span class="text-[9px] text-slate-500 mb-0.5">${m.sender}</span>
-              <div class="px-3 py-2 rounded-2xl max-w-[80%] text-xs ${isMe ? 'bg-indigo-600 text-white rounded-br-none' : 'bg-slate-800 text-slate-200 rounded-bl-none'}">
-                ${m.text}
-              </div>
-            </div>
-          `;
-        }).join('');
-        body.scrollTop = body.scrollHeight;
-      }
-    }
-
-    function sendChatMessage(e) {
-      e.preventDefault();
-      if (!currentUser) return openAuthModal();
-
-      const input = document.getElementById('chat-input-text');
-      const text = input.value.trim();
-      if (!text) return;
-
-      const activeThread = chatThreads.find(t => t.id === activeChatThreadId);
-      if (activeThread) {
-        activeThread.messages.push({
-          sender: currentUser.name,
-          text: text
-        });
-        input.value = '';
-        saveChatsState();
-        renderChatThreads();
-      }
-    }
-
-    function setFilter(type) {
-      currentFilter = type;
-      renderCardGrid();
     }
 
     function updateRemainingCardCount() {
       const count = inventory.filter(c => c.status === 'AVAILABLE').length;
       const countEl = document.getElementById('remaining-cards-count');
       if (countEl) countEl.innerText = count;
+    }
+
+    function formatIDR(amount) {
+      return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(amount);
     }
 
     function showToast(msg) {
