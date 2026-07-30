@@ -903,6 +903,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         renderUserProfileUI();
       }
     });
+
+    // Subscriptions for Real-time table changes
+    supabaseClient
+      .channel('public:cards')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'cards' }, () => {
+        fetchDatabaseInventory();
+      })
+      .subscribe();
   }
 
   renderAuthHeader();
