@@ -48,7 +48,7 @@
     ::-webkit-scrollbar-track { background: #030712; }
     ::-webkit-scrollbar-thumb { background: #1f2937; border-radius: 9999px; }
   </style>
-<link rel="stylesheet" href="css/ui-2.0.css">
+  <link rel="stylesheet" href="css/ui-2.0.css">
   <link rel="stylesheet" href="css/ui-3.0.css">
 </head>
 <body class="min-h-screen flex flex-col justify-between selection:bg-amber-500 selection:text-black relative">
@@ -1033,12 +1033,13 @@
     <span id="toast-msg">Action completed.</span>
   </div>
 
-  <!-- Supabase migration: Firebase legacy block disabled -->
-  <script>
-    const db = null; // Firebase disabled - use Supabase data layer
-    const auth = null; // Firebase disabled - use Supabase Auth
-    const analytics = null; // Firebase disabled - use analytics_events
+  <!-- Supabase marketplace services -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-init.js"></script>
+  <script src="js/supabase-firebase-compat.js"></script>
 
+  <!-- App logic with Supabase Auth integration -->
+  <script>
     const TRADE_FEE_PERCENT = 0.02;
     const OFFICIAL_QRIS_STRING = "00020101021126610014COM.GO-JEK.WWW01189360091430419400360210G0419400360303UMI51440014ID.CO.QRIS.WWW0215ID10265490344800303UMI5204594453033605802ID5925Eugene Card, Toko Kartu &6012TORAJA UTARA61059183162070703A0163048BD9";
     const ADMIN_EMAILS = ['eugene.aquila06@gmail.com', 'yujinybwork@gmail.com', 'eugene.aquila06', 'admin house'];
@@ -1441,6 +1442,27 @@
         submitQrisOrderBtn: "Kirim Pesanan QRIS untuk Persetujuan Admin"
       }
     };
+
+    // Google Login via Supabase OAuth
+    async function loginWithGoogle() {
+      try {
+        if (!window.supabaseClient) {
+          showToast('Supabase client is not initialized.');
+          return;
+        }
+
+        const { error } = await window.supabaseClient.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            redirectTo: window.location.origin + window.location.pathname
+          }
+        });
+
+        if (error) throw error;
+      } catch (error) {
+        showToast('Google Login Error: ' + error.message);
+      }
+    }
 
     function toggleLanguage() {
       currentLanguage = currentLanguage === 'EN' ? 'ID' : 'EN';
@@ -2431,15 +2453,22 @@
       renderAuthHeader();
       startAuctionTimer();
 
-      auth.onAuthStateChanged((user) => {
-        if (user) {
-          handleUserSession(user);
-        } else {
-          currentUser = null;
-          renderAuthHeader();
-          updateAllViews();
-        }
-      });
+      // Listen for Supabase Auth state changes
+      if (window.supabaseClient) {
+        const { data: { subscription } } = window.supabaseClient.auth.onAuthStateChange((event, session) => {
+          if (session && session.user) {
+            handleUserSession({
+              displayName: session.user.user_metadata?.full_name || session.user.user_metadata?.name || session.user.email?.split('@')[0],
+              email: session.user.email,
+              photoURL: session.user.user_metadata?.avatar_url
+            });
+          } else {
+            currentUser = null;
+            renderAuthHeader();
+            updateAllViews();
+          }
+        });
+      }
 
       document.addEventListener('click', (e) => {
         const ownerTrigger = document.getElementById('owner-dropdown-trigger');
@@ -2509,15 +2538,6 @@
     function openAuthModal() { document.getElementById('auth-modal').classList.remove('hidden'); }
     function closeAuthModal() { document.getElementById('auth-modal').classList.add('hidden'); }
 
-    async function loginWithGoogle() {
-      const provider = null; // Supabase Google OAuth
-      try {
-        await auth.signInWithPopup(provider);
-      } catch (error) {
-        showToast('Google Login Error: ' + error.message);
-      }
-    }
-
     async function handleUserSession(user) {
       const email = user.email ? user.email.toLowerCase() : '';
 
@@ -2570,7 +2590,9 @@
     }
 
     async function logoutUser() {
-      await auth.signOut();
+      if (window.supabaseClient) {
+        await window.supabaseClient.auth.signOut();
+      }
       currentUser = null;
       renderAuthHeader();
       switchTab('catalog');
@@ -3068,10 +3090,10 @@
       if (!confirm(`Submit sell back request for ${card.serial} via QRIS payout (${formatIDR(card.price)})?`)) return;
 
       try {
-        const { data: authData } = await supabaseClient.auth.getUser();
+        const { data: authData } = await window.supabaseClient.auth.getUser();
         if (!authData.user) return showToast('Authentication required.');
 
-        const { error } = await supabaseClient
+        const { error } = await window.supabaseClient
           .from('sell_back_requests')
           .insert({
             card_id: card.id,
@@ -4108,11 +4130,6 @@
     }
   </script>
 
-  <!-- Supabase marketplace services -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/supabase-init.js"></script>
-  <script src="js/supabase-firebase-compat.js"></script>
-  <script src="js/supabase-init.js"></script>
   <script src="js/sellback-handler.js"></script>
 
 </body>
