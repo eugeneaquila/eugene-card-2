@@ -152,7 +152,7 @@
           <span id="notification-badge" class="absolute -top-1 -right-1 w-4 h-4 bg-blue-600 text-white font-bold text-[9px] rounded-full flex items-center justify-center">0</span>
         </button>
 
-        <!-- Prominent Auth Header Container -->
+        <!-- Auth Header Container -->
         <div id="auth-header-container"></div>
       </div>
 
@@ -171,31 +171,28 @@
           <svg viewBox="0 0 100 100" class="w-full h-full"><use href="#eugene-logo-mark"/></svg>
         </div>
         <h3 class="text-base font-bold text-white">Log In to Eugene Card</h3>
-        <p class="text-xs text-slate-400">Sign in to customize your collector profile, access admin hub, and trade cards.</p>
+        <p class="text-xs text-slate-400">Sign in using Supabase Auth to manage cards and access the admin hub.</p>
       </div>
 
       <div class="space-y-3">
-        <button onclick="loginWithGoogle()" class="w-full py-2.5 bg-white hover:bg-slate-100 text-slate-900 font-bold text-xs rounded-xl flex items-center justify-center gap-2 shadow transition-all">
-          <i class="fa-brands fa-google text-red-500 text-xs"></i> <span>Continue with Google</span>
+        <button onclick="loginWithGoogleSupabase()" class="w-full py-2.5 bg-white hover:bg-slate-100 text-slate-900 font-bold text-xs rounded-xl flex items-center justify-center gap-2 shadow transition-all">
+          <i class="fa-brands fa-google text-red-500 text-xs"></i> <span>Sign In with Supabase Google</span>
         </button>
         
         <div class="relative flex py-1 items-center">
           <div class="flex-grow border-t border-slate-800"></div>
-          <span class="flex-shrink mx-2 text-[10px] text-slate-400 font-semibold uppercase">Or Choose Account Persona</span>
+          <span class="flex-shrink mx-2 text-[10px] text-slate-400 font-semibold uppercase">Or Dev Test Persona</span>
           <div class="flex-grow border-t border-slate-800"></div>
         </div>
 
         <div class="grid grid-cols-2 gap-2">
-          <button onclick="loginAsSpecificUser('eugene.aquila06@gmail.com')" class="py-2.5 bg-rose-950/40 hover:bg-rose-900/50 text-rose-300 font-bold text-[11px] rounded-xl border border-rose-500/30 flex items-center justify-center gap-1.5 transition-all">
+          <button onclick="devSimulateLogin('eugene.aquila06@gmail.com')" class="py-2.5 bg-rose-950/40 hover:bg-rose-900/50 text-rose-300 font-bold text-[11px] rounded-xl border border-rose-500/30 flex items-center justify-center gap-1.5 transition-all">
             <i class="fa-solid fa-shield-halved"></i> Admin Aquila
           </button>
-          <button onclick="loginAsSpecificUser('yujinybwork@gmail.com')" class="py-2.5 bg-rose-950/40 hover:bg-rose-900/50 text-rose-300 font-bold text-[11px] rounded-xl border border-rose-500/30 flex items-center justify-center gap-1.5 transition-all">
+          <button onclick="devSimulateLogin('yujinybwork@gmail.com')" class="py-2.5 bg-rose-950/40 hover:bg-rose-900/50 text-rose-300 font-bold text-[11px] rounded-xl border border-rose-500/30 flex items-center justify-center gap-1.5 transition-all">
             <i class="fa-solid fa-shield-halved"></i> Admin Yujin
           </button>
         </div>
-        <button onclick="loginAsSpecificUser('collector_eugene@gmail.com')" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-[11px] rounded-xl border border-slate-700 flex items-center justify-center gap-1.5 transition-all">
-          <i class="fa-solid fa-user"></i> Standard Collector Persona
-        </button>
       </div>
     </div>
   </div>
@@ -213,7 +210,7 @@
           <div>
             <span class="text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 tracking-wider">LIMITED EDITION</span>
             <h2 class="text-base font-bold text-white mt-0.5">Beta Edition Card Stock</h2>
-            <p class="text-xs text-slate-400">Official QRIS Primary Market Availability (2% Tax Included)</p>
+            <p class="text-xs text-slate-400">Official Primary Market Availability (2% Tax Included)</p>
           </div>
         </div>
         
@@ -244,9 +241,6 @@
         <h2 class="text-xl font-bold text-white uppercase"><i class="fa-solid fa-right-left text-blue-400 mr-2"></i> Trading Room</h2>
         <p class="text-xs text-slate-400 mt-1">Direct card listings and primary trading hub.</p>
       </div>
-      <div id="trade-listings-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        <p class="text-xs text-slate-400">No active trade listings available.</p>
-      </div>
     </section>
 
     <!-- AUCTION VIEW -->
@@ -254,9 +248,6 @@
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
         <h2 class="text-xl font-bold text-white uppercase"><i class="fa-solid fa-gavel text-emerald-400 mr-2"></i> Auction House</h2>
         <p class="text-xs text-slate-400 mt-1">Competitive bids on rare cards.</p>
-      </div>
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 text-center text-xs text-slate-400">
-        No active auctions currently live. Check back soon!
       </div>
     </section>
 
@@ -266,9 +257,6 @@
         <h2 class="text-xl font-bold text-white uppercase"><i class="fa-solid fa-handshake text-purple-400 mr-2"></i> Trade Proposals</h2>
         <p class="text-xs text-slate-400 mt-1">Pending and incoming offers from collectors.</p>
       </div>
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 text-center text-xs text-slate-400">
-        No active trade proposals found.
-      </div>
     </section>
 
     <!-- INBOX VIEW -->
@@ -276,9 +264,6 @@
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
         <h2 class="text-xl font-bold text-white uppercase"><i class="fa-solid fa-comments text-indigo-400 mr-2"></i> Direct Messages</h2>
         <p class="text-xs text-slate-400 mt-1">Chat directly with other collectors.</p>
-      </div>
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 text-center text-xs text-slate-400">
-        Your inbox is empty.
       </div>
     </section>
 
@@ -303,9 +288,6 @@
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
         <h2 class="text-xl font-bold text-white uppercase"><i class="fa-solid fa-vault text-blue-400 mr-2"></i> My Vault</h2>
         <p class="text-xs text-slate-400 mt-1">Cards registered to your collection.</p>
-      </div>
-      <div id="owned-cards-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-        <p class="text-xs text-slate-400 col-span-full">Log in to view cards in your binder.</p>
       </div>
     </section>
 
@@ -350,6 +332,10 @@
     <span id="toast-msg">Action completed.</span>
   </div>
 
+  <!-- Supabase JS Client Library -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-init.js"></script>
+
   <script>
     const ADMIN_EMAILS = [
       'eugene.aquila06@gmail.com',
@@ -361,7 +347,7 @@
     let currentFilter = 'ALL';
     let inventory = [];
 
-    // Initialize mock card inventory
+    // Initialize mock inventory cards
     for (let i = 1; i <= 50; i++) {
       const isPremium = i <= 25;
       const numStr = String(i).padStart(2, '0');
@@ -377,7 +363,27 @@
       });
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Initialize Supabase Auth state listener
+      if (window.supabaseClient) {
+        // 1. Check existing session on boot
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        if (session?.user) {
+          handleSupabaseUserSession(session.user);
+        }
+
+        // 2. Register session listener
+        supabaseClient.auth.onAuthStateChange((event, session) => {
+          if (session?.user) {
+            handleSupabaseUserSession(session.user);
+            returnToPreviousStatePostLogin();
+          } else {
+            currentUser = null;
+            renderAuthHeader();
+          }
+        });
+      }
+
       renderAuthHeader();
       renderCardGrid();
     });
@@ -407,27 +413,60 @@
       return 'catalog';
     }
 
-    function loginWithGoogle() {
-      // Simulates Google OAuth flow returning an Admin or Collector
-      const mockEmail = 'eugene.aquila06@gmail.com'; 
-      loginAsSpecificUser(mockEmail);
+    // Official Supabase Google Auth Trigger
+    async function loginWithGoogleSupabase() {
+      try {
+        const activeTab = getCurrentActiveTab();
+        localStorage.setItem('redirect_after_login_tab', activeTab);
+
+        if (!window.supabaseClient) {
+          throw new Error('Supabase client not initialized.');
+        }
+
+        const { data, error } = await supabaseClient.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            redirectTo: window.location.origin
+          }
+        });
+
+        if (error) throw error;
+      } catch (error) {
+        showToast('Supabase Auth Error: ' + error.message);
+      }
     }
 
-    function loginAsSpecificUser(email) {
-      const isAdmin = isAdminEmail(email);
+    // Developer Test Login Trigger
+    function devSimulateLogin(email) {
       const name = email.split('@')[0];
-      
+      const mockSupabaseUser = {
+        id: 'dev-user-' + Date.now(),
+        email: email,
+        user_metadata: {
+          full_name: name,
+          avatar_url: `https://api.dicebear.com/7.x/identicon/svg?seed=${email}`
+        }
+      };
+      handleSupabaseUserSession(mockSupabaseUser);
+      returnToPreviousStatePostLogin();
+      showToast(`Dev session created for ${email}`);
+    }
+
+    function handleSupabaseUserSession(user) {
+      const email = user.email ? user.email.toLowerCase() : '';
+      const name = user.user_metadata?.full_name || user.user_metadata?.name || email.split('@')[0];
+      const isAdmin = isAdminEmail(email);
+
       currentUser = {
+        id: user.id,
         email: email,
         name: name,
-        username: name,
+        username: name.toLowerCase().replace(/\s+/g, '_'),
         isAdmin: isAdmin,
-        avatarUrl: `https://api.dicebear.com/7.x/identicon/svg?seed=${email}`
+        avatarUrl: user.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/identicon/svg?seed=${email}`
       };
 
       renderAuthHeader();
-      returnToPreviousStatePostLogin();
-      showToast(`Logged in as ${email} (${isAdmin ? 'Admin Access Granted' : 'Collector'})`);
     }
 
     function returnToPreviousStatePostLogin() {
@@ -437,13 +476,16 @@
       
       if ((savedTab === 'admin' || savedTab === 'inventory' || savedTab === 'analytics') && !currentUser?.isAdmin) {
         switchTab('catalog');
-        showToast('Access restricted to Admins.');
+        showToast('Returned to Collection tab.');
       } else {
         switchTab(savedTab);
       }
     }
 
-    function logoutUser() {
+    async function logoutUser() {
+      if (window.supabaseClient) {
+        await supabaseClient.auth.signOut();
+      }
       currentUser = null;
       renderAuthHeader();
       switchTab('catalog');
