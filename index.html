@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Eugene Card Marketplace | Beta Edition</title>
 
-  <!-- Browser Tab Favicon -->
+  <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='42' fill='none' stroke='%233b82f6' stroke-width='5' stroke-dasharray='210 50' transform='rotate(-45 50 50)'/><polygon points='50,18 80,35 80,68 50,85 20,68 20,35' fill='%233b82f6'/><path d='M 32 42 C 38 32, 52 32, 58 40 C 62 46, 48 54, 40 60 C 35 64, 45 70, 60 62' fill='none' stroke='%23ffffff' stroke-width='4' stroke-linecap='round'/></svg>">
 
   <!-- Tailwind CSS -->
@@ -32,9 +32,10 @@
     }
   </script>
 
-  <!-- FontAwesome Icons & Google Fonts -->
+  <!-- Icons, Fonts & QR Code Library -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
   <style>
     body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #f8fafc; }
@@ -128,10 +129,9 @@
           <i class="fa-solid fa-vault text-blue-400"></i> My Vault
         </button>
         <button id="nav-wishlist" onclick="switchTab('wishlist')" class="px-3 py-1.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white flex items-center gap-1.5 whitespace-nowrap transition-all">
-          <i class="fa-solid fa-heart text-rose-400"></i> Wishlist
+          <i class="fa-solid fa-heart text-rose-400"></i> Wishlist (<span id="wishlist-count-badge">0</span>)
         </button>
 
-        <!-- Admin Features Section -->
         <div id="admin-nav-separator" class="h-4 w-px bg-slate-700 mx-1 self-center hidden"></div>
 
         <button id="nav-analytics" onclick="switchTab('analytics')" class="admin-only-nav hidden px-3 py-1.5 rounded-xl text-xs font-medium text-amber-300 hover:text-white flex items-center gap-1.5 whitespace-nowrap bg-amber-950/30 border border-amber-500/30">
@@ -145,7 +145,7 @@
         </button>
       </nav>
 
-      <!-- Auth Header Container -->
+      <!-- Auth & Actions -->
       <div class="flex items-center gap-2 shrink-0">
         <button id="notif-toggle-btn" onclick="openNotifications()" class="relative p-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl border border-slate-700 flex items-center justify-center transition-all">
           <i class="fa-solid fa-bell text-xs text-blue-400"></i>
@@ -158,7 +158,7 @@
     </div>
   </header>
 
-  <!-- AUTH MODAL (Google Only) -->
+  <!-- AUTH MODAL -->
   <div id="auth-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-6 space-y-5 relative shadow-2xl">
       <button onclick="closeAuthModal()" class="absolute top-4 right-4 w-7 h-7 rounded-lg bg-slate-800 text-slate-400 hover:text-white text-xs flex items-center justify-center">
@@ -222,6 +222,40 @@
             </div>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QRIS PAYMENT MODAL -->
+  <div id="qris-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[60] hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 relative shadow-2xl space-y-4 text-center">
+      <button onclick="closeQrisModal()" class="absolute top-4 right-4 w-7 h-7 rounded-lg bg-slate-800 text-slate-400 hover:text-white text-xs flex items-center justify-center">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <div>
+        <h3 class="text-base font-bold text-white">Scan QRIS to Complete Payment</h3>
+        <p id="qris-card-title" class="text-xs text-blue-400 font-mono mt-1">Eugene Card Purchase</p>
+      </div>
+
+      <!-- QR Code Canvas Display -->
+      <div class="bg-white p-4 rounded-2xl w-56 h-56 mx-auto flex items-center justify-center border-2 border-blue-500 shadow-xl">
+        <div id="qris-canvas"></div>
+      </div>
+
+      <div class="bg-slate-800/80 p-3 rounded-xl border border-slate-700 text-left space-y-1">
+        <div class="flex justify-between text-xs"><span class="text-slate-400">Merchant Name:</span> <span class="font-bold text-white">Eugene Card, Toko Kartu</span></div>
+        <div class="flex justify-between text-xs"><span class="text-slate-400">Location:</span> <span class="font-bold text-white">TORAJA UTARA</span></div>
+        <div class="flex justify-between text-xs"><span class="text-slate-400">Amount Due:</span> <span id="qris-amount-due" class="font-mono font-bold text-emerald-400">IDR 0</span></div>
+      </div>
+
+      <div class="space-y-2 pt-2">
+        <label class="block text-left text-[10px] font-bold uppercase text-slate-400">Upload Payment Proof (Receipt Screenshot)</label>
+        <input type="file" id="qris-proof-file" accept="image/*" class="w-full text-xs text-slate-400 bg-slate-800 border border-slate-700 rounded-xl p-2 file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-600 file:text-white">
+        
+        <button onclick="submitQrisPaymentProof()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 mt-3">
+          <i class="fa-solid fa-check-circle"></i> Confirm & Submit Payment Proof
+        </button>
       </div>
     </div>
   </div>
@@ -337,7 +371,9 @@
         </button>
       </div>
 
-      <div id="trade-content"></div>
+      <div id="trade-content" class="bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center text-xs text-slate-400">
+        No peer-to-peer listings active yet. Be the first to create one!
+      </div>
     </section>
 
     <!-- AUCTION VIEW -->
@@ -347,7 +383,9 @@
         <p class="text-xs text-slate-400 mt-1">Place real-time bids on rare serial cards before time expires.</p>
       </div>
 
-      <div id="auction-content"></div>
+      <div id="auction-content" class="bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center text-xs text-slate-400">
+        Next featured auction begins soon. Stay tuned!
+      </div>
     </section>
 
     <!-- TRADE REQUESTS VIEW -->
@@ -356,7 +394,9 @@
         <h2 class="text-xl font-bold text-white uppercase"><i class="fa-solid fa-handshake text-purple-400 mr-2"></i> Active Trade Proposals</h2>
         <p class="text-xs text-slate-400 mt-1">Review incoming and outgoing trade proposals.</p>
       </div>
-      <div id="trade-req-content"></div>
+      <div id="trade-req-content" class="bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center text-xs text-slate-400">
+        No active trade proposals pending.
+      </div>
     </section>
 
     <!-- INBOX VIEW -->
@@ -365,7 +405,9 @@
         <h2 class="text-xl font-bold text-white uppercase"><i class="fa-solid fa-comments text-indigo-400 mr-2"></i> Messenger & Notifications</h2>
         <p class="text-xs text-slate-400 mt-1">Direct message buyers and sellers across trades.</p>
       </div>
-      <div id="inbox-content"></div>
+      <div id="inbox-content" class="bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center text-xs text-slate-400">
+        Your inbox is clean. No conversations initiated yet.
+      </div>
     </section>
 
     <!-- HOLDERS VIEW -->
@@ -374,7 +416,9 @@
         <h2 class="text-xl font-bold text-white uppercase"><i class="fa-solid fa-users text-teal-400 mr-2"></i> Top Card Holders</h2>
         <p class="text-xs text-slate-400 mt-1">Community leaderboard and collection ranks.</p>
       </div>
-      <div id="holders-content"></div>
+      <div id="holders-content" class="bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center text-xs text-slate-400">
+        Leaderboard updating...
+      </div>
     </section>
 
     <!-- HISTORY VIEW -->
@@ -403,9 +447,7 @@
         <h2 class="text-xl font-bold text-white uppercase"><i class="fa-solid fa-heart text-rose-400 mr-2"></i> Saved Wishlist</h2>
         <p class="text-xs text-slate-400 mt-1">Keep track of cards you want to acquire.</p>
       </div>
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center text-xs text-slate-400">
-        No wishlisted cards saved yet. Click the heart icon on any card in the Collection tab!
-      </div>
+      <div id="wishlist-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
     </section>
 
     <!-- ANALYTICS VIEW (ADMIN ONLY) -->
@@ -439,8 +481,10 @@
         </div>
       </div>
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-3">
-        <h4 class="text-xs font-bold text-slate-300 uppercase">Pending QRIS Orders</h4>
-        <p class="text-xs text-slate-500">No pending orders waiting for manual approval.</p>
+        <h4 class="text-xs font-bold text-slate-300 uppercase">Pending QRIS Orders Queue</h4>
+        <div id="admin-orders-queue" class="space-y-2">
+          <p class="text-xs text-slate-500">No pending orders waiting for manual approval.</p>
+        </div>
       </div>
     </section>
 
@@ -494,9 +538,16 @@
       'eugene.aquila06'
     ];
 
+    // Official Configured QRIS Payload String
+    const QRIS_STRING_PAYLOAD = "00020101021126610014COM.GO-JEK.WWW01189360091430419400360210G0419400360303UMI51440014ID.CO.QRIS.WWW0215ID10265490344800303UMI5204594453033605802ID5925Eugene Card, Toko Kartu &6012TORAJA UTARA61059183162070703A0163048BD9";
+
     let currentUser = null;
     let currentFilter = 'ALL';
     let inventory = [];
+    let wishlist = new Set();
+    let pendingOrders = [];
+    let activeCardForAction = null;
+    let qrisGeneratorInstance = null;
 
     // Initialize mock card inventory
     for (let i = 1; i <= 50; i++) {
@@ -535,6 +586,7 @@
       renderAuthHeader();
       renderCardGrid();
       renderInventoryTable();
+      updateRemainingCardCount();
     });
 
     function isAdminEmail(email) {
@@ -562,7 +614,6 @@
       return 'catalog';
     }
 
-    // Official Supabase Google Auth Trigger
     async function loginWithGoogleSupabase() {
       try {
         const activeTab = getCurrentActiveTab();
@@ -574,9 +625,7 @@
 
         const { data, error } = await supabaseClient.auth.signInWithOAuth({
           provider: 'google',
-          options: {
-            redirectTo: window.location.origin
-          }
+          options: { redirectTo: window.location.origin }
         });
 
         if (error) throw error;
@@ -669,7 +718,6 @@
 
     function switchTab(tabName) {
       const adminOnlyTabs = ['admin', 'inventory', 'analytics'];
-      
       if (adminOnlyTabs.includes(tabName) && !currentUser?.isAdmin) {
         return showToast('Admin permission required.');
       }
@@ -692,9 +740,12 @@
       if (activeNav && !adminOnlyTabs.includes(tabName)) {
         activeNav.className = 'px-3 py-1.5 rounded-xl text-xs font-medium text-white bg-slate-700 flex items-center gap-1.5 whitespace-nowrap transition-all';
       }
+
+      if (tabName === 'wishlist') renderWishlistGrid();
+      if (tabName === 'dashboard') renderVaultGrid();
     }
 
-    // --- CARD GRID & CARD DETAILS ---
+    // --- CARD GRID & DETAILS ---
     function renderCardGrid() {
       const grid = document.getElementById('card-grid');
       if (!grid) return;
@@ -710,6 +761,9 @@
         <div onclick="openCardDetailsModal('${card.id}')" class="${card.type === 'PREMIUM' ? 'card-holo-premium' : 'card-holo-standard'} rounded-xl p-3 flex flex-col justify-between relative cursor-pointer">
           <div class="flex items-center justify-between mb-2">
             <span class="text-[9px] font-bold uppercase px-2 py-0.5 rounded-full ${card.type === 'PREMIUM' ? 'bg-indigo-500/20 text-indigo-300' : 'bg-blue-500/20 text-blue-400'}">${card.type}</span>
+            <button onclick="event.stopPropagation(); toggleWishlist('${card.id}')" class="text-xs ${wishlist.has(card.id) ? 'text-rose-500' : 'text-slate-500 hover:text-rose-400'}">
+              <i class="fa-solid fa-heart"></i>
+            </button>
           </div>
           <div class="w-full aspect-[4/5] bg-slate-900 rounded-lg border border-slate-800 p-1 flex flex-col justify-between mb-2 text-center overflow-hidden">
             <img src="${card.imgUrl}" class="w-full h-full object-contain rounded">
@@ -724,6 +778,8 @@
       const card = inventory.find(c => c.id === cardId);
       if (!card) return;
 
+      activeCardForAction = card;
+
       document.getElementById('detail-card-img').src = card.imgUrl;
       document.getElementById('detail-card-serial').innerText = card.serial;
       document.getElementById('detail-card-name').innerText = card.name;
@@ -734,7 +790,6 @@
       typeSpan.className = `text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${card.type === 'PREMIUM' ? 'bg-indigo-500/20 text-indigo-300' : 'bg-blue-500/20 text-blue-400'}`;
       
       document.getElementById('detail-card-status').innerText = `Status: ${card.status} ${card.owner ? `(Owner: ${card.owner})` : ''}`;
-
       document.getElementById('card-details-modal').classList.remove('hidden');
     }
 
@@ -742,7 +797,131 @@
       document.getElementById('card-details-modal').classList.add('hidden');
     }
 
-    // --- ADMIN INVENTORY MANAGEMENT & EDITOR ---
+    // --- QRIS CHECKOUT & PAYMENTS ---
+    function buyActiveDetailCard() {
+      if (!currentUser) return openAuthModal();
+      if (!activeCardForAction) return;
+
+      closeCardDetailsModal();
+
+      document.getElementById('qris-card-title').innerText = `${activeCardForAction.name} (${activeCardForAction.serial})`;
+      document.getElementById('qris-amount-due').innerText = `IDR ${activeCardForAction.price.toLocaleString()}`;
+
+      // Render Dynamic QRIS Canvas using qrcode.js
+      const canvasContainer = document.getElementById('qris-canvas');
+      canvasContainer.innerHTML = '';
+      
+      new QRCode(canvasContainer, {
+        text: QRIS_STRING_PAYLOAD,
+        width: 180,
+        height: 180,
+        colorDark: "#0f172a",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
+      });
+
+      document.getElementById('qris-modal').classList.remove('hidden');
+    }
+
+    function closeQrisModal() {
+      document.getElementById('qris-modal').classList.add('hidden');
+    }
+
+    function submitQrisPaymentProof() {
+      const fileInput = document.getElementById('qris-proof-file');
+      if (!fileInput.files.length) {
+        return showToast('Please select a payment receipt image before submitting.');
+      }
+
+      pendingOrders.push({
+        id: `ord-${Date.now()}`,
+        card: activeCardForAction,
+        buyer: currentUser.name,
+        timestamp: new Date().toLocaleTimeString()
+      });
+
+      showToast('Payment proof submitted! Waiting for Admin verification.');
+      closeQrisModal();
+      renderAdminOrdersQueue();
+    }
+
+    // --- WISHLIST & VAULT SYSTEM ---
+    function toggleWishlist(cardId) {
+      if (wishlist.has(cardId)) {
+        wishlist.delete(cardId);
+        showToast('Removed from wishlist.');
+      } else {
+        wishlist.add(cardId);
+        showToast('Saved to wishlist!');
+      }
+      document.getElementById('wishlist-count-badge').innerText = wishlist.size;
+      renderCardGrid();
+    }
+
+    function wishlistActiveDetailCard() {
+      if (activeCardForAction) toggleWishlist(activeCardForAction.id);
+    }
+
+    function renderWishlistGrid() {
+      const container = document.getElementById('wishlist-grid');
+      const items = inventory.filter(c => wishlist.has(c.id));
+
+      if (items.length === 0) {
+        container.innerHTML = `<div class="col-span-full bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center text-xs text-slate-400">No wishlisted cards saved yet. Click the heart icon on any card in the Collection tab!</div>`;
+        return;
+      }
+
+      container.innerHTML = items.map(card => `
+        <div onclick="openCardDetailsModal('${card.id}')" class="card-holo-standard rounded-xl p-3 flex flex-col justify-between relative cursor-pointer">
+          <div class="w-full aspect-[4/5] bg-slate-900 rounded-lg border border-slate-800 p-1 flex flex-col justify-between mb-2 text-center overflow-hidden">
+            <img src="${card.imgUrl}" class="w-full h-full object-contain rounded">
+          </div>
+          <p class="text-center font-bold text-blue-400 font-mono mb-1 text-xs">${card.serial}</p>
+          <p class="text-[11px] font-bold text-white truncate text-center">${card.name}</p>
+        </div>
+      `).join('');
+    }
+
+    function renderVaultGrid() {
+      const container = document.getElementById('owned-cards-grid');
+      if (!currentUser) {
+        container.innerHTML = "Log in with Google to view your owned cards inside your private binder.";
+        return;
+      }
+
+      const owned = inventory.filter(c => c.owner === currentUser.email);
+      if (owned.length === 0) {
+        container.innerHTML = "You don't own any cards yet. Buy cards via QRIS or propose trades to populate your vault!";
+        return;
+      }
+
+      container.className = "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4";
+      container.innerHTML = owned.map(card => `
+        <div class="card-holo-premium rounded-xl p-3 flex flex-col justify-between relative">
+          <p class="text-center font-bold text-blue-400 font-mono mb-1 text-xs">${card.serial}</p>
+          <p class="text-[11px] font-bold text-white truncate text-center">${card.name}</p>
+        </div>
+      `).join('');
+    }
+
+    function tradeActiveDetailCard() {
+      if (!currentUser) return openAuthModal();
+      showToast(`Trade offer initiated for ${activeCardForAction?.serial}`);
+      closeCardDetailsModal();
+      switchTab('trade-req');
+    }
+
+    function createListingFromVault() {
+      if (!currentUser) return openAuthModal();
+      showToast('Select a card from your Vault to list on the market.');
+      switchTab('dashboard');
+    }
+
+    function openNotifications() {
+      showToast('No new unread market notifications.');
+    }
+
+    // --- ADMIN INVENTORY MANAGEMENT & QUEUES ---
     function renderInventoryTable() {
       const tbody = document.getElementById('inventory-table-body');
       if (!tbody) return;
@@ -768,6 +947,39 @@
           </td>
         </tr>
       `).join('');
+    }
+
+    function renderAdminOrdersQueue() {
+      const container = document.getElementById('admin-orders-queue');
+      if (!pendingOrders.length) {
+        container.innerHTML = `<p class="text-xs text-slate-500">No pending orders waiting for manual approval.</p>`;
+        return;
+      }
+
+      container.innerHTML = pendingOrders.map((ord, idx) => `
+        <div class="bg-slate-800 p-3 rounded-xl flex items-center justify-between">
+          <div>
+            <p class="text-xs font-bold text-white">${ord.card.name} (${ord.card.serial})</p>
+            <p class="text-[10px] text-slate-400">Buyer: ${ord.buyer} • ${ord.timestamp}</p>
+          </div>
+          <button onclick="approveOrder(${idx})" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-lg">Approve</button>
+        </div>
+      `).join('');
+    }
+
+    function approveOrder(index) {
+      const order = pendingOrders[index];
+      const card = inventory.find(c => c.id === order.card.id);
+      if (card) {
+        card.status = 'OWNED';
+        card.owner = currentUser.email;
+      }
+      pendingOrders.splice(index, 1);
+      renderAdminOrdersQueue();
+      renderCardGrid();
+      renderInventoryTable();
+      updateRemainingCardCount();
+      showToast('Order approved! Card assigned to owner.');
     }
 
     function openCardEditorModal(cardId = null) {
@@ -839,6 +1051,7 @@
 
       renderCardGrid();
       renderInventoryTable();
+      updateRemainingCardCount();
       closeCardEditorModal();
     }
 
@@ -847,12 +1060,18 @@
       inventory = inventory.filter(c => c.id !== cardId);
       renderCardGrid();
       renderInventoryTable();
+      updateRemainingCardCount();
       showToast('Card deleted from inventory.');
     }
 
     function setFilter(type) {
       currentFilter = type;
       renderCardGrid();
+    }
+
+    function updateRemainingCardCount() {
+      const count = inventory.filter(c => c.status === 'AVAILABLE').length;
+      document.getElementById('remaining-cards-count').innerText = count;
     }
 
     function showToast(msg) {
