@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eugene Card Marketplace | Beta Edition 3.0</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='42' fill='none' stroke='%233b82f6' stroke-width='5' stroke-dasharray='210 50' transform='rotate(-45 50 50)'/><polygon points='50,18 80,35 80,68 50,85 20,68 20,35' fill='%233b82f6'/><path d='M 32 42 C 38 32, 52 32, 58 40 C 62 46, 48 54, 40 60 C 35 64, 45 70, 60 62' fill='none' stroke='%23ffffff' stroke-width='4' stroke-linecap='round'/></svg>">
+
+  <!-- Tailwind CSS & Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            gemini: {
+              bg: '#07090e',
+              card: '#0f172a',
+              border: '#334155',
+              hover: '#334155',
+              accent: '#3b82f6',
+              accentHover: '#2563eb',
+              muted: '#94a3b8'
+            }
+          },
+          fontFamily: { sans: ['Inter', 'sans-serif'] }
+        }
+      }
+    }
+  </script>
+
+  <!-- FontAwesome & Google Fonts -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <style>
+    body { font-family: 'Inter', sans-serif; background-color: #07090e; color: #f8fafc; }
+    
+    .glass-panel-3 {
+      background: rgba(15, 23, 42, 0.78);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(148, 163, 184, 0.12);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    }
+
+    .card-holo-premium {
+      background: linear-gradient(135deg, #1e1b4b 0%, #311042 50%, #0f172a 100%);
+      border: 1px solid rgba(99, 102, 241, 0.4);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+      transition: all 0.25s ease;
+    }
+    .card-holo-premium:hover { 
+      border-color: rgba(129, 140, 248, 0.8); 
+      transform: translateY(-3px); 
+      box-shadow: 0 8px 25px rgba(99, 102, 241, 0.25); 
+    }
+    
+    .card-holo-standard {
+      background: linear-gradient(135deg, #0f172a 0%, #07090e 100%);
+      border: 1px solid #334155;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+      transition: all 0.25s ease;
+    }
+    .card-holo-standard:hover { 
+      border-color: #475569; 
+      transform: translateY(-3px); 
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6); 
+    }
+
+    /* Admin 3.0 Command Center Sidebar */
+    .ec3a-side {
+      position: fixed; left: 0; top: 0; bottom: 0; width: 244px; z-index: 60;
+      background: rgba(3, 7, 18, 0.96); border-right: 1px solid rgba(148, 163, 184, 0.11);
+      backdrop-filter: blur(20px); padding: 18px 13px; display: flex; flex-direction: column; gap: 18px;
+    }
+    .ec3a-brand { display: flex; align-items: center; gap: 10px; padding: 8px 8px 15px; border-bottom: 1px solid rgba(148, 163, 184, 0.1); cursor: pointer; }
+    .ec3a-mark { width: 38px; height: 38px; border-radius: 12px; display: grid; place-items: center; background: #0f172a; border: 1px solid rgba(99, 102, 241, 0.3); }
+    .ec3a-title { font-size: 11px; font-weight: 950; letter-spacing: .12em; color: #fff; }
+    .ec3a-sub { font-size: 8px; color: #64748b; margin-top: 2px; }
+    .ec3a-label { font-size: 8px; letter-spacing: .15em; text-transform: uppercase; color: #475569; font-weight: 900; padding: 0 9px; }
+    .ec3a-links { display: flex; flex-direction: column; gap: 4px; }
+    .ec3a-link {
+      display: flex; align-items: center; gap: 10px; padding: 10px 11px; border-radius: 11px;
+      color: #94a3b8; font-size: 10px; font-weight: 850; border: 1px solid transparent; text-decoration: none; cursor: pointer; transition: all 0.2s ease;
+    }
+    .ec3a-link i { width: 16px; text-align: center; }
+    .ec3a-link:hover { background: #0f172a; color: #fff; }
+    .ec3a-link.active { background: rgba(99, 102, 241, 0.12); border-color: rgba(99, 102, 241, 0.2); color: #c7d2fe; box-shadow: inset 3px 0 #6366f1; }
+    .ec3a-note { margin-top: auto; padding: 11px; border-radius: 14px; background: rgba(99, 102, 241, 0.04); border: 1px solid rgba(99, 102, 241, 0.1); font-size: 8px; line-height: 1.5; color: #64748b; }
+    .ec3a-note strong { color: #a5b4fc; }
+    .ec3a-page { margin-left: 244px; min-height: 100vh; display: flex; flex-direction: column; }
+
+    @media(max-width: 850px) {
+      .ec3a-side { display: none; }
+      .ec3a-page { margin-left: 0; }
+    }
+
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #07090e; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 9999px; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-blue-600 selection:text-white relative">
+
+  <!-- ADMIN COMMAND CENTER SIDEBAR (Visible for Admins) -->
+  <aside id="admin-sidebar" class="ec3a-side hidden">
+    <div class="ec3a-brand" onclick="switchTab('catalog')">
+      <div class="ec3a-mark"><i class="fa-solid fa-layer-group text-indigo-400"></i></div>
+      <div>
+        <div class="ec3a-title">EUGENE CARD</div>
+        <div class="ec3a-sub">ADMIN CONTROL 3.0</div>
+      </div>
+    </div>
+    <div class="ec3a-label">Command Center</div>
+    <div class="ec3a-links">
+      <a onclick="switchTab('admin')" id="side-nav-admin" class="ec3a-link"><i class="fa-solid fa-gauge-high"></i>Overview</a>
+      <a onclick="switchTab('analytics')" id="side-nav-analytics" class="ec3a-link"><i class="fa-solid fa-chart-line"></i>Analytics Hub</a>
+      <a onclick="switchTab('revenue')" id="side-nav-revenue" class="ec3a-link"><i class="fa-solid fa-sack-dollar"></i>Revenue & Finance</a>
+      <a onclick="switchTab('inventory')" id="side-nav-inventory" class="ec3a-link"><i class="fa-solid fa-boxes-stacked"></i>Inventory Control</a>
+      <a onclick="switchTab('trade-req')" id="side-nav-trade-req" class="ec3a-link"><i class="fa-solid fa-handshake"></i>Trades</a>
+      <a onclick="switchTab('auction')" id="side-nav-auction" class="ec3a-link"><i class="fa-solid fa-gavel"></i>Auctions</a>
+      <a onclick="switchTab('history')" id="side-nav-history" class="ec3a-link"><i class="fa-solid fa-clock-rotate-left"></i>History Audit</a>
+    </div>
+    <div class="ec3a-note"><strong>3.0 Admin Layer</strong><br>Analytics, financial intelligence & database tools connected live.</div>
+  </aside>
+
+  <!-- Embedded Logo SVG -->
+  <svg style="display: none;">
+    <defs>
+      <g id="eugene-logo-mark">
+        <circle cx="50" cy="50" r="42" fill="none" stroke="#3b82f6" stroke-width="5" stroke-dasharray="210 50" transform="rotate(-45 50 50)"/>
+        <polygon points="50,18 80,35 80,68 50,85 20,68 20,35" fill="#3b82f6"/>
+        <path d="M 32 42 C 38 32, 52 32, 58 40 C 62 46, 48 54, 40 60 C 35 64, 45 70, 60 62" fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/>
+      </g>
+    </defs>
+  </svg>
+
+  <div class="ec3a-page">
+    <!-- Header -->
+    <header class="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 lg:px-8 py-3">
+      <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+        
+        <!-- Brand Logo -->
+        <div class="flex items-center gap-3 cursor-pointer shrink-0" onclick="switchTab('catalog')">
+          <div class="w-9 h-9 rounded-xl overflow-hidden bg-slate-800 border border-slate-700 p-1 flex items-center justify-center">
+            <svg viewBox="0 0 100 100" class="w-full h-full"><use href="#eugene-logo-mark"/></svg>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h1 class="font-bold text-sm tracking-wide text-white uppercase">EUGENE CARD</h1>
+              <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/30">Beta 3.0</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <nav class="flex items-center gap-1 bg-slate-800/80 p-1 rounded-2xl border border-slate-700 overflow-x-auto max-w-full">
+          <button id="nav-catalog" onclick="switchTab('catalog')" class="px-3 py-1.5 rounded-xl text-xs font-medium text-white bg-slate-700 flex items-center gap-1.5 whitespace-nowrap transition-all">
+            <i class="fa-solid fa-layer-group text-blue-400"></i> Collection
+          </button>
+          <button id="nav-trade" onclick="switchTab('trade')" class="px-3 py-1.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white flex items-center gap-1.5 whitespace-nowrap transition-all">
+            <i class="fa-solid fa-right-left text-blue-400"></i> Trade
+          </button>
+          <button id="nav-auction" onclick="switchTab('auction')" class="px-3 py-1.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white flex items-center gap-1.5 whitespace-nowrap transition-all">
+            <i class="fa-solid fa-gavel text-emerald-400"></i> Auction
+          </button>
+          <button id="nav-trade-req" onclick="switchTab('trade-req')" class="px-3 py-1.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white flex items-center gap-1.5 whitespace-nowrap transition-all">
+            <i class="fa-solid fa-handshake text-purple-400"></i> Trade Requests
+          </button>
+          <button id="nav-inbox" onclick="switchTab('inbox')" class="px-3 py-1.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white flex items-center gap-1.5 whitespace-nowrap transition-all relative">
+            <i class="fa-solid fa-comments text-indigo-400"></i> Private Inbox
+          </button>
+          <button id="nav-holders" onclick="switchTab('holders')" class="px-3 py-1.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white flex items-center gap-1.5 whitespace-nowrap transition-all">
+            <i class="fa-solid fa-users text-teal-400"></i> Holders
+          </button>
+          <button id="nav-history" onclick="switchTab('history')" class="px-3 py-1.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white flex items-center gap-1.5 whitespace-nowrap transition-all">
+            <i class="fa-solid fa-clock-rotate-left text-cyan-400"></i> History
+          </button>
+
+          <div class="h-4 w-px bg-slate-700 mx-1 self-center hidden sm:block"></div>
+
+          <button id="nav-dashboard" onclick="switchTab('dashboard')" class="px-3 py-1.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white flex items-center gap-1.5 whitespace-nowrap transition-all">
+            <i class="fa-solid fa-vault text-blue-400"></i> My Vault
+          </button>
+          <button id="nav-wishlist" onclick="switchTab('wishlist')" class="px-3 py-1.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white flex items-center gap-1.5 whitespace-nowrap transition-all">
+            <i class="fa-solid fa-heart text-rose-400"></i> Wishlist (<span id="wishlist-count-badge">0</span>)
+          </button>
+
+          <div id="admin-nav-separator" class="h-4 w-px bg-slate-700 mx-1 self-center hidden"></div>
+
+          <!-- ADMIN HUBS (Unified Tabs & Direct Links) -->
+          <button id="nav-analytics" onclick="switchTab('analytics')" class="admin-only-nav hidden px-3 py-1.5 rounded-xl text-xs font-medium text-amber-300 hover:text-white flex items-center gap-1.5 whitespace-nowrap bg-amber-950/30 border border-amber-500/30">
+            <i class="fa-solid fa-chart-line text-amber-400"></i> Analytics Hub
+          </button>
+          <button id="nav-revenue" onclick="switchTab('revenue')" class="admin-only-nav hidden px-3 py-1.5 rounded-xl text-xs font-medium text-emerald-300 hover:text-white flex items-center gap-1.5 whitespace-nowrap bg-emerald-950/30 border border-emerald-500/30">
+            <i class="fa-solid fa-sack-dollar text-emerald-400"></i> Revenue Hub
+          </button>
+          <button id="nav-admin" onclick="switchTab('admin')" class="admin-only-nav hidden px-3 py-1.5 rounded-xl text-xs font-medium text-rose-400 hover:text-white flex items-center gap-1.5 whitespace-nowrap bg-rose-950/30 border border-rose-500/30">
+            <i class="fa-solid fa-shield-halved"></i> Admin Command
+          </button>
+          <button id="nav-inventory" onclick="switchTab('inventory')" class="admin-only-nav hidden px-3 py-1.5 rounded-xl text-xs font-medium text-amber-300 hover:text-white flex items-center gap-1.5 whitespace-nowrap bg-amber-950/30 border border-amber-500/30">
+            <i class="fa-solid fa-boxes-stacked"></i> Inventory Control
+          </button>
+        </nav>
+
+        <!-- Auth & Cart -->
+        <div class="flex items-center gap-2 shrink-0">
+          <button onclick="showCartModal()" class="relative p-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl border border-slate-700 flex items-center justify-center transition-all" title="View Cart">
+            <i class="fa-solid fa-cart-shopping text-xs text-amber-400"></i>
+            <span id="cart-badge" class="absolute -top-1 -right-1 w-4 h-4 bg-amber-500 text-slate-950 font-bold text-[9px] rounded-full flex items-center justify-center">0</span>
+          </button>
+          <div id="auth-header-container"></div>
+        </div>
+
+      </div>
+    </header>
+
+    <!-- MODALS SECTION -->
+    <div id="create-auction-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+      <div class="glass-panel-3 rounded-2xl max-w-md w-full p-6 space-y-4 relative shadow-2xl">
+        <button onclick="closeCreateAuctionModal()" class="absolute top-4 right-4 w-7 h-7 rounded-lg bg-slate-800 text-slate-400 hover:text-white text-xs flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+        <div class="flex items-center gap-2 border-b border-slate-800 pb-3"><i class="fa-solid fa-gavel text-emerald-400"></i><h3 class="text-base font-bold text-white">List Card in Auction House</h3></div>
+        <form onsubmit="submitCardAuction(event)" class="space-y-3">
+          <input type="hidden" id="auction-card-id">
+          <div id="auction-card-summary" class="p-3 bg-slate-800/80 rounded-xl border border-slate-700 text-xs font-bold text-emerald-400">Card Selected</div>
+          <div><label class="text-[10px] font-bold text-slate-400 uppercase">Starting Bid (IDR)</label><input type="number" id="auction-start-price" required min="10000" class="w-full mt-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-mono"></div>
+          <div><label class="text-[10px] font-bold text-slate-400 uppercase">Duration (Hours)</label><select id="auction-duration-hrs" class="w-full mt-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"><option value="24" selected>24 Hours</option><option value="48">48 Hours</option></select></div>
+          <button type="submit" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow transition-all">Launch Live Auction</button>
+        </form>
+      </div>
+    </div>
+
+    <div id="admin-proof-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+      <div class="glass-panel-3 rounded-2xl max-w-md w-full p-6 space-y-4 relative shadow-2xl">
+        <button onclick="closeAdminProofModal()" class="absolute top-4 right-4 w-7 h-7 rounded-lg bg-slate-800 text-slate-400 hover:text-white text-xs flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+        <div class="flex items-center gap-2 border-b border-slate-800 pb-3"><i class="fa-solid fa-upload text-amber-400"></i><h3 class="text-base font-bold text-white">Approve Payout (2% Tax)</h3></div>
+        <div id="admin-approval-summary" class="p-3 bg-slate-800/80 rounded-xl border border-slate-700 text-xs text-slate-300 space-y-1"></div>
+        <form onsubmit="confirmAdminPayoutWithProof(event)" class="space-y-3">
+          <input type="hidden" id="admin-pending-index">
+          <div><label class="block text-[10px] font-bold uppercase text-slate-400">Upload Receipt Image (*Required)</label><input type="file" id="admin-receipt-file" accept="image/*" required class="w-full text-xs text-slate-400 bg-slate-800 border border-slate-700 rounded-xl p-2"></div>
+          <div><label class="text-[10px] font-bold text-slate-400 uppercase">Transfer Reference</label><input type="text" id="admin-tx-ref" placeholder="Ref: TRF-992014" class="w-full mt-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-mono"></div>
+          <button type="submit" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow transition-all">Confirm Transfer & Payout</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- MAIN MARKETPLACE BODY -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 lg:p-8 space-y-8">
+      
+      <!-- CATALOG VIEW -->
+      <section id="view-catalog" class="space-y-6">
+        <div class="glass-panel-3 rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div class="flex items-center gap-4">
+            <div class="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 p-1 flex items-center justify-center">
+              <svg viewBox="0 0 100 100" class="w-full h-full"><use href="#eugene-logo-mark"/></svg>
+            </div>
+            <div>
+              <span class="text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 tracking-wider">BETA EDITION 3.0</span>
+              <h2 class="text-base font-bold text-white mt-0.5">Primary Card Marketplace Stock</h2>
+              <p class="text-xs text-slate-400">Official marketplace with automated 2% platform fee calculations</p>
+            </div>
+          </div>
+          <div class="bg-slate-800/80 px-5 py-2.5 rounded-xl border border-slate-700 text-center sm:text-right w-full sm:w-auto">
+            <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Remaining Available</p>
+            <p class="text-xl font-bold font-mono text-blue-400"><span id="remaining-cards-count">0</span> <span class="text-slate-400 text-xs font-normal">Cards</span></p>
+          </div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-slate-900 p-2.5 rounded-xl border border-slate-800">
+          <div class="relative flex-1">
+            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+            <input type="text" id="search-input" oninput="renderCardGrid()" placeholder="Search serial (*01 / *001) or card name..." class="w-full bg-slate-800 border border-slate-700 rounded-lg pl-9 pr-4 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
+          </div>
+          <div class="flex items-center gap-1.5">
+            <button onclick="setFilter('ALL')" id="filter-ALL" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 text-white transition-all">All</button>
+            <button onclick="setFilter('PREMIUM')" id="filter-PREMIUM" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-400 hover:text-white transition-all">Premium</button>
+            <button onclick="setFilter('STANDARD')" id="filter-STANDARD" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-400 hover:text-white transition-all">Standard</button>
+          </div>
+        </div>
+
+        <div id="card-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
+      </section>
+
+      <!-- TRADE VIEW -->
+      <section id="view-trade" class="hidden space-y-6">
+        <div class="glass-panel-3 rounded-2xl p-6 flex items-center justify-between">
+          <div>
+            <h2 class="text-xl font-bold text-white uppercase"><i class="fa-solid fa-right-left text-blue-400 mr-2"></i> Trading Room</h2>
+            <p class="text-xs text-slate-400 mt-1">Browse open card offers or list one of your own cards for sale.</p>
+          </div>
+        </div>
+        <div id="trade-content" class="glass-panel-3 rounded-2xl p-8 text-center text-xs text-slate-400">No peer-to-peer listings active yet.</div>
+      </section>
+
+      <!-- AUCTION VIEW -->
+      <section id="view-auction" class="hidden space-y-6">
+        <div class="glass-panel-3 rounded-2xl p-6 flex items-center justify-between">
+          <div>
+            <h2 class="text-xl font-bold text-white uppercase"><i class="fa-solid fa-gavel text-emerald-400 mr-2"></i> Live Auction House</h2>
+            <p class="text-xs text-slate-400 mt-1">Place real-time bids on rare serial cards.</p>
+          </div>
+        </div>
+        <div id="auction-content" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
+      </section>
+
+      <!-- TRADE REQUESTS VIEW -->
+      <section id="view-trade-req" class="hidden space-y-6">
+        <div class="glass-panel-3 rounded-2xl p-6">
+          <h2 class="text-xl font-bold text-white uppercase"><i class="fa-solid fa-handshake text-purple-400 mr-2"></i> Active Trade Proposals</h2>
+          <p class="text-xs text-slate-400 mt-1">Review incoming and outgoing card/cash trade proposals.</p>
+        </div>
+        <div id="trade-req-content" class="space-y-3">
+          <div class="glass-panel-3 rounded-2xl p-8 text-center text-xs text-slate-400">No active trade proposals pending.</div>
+        </div>
+      </section>
+
+      <!-- PRIVATE INBOX / CHAT VIEW -->
+      <section id="view-inbox" class="hidden space-y-6">
+        <div class="glass-panel-3 rounded-2xl p-6">
+          <h2 class="text-xl font-bold text-white uppercase"><i class="fa-solid fa-comments text-indigo-400 mr-2"></i> Private Messenger & Inbox</h2>
+          <p class="text-xs text-slate-400 mt-1">Private messages strictly scoped between buyers and sellers.</p>
+        </div>
+        <div class="glass-panel-3 rounded-2xl grid grid-cols-1 md:grid-cols-3 min-h-[450px] overflow-hidden">
+          <div class="border-r border-slate-800 p-4 space-y-3">
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Search Collectors</p>
+            <input type="text" id="chat-user-search" oninput="searchUsersForChat(this.value)" placeholder="Search @username..." class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
+            <div id="chat-search-results" class="space-y-1 hidden bg-slate-950/80 p-2 rounded-xl border border-slate-800 max-h-40 overflow-y-auto"></div>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider pt-2">Threads</p>
+            <div id="chat-threads-list" class="space-y-1.5"></div>
+          </div>
+          <div class="col-span-2 flex flex-col justify-between bg-slate-950/40 p-4">
+            <div id="chat-active-header" class="pb-3 border-b border-slate-800 flex items-center justify-between"><span class="text-xs font-bold text-white">Select a conversation</span></div>
+            <div id="chat-messages-body" class="flex-1 my-4 space-y-3 overflow-y-auto max-h-[300px] pr-2"></div>
+            <form onsubmit="sendChatMessage(event)" class="pt-3 border-t border-slate-800 flex gap-2">
+              <input type="text" id="chat-input-text" placeholder="Write a message..." class="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-4 py-2 text-xs text-white">
+              <button type="submit" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl">Send</button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- HOLDERS VIEW -->
+      <section id="view-holders" class="hidden space-y-6">
+        <div class="glass-panel-3 rounded-2xl p-6">
+          <h2 class="text-xl font-bold text-white uppercase"><i class="fa-solid fa-users text-teal-400 mr-2"></i> Top Card Holders</h2>
+          <p class="text-xs text-slate-400 mt-1">Community leaderboard and collector ranks.</p>
+        </div>
+        <div id="holders-content" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
+      </section>
+
+      <!-- HISTORY VIEW -->
+      <section id="view-history" class="hidden space-y-6">
+        <div class="glass-panel-3 rounded-2xl p-6">
+          <h2 class="text-xl font-bold text-white uppercase"><i class="fa-solid fa-clock-rotate-left text-cyan-400 mr-2"></i> Marketplace Ledger</h2>
+          <p class="text-xs text-slate-400 mt-1">Verified transaction records on the network.</p>
+        </div>
+        <div id="history-content" class="space-y-2"></div>
+      </section>
+
+      <!-- DASHBOARD / VAULT VIEW -->
+      <section id="view-dashboard" class="hidden space-y-6">
+        <div id="user-profile-banner" class="glass-panel-3 rounded-2xl p-6 relative overflow-hidden">
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 relative z-10">
+            <div class="flex items-center gap-4">
+              <div class="w-16 h-16 rounded-2xl overflow-hidden border-2 border-blue-500/50 bg-slate-800 shrink-0">
+                <img id="profile-avatar-img" src="https://api.dicebear.com/7.x/identicon/svg?seed=guest" class="w-full h-full object-cover">
+              </div>
+              <div class="space-y-1">
+                <div class="flex items-center gap-2">
+                  <h2 id="profile-display-name" class="text-lg font-bold text-white">Guest Collector</h2>
+                  <span id="profile-username-tag" class="text-xs font-mono text-blue-400">@guest</span>
+                </div>
+                <p id="profile-bio-text" class="text-xs text-slate-400 max-w-md">No bio added yet.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="glass-panel-3 rounded-2xl p-6">
+          <h2 class="text-xl font-bold text-white uppercase"><i class="fa-solid fa-vault text-blue-400 mr-2"></i> My Personal Vault</h2>
+        </div>
+        <div id="owned-cards-grid" class="glass-panel-3 rounded-2xl p-8 text-center text-xs text-slate-400">Log in with Google to view your owned cards.</div>
+      </section>
+
+      <!-- WISHLIST VIEW -->
+      <section id="view-wishlist" class="hidden space-y-6">
+        <div class="glass-panel-3 rounded-2xl p-6">
+          <h2 class="text-xl font-bold text-white uppercase"><i class="fa-solid fa-heart text-rose-400 mr-2"></i> Saved Wishlist</h2>
+        </div>
+        <div id="wishlist-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4"></div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- ADMIN ANALYTICS HUB TAB                    -->
+      <!-- ========================================== -->
+      <section id="view-analytics" class="hidden space-y-6">
+        <div class="flex flex-wrap items-center justify-between gap-3 glass-panel-3 rounded-2xl p-6">
+          <div>
+            <span class="inline-flex px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/20 text-[10px] font-black uppercase tracking-widest">Eugene Card 3.0</span>
+            <h2 class="text-xl font-bold text-white uppercase mt-1"><i class="fa-solid fa-chart-line text-amber-400 mr-2"></i> Predictive Analytics Hub</h2>
+            <p class="text-xs text-slate-400 mt-0.5">Post-trade floor price estimation & market velocity intelligence</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="toggleAnalyticsLanguage()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-amber-400 font-mono font-bold text-xs rounded-xl border border-slate-700">
+              <i class="fa-solid fa-globe mr-1"></i> <span id="analytics-lang-label">EN</span>
+            </button>
+            <button onclick="renderAnalyticsHub()" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-amber-400 text-xs font-bold rounded-xl border border-slate-700 flex items-center gap-2">
+              <i class="fa-solid fa-rotate"></i> Refresh
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="glass-panel-3 rounded-3xl p-5 space-y-2">
+            <span class="text-xs text-slate-400 font-bold">Realized Sales Volume</span>
+            <p id="stat-total-volume" class="text-2xl font-black text-white font-mono">Rp 0</p>
+            <p class="text-[10px] text-emerald-400 font-bold"><i class="fa-solid fa-arrow-trend-up"></i> Settled QRIS Trades</p>
+          </div>
+          <div class="glass-panel-3 rounded-3xl p-5 space-y-2">
+            <span class="text-xs text-slate-400 font-bold">Current Market Cap</span>
+            <p id="stat-total-valuation" class="text-2xl font-black text-white font-mono">Rp 0</p>
+            <p id="stat-total-cards" class="text-[10px] text-slate-500">Across 0 database cards</p>
+          </div>
+          <div class="glass-panel-3 rounded-3xl p-5 space-y-2">
+            <span class="text-xs text-slate-400 font-bold">12-Month Est. Vault Cap</span>
+            <p id="stat-future-valuation" class="text-2xl font-black text-amber-400 font-mono">Rp 0</p>
+            <p id="stat-appreciation-rate" class="text-[10px] text-emerald-400 font-bold">+0% projected gain</p>
+          </div>
+          <div class="glass-panel-3 rounded-3xl p-5 space-y-2">
+            <span class="text-xs text-slate-400 font-bold">Trade Stability Index</span>
+            <p id="stat-stability-index" class="text-2xl font-black text-teal-400 font-mono">0%</p>
+            <p class="text-[10px] text-teal-300 font-bold">Low Volatility Rating</p>
+          </div>
+        </div>
+
+        <!-- CHARTS -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="lg:col-span-2 glass-panel-3 rounded-3xl p-6 space-y-4">
+            <h3 class="text-base font-extrabold text-white uppercase tracking-wider"><i class="fa-solid fa-chart-line text-amber-400 mr-2"></i> 6–12 Month Valuation Forecast</h3>
+            <div class="w-full h-72 relative"><canvas id="trendForecastChart"></canvas></div>
+          </div>
+          <div class="glass-panel-3 rounded-3xl p-6 space-y-4 flex flex-col justify-between">
+            <h3 class="text-base font-extrabold text-white uppercase tracking-wider"><i class="fa-solid fa-pie-chart text-teal-400 mr-2"></i> Rarity Distribution</h3>
+            <div class="w-full h-56 relative my-auto"><canvas id="tierDistributionChart"></canvas></div>
+            <div class="text-xs text-slate-400 flex justify-around border-t border-slate-800 pt-3">
+              <span>Premium: <strong id="premium-count-badge" class="text-amber-400">0</strong></span>
+              <span>Standard: <strong id="standard-count-badge" class="text-blue-400">0</strong></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- SIMULATOR TABLE -->
+        <div class="glass-panel-3 rounded-3xl p-6 space-y-4">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-800 pb-4">
+            <h3 class="text-base font-extrabold text-white uppercase tracking-wider"><i class="fa-solid fa-sliders text-amber-400 mr-2"></i> Post-Trade Price Estimation Simulator</h3>
+            <div class="flex items-center gap-2">
+              <button onclick="setGrowthScenario('conservative')" id="btn-scenario-conservative" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800 text-slate-400">Conservative</button>
+              <button onclick="setGrowthScenario('moderate')" id="btn-scenario-moderate" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-500 text-slate-950">Moderate</button>
+              <button onclick="setGrowthScenario('bullish')" id="btn-scenario-bullish" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800 text-slate-400">Bullish</button>
+            </div>
+          </div>
+          <div class="overflow-x-auto max-h-[500px] rounded-2xl border border-slate-800">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-950 text-slate-400 border-b border-slate-800 sticky top-0 font-bold uppercase">
+                <tr>
+                  <th class="p-3.5">Serial</th><th class="p-3.5">Card Name</th><th class="p-3.5">Type</th><th class="p-3.5">Current Floor</th>
+                  <th class="p-3.5 text-emerald-400">Est. Price After Trade</th><th class="p-3.5 text-emerald-400">Gain</th>
+                  <th class="p-3.5 text-indigo-300">6-Mo. Est.</th><th class="p-3.5 text-indigo-400">12-Mo. Est.</th><th class="p-3.5 text-right">Rating</th>
+                </tr>
+              </thead>
+              <tbody id="predictive-table-body" class="divide-y divide-slate-800 bg-slate-950/40">
+                <tr><td colspan="9" class="p-6 text-center text-slate-500">Loading predictive analytics...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- ADMIN REVENUE HUB TAB                      -->
+      <!-- ========================================== -->
+      <section id="view-revenue" class="hidden space-y-6">
+        <div class="flex flex-wrap items-center justify-between gap-3 glass-panel-3 rounded-2xl p-6">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-2xl bg-emerald-950/50 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-xl">
+              <i class="fa-solid fa-sack-dollar"></i>
+            </div>
+            <div>
+              <h2 class="font-extrabold text-xl text-white tracking-wider uppercase">ADMIN REVENUE & FINANCIAL HUB</h2>
+              <p class="text-xs text-slate-400 mt-0.5">Dedicated Financial & Profitability Analytics Engine</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-3">
+            <button onclick="toggleRevenueLanguage()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-emerald-400 font-mono font-bold text-xs rounded-xl border border-slate-700">
+              <i class="fa-solid fa-globe mr-1"></i> <span id="rev-lang-label">EN</span>
+            </button>
+            <select id="time-filter" onchange="applyRevenueFilter()" class="bg-slate-950 border border-emerald-500/30 rounded-xl px-4 py-2 text-xs text-emerald-400 font-bold focus:outline-none cursor-pointer">
+              <option value="ALL">All Time</option><option value="TODAY">Today</option><option value="WEEK">This Week</option><option value="MONTH">This Month</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- KPI CARDS -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="glass-panel-3 rounded-2xl p-5 space-y-2">
+            <p class="text-[10px] text-slate-400 font-extrabold uppercase">GROSS SALES REVENUE</p>
+            <p id="kpi-gross-sales" class="text-2xl font-black text-emerald-400 font-mono">Rp 0</p>
+          </div>
+          <div class="glass-panel-3 rounded-2xl p-5 space-y-2">
+            <p class="text-[10px] text-slate-400 font-extrabold uppercase">PLATFORM TAX (2% FEE)</p>
+            <p id="kpi-platform-tax" class="text-2xl font-black text-amber-400 font-mono">Rp 0</p>
+          </div>
+          <div class="glass-panel-3 rounded-2xl p-5 space-y-2">
+            <p class="text-[10px] text-slate-400 font-extrabold uppercase">COMPLETED SALES</p>
+            <p id="kpi-completed-sales" class="text-2xl font-black text-white font-mono">0</p>
+          </div>
+          <div class="glass-panel-3 rounded-2xl p-5 space-y-2">
+            <p class="text-[10px] text-slate-400 font-extrabold uppercase">AVERAGE ORDER VALUE</p>
+            <p id="kpi-avg-order-value" class="text-2xl font-black text-emerald-400 font-mono">Rp 0</p>
+          </div>
+        </div>
+
+        <!-- CHARTS -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          <div class="lg:col-span-2 glass-panel-3 rounded-3xl p-6 shadow-xl">
+            <h3 class="text-sm font-black text-white tracking-wider mb-2">SALES TREND</h3>
+            <div class="h-64 relative"><canvas id="revenueTrendChart"></canvas></div>
+          </div>
+          <div class="glass-panel-3 rounded-3xl p-6 shadow-xl">
+            <h3 class="text-sm font-black text-white tracking-wider mb-2">REVENUE MIX</h3>
+            <div class="h-48 relative"><canvas id="revenueMixChart"></canvas></div>
+            <div id="revenue-mix-legend" class="grid grid-cols-2 gap-2 mt-3"></div>
+          </div>
+        </div>
+
+        <!-- PROFITABILITY TABLE -->
+        <div class="glass-panel-3 rounded-3xl p-6 space-y-4">
+          <h3 class="text-xs font-extrabold text-white uppercase tracking-wider">CARD-LEVEL PROFITABILITY BREAKDOWN</h3>
+          <div class="overflow-x-auto max-h-[450px]">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-950 text-slate-400 border-b border-slate-800 sticky top-0">
+                <tr><th class="p-3.5">Serial</th><th class="p-3.5">Card Name</th><th class="p-3.5">Base Price</th><th class="p-3.5 text-emerald-400">Total Sales Revenue</th><th class="p-3.5">Status</th></tr>
+              </thead>
+              <tbody id="card-profitability-tbody" class="divide-y divide-slate-800">
+                <tr><td colspan="5" class="p-6 text-center text-slate-500">Loading revenue records...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ADMIN COMMAND CENTER OVERVIEW -->
+      <section id="view-admin" class="hidden space-y-6">
+        <div class="glass-panel-3 rounded-2xl p-6 flex justify-between items-center">
+          <div>
+            <h2 class="text-xl font-bold text-white uppercase"><i class="fa-solid fa-shield-halved text-rose-400 mr-2"></i> Admin Command Center 3.0</h2>
+            <p class="text-xs text-slate-400 mt-1">Marketplace control room: operations, collectors, inventory, auctions, trades, and finance.</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <div class="glass-panel-3 rounded-2xl p-5"><p class="text-[10px] text-slate-500 uppercase font-black">Cards</p><p id="admin-stat-cards" class="text-3xl font-black mt-1 text-white">—</p></div>
+          <div class="glass-panel-3 rounded-2xl p-5"><p class="text-[10px] text-slate-500 uppercase font-black">Inventory Floor</p><p id="admin-stat-inventory" class="text-3xl font-black mt-1 text-emerald-400">—</p></div>
+          <div class="glass-panel-3 rounded-2xl p-5"><p class="text-[10px] text-slate-500 uppercase font-black">Collectors</p><p id="admin-stat-collectors" class="text-3xl font-black mt-1 text-amber-400">—</p></div>
+          <div class="glass-panel-3 rounded-2xl p-5"><p class="text-[10px] text-slate-500 uppercase font-black">Pending Orders</p><p id="admin-stat-trades" class="text-3xl font-black mt-1 text-indigo-400">—</p></div>
+        </div>
+
+        <div class="glass-panel-3 rounded-2xl p-6 space-y-3">
+          <h4 class="text-xs font-bold text-slate-300 uppercase">Pending Transactions Queue (QRIS, Trades & Sell-Backs)</h4>
+          <div id="admin-orders-queue" class="space-y-2"><p class="text-xs text-slate-500">No pending orders waiting for approval.</p></div>
+        </div>
+      </section>
+
+      <!-- INVENTORY VIEW -->
+      <section id="view-inventory" class="hidden space-y-6">
+        <div class="glass-panel-3 rounded-2xl p-6 flex justify-between items-center">
+          <div>
+            <h2 class="text-xl font-bold text-white uppercase"><i class="fa-solid fa-boxes-stacked text-amber-400 mr-2"></i> Inventory Control</h2>
+            <p class="text-xs text-slate-400 mt-1">Manage specs, edit owners, export backup JSON, or mint new cards.</p>
+          </div>
+          <button onclick="openCardEditorModal()" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-xl shadow">+ Mint Card</button>
+        </div>
+        <div class="glass-panel-3 rounded-2xl overflow-hidden">
+          <table class="w-full text-left text-xs text-slate-300">
+            <thead class="bg-slate-800/80 text-[10px] uppercase text-slate-400 font-semibold border-b border-slate-800">
+              <tr><th class="p-3">Serial</th><th class="p-3">Card Name</th><th class="p-3">Edition</th><th class="p-3">Tier</th><th class="p-3">Price</th><th class="p-3">Owner</th><th class="p-3">Status</th><th class="p-3 text-right">Actions</th></tr>
+            </thead>
+            <tbody id="inventory-table-body" class="divide-y divide-slate-800"></tbody>
+          </table>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- TOAST -->
+  <div id="toast" class="fixed bottom-6 right-6 z-[10000] bg-slate-900 border border-blue-500/40 text-blue-400 text-xs font-semibold px-4 py-3 rounded-xl shadow-2xl transform translate-y-20 opacity-0 transition-all pointer-events-none">
+    <span id="toast-msg">Action completed.</span>
+  </div>
+
+  <!-- Supabase JS Client Library -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-init.js"></script>
+
+  <script>
+    const ADMIN_EMAILS = ['eugene.aquila06@gmail.com', 'yujinybwork@gmail.com', 'eugene.aquila06'];
+    const QRIS_STRING_PAYLOAD = "00020101021126610014COM.GO-JEK.WWW01189360091430419400360210G0419400360303UMI51440014ID.CO.QRIS.WWW0215ID10265490344800303UMI5204594453033605802ID5925Eugene Card, Toko Kartu &6012TORAJA UTARA61059183162070703A0163048BD9";
+
+    let currentUser = null;
+    let currentFilter = 'ALL';
+    let inventory = [];
+    let wishlist = new Set(JSON.parse(localStorage.getItem('eugene_wishlist_data') || '[]'));
+    let shoppingCart = new Set(JSON.parse(localStorage.getItem('eugene_cart_data') || '[]'));
+    let tradeProposals = JSON.parse(localStorage.getItem('eugene_trade_proposals') || '[]');
+    let pendingOrders = JSON.parse(localStorage.getItem('eugene_pending_orders') || '[]');
+    let liveAuctions = JSON.parse(localStorage.getItem('eugene_live_auctions') || '[]');
+    let transactionHistory = JSON.parse(localStorage.getItem('eugene_transaction_history') || '[]');
+
+    let currentScenario = 'moderate';
+    let currentAnalyticsLang = 'EN';
+    let currentRevLang = 'EN';
+    let trendChartInstance = null;
+    let tierChartInstance = null;
+    let revenueTrendChartInstance = null;
+    let revenueMixChartInstance = null;
+
+    const SCENARIOS = {
+      conservative: { std6m: 1.05, std12m: 1.10, prem6m: 1.12, prem12m: 1.20, tradeBump: 1.03 },
+      moderate:     { std6m: 1.15, std12m: 1.25, prem6m: 1.25, prem12m: 1.50, tradeBump: 1.05 },
+      bullish:      { std6m: 1.35, std12m: 1.50, prem6m: 1.50, prem12m: 2.00, tradeBump: 1.10 }
+    };
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (window.location.hash.includes('access_token')) {
+        window.history.replaceState(null, '', window.location.pathname);
+      }
+
+      await fetchDatabaseInventory();
+
+      if (window.supabaseClient) {
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        if (session?.user) handleSupabaseUserSession(session.user);
+
+        supabaseClient.auth.onAuthStateChange((event, session) => {
+          if (session?.user && (!currentUser || currentUser.email !== session.user.email)) {
+            handleSupabaseUserSession(session.user);
+          } else if (!session?.user) {
+            currentUser = null;
+            renderAuthHeader();
+          }
+        });
+      }
+
+      renderAuthHeader();
+      renderHistoryLedger();
+      renderAdminOrdersQueue();
+      renderTradeProposals();
+      renderAuctionsGrid();
+
+      const savedTab = localStorage.getItem('eugene_current_tab') || 'catalog';
+      switchTab(savedTab);
+    });
+
+    async function fetchDatabaseInventory() {
+      if (window.supabaseClient) {
+        const { data, error } = await supabaseClient.from('inventory').select('*').order('id', { ascending: true });
+        if (!error && data && data.length > 0) {
+          inventory = data;
+          renderCardGrid();
+          renderInventoryTable();
+          updateRemainingCardCount();
+          return;
+        }
+      }
+      inventory = JSON.parse(localStorage.getItem('eugene_inventory_data') || '[]');
+      renderCardGrid();
+      renderInventoryTable();
+      updateRemainingCardCount();
+    }
+
+    function isAdminEmail(email) {
+      if (!email) return false;
+      const lower = email.toLowerCase().trim();
+      return ADMIN_EMAILS.some(admin => lower === admin || lower.startsWith(admin));
+    }
+
+    function handleSupabaseUserSession(user) {
+      const email = user.email ? user.email.toLowerCase() : '';
+      const name = user.user_metadata?.full_name || email.split('@')[0];
+      const isAdmin = isAdminEmail(email);
+
+      currentUser = {
+        id: user.id, email, name,
+        username: name.toLowerCase().replace(/\s+/g, '_'),
+        isAdmin,
+        avatarUrl: user.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/identicon/svg?seed=${email}`
+      };
+
+      renderAuthHeader();
+      renderCardGrid();
+      renderInventoryTable();
+    }
+
+    async function logoutUser() {
+      if (window.supabaseClient) await supabaseClient.auth.signOut();
+      currentUser = null;
+      renderAuthHeader();
+      switchTab('catalog');
+      showToast('Logged out.');
+    }
+
+    function renderAuthHeader() {
+      const container = document.getElementById('auth-header-container');
+      const adminNavs = document.querySelectorAll('.admin-only-nav');
+      const adminSidebar = document.getElementById('admin-sidebar');
+      const adminSep = document.getElementById('admin-nav-separator');
+
+      if (currentUser?.isAdmin) {
+        adminNavs.forEach(el => el.classList.remove('hidden'));
+        if (adminSidebar) adminSidebar.classList.remove('hidden');
+        if (adminSep) adminSep.classList.remove('hidden');
+
+        container.innerHTML = `
+          <div class="flex items-center gap-2 bg-slate-800 border border-slate-700 rounded-xl p-1 pl-2.5">
+            <img src="${currentUser.avatarUrl}" class="w-6 h-6 rounded-full object-cover">
+            <div class="flex flex-col text-right">
+              <span class="text-xs font-bold text-white">${currentUser.name}</span>
+              <span class="text-[9px] text-rose-400 font-bold font-mono">Admin 3.0</span>
+            </div>
+            <button onclick="logoutUser()" class="p-1.5 text-slate-400 hover:text-rose-400 rounded-lg"><i class="fa-solid fa-right-from-bracket"></i></button>
+          </div>
+        `;
+      } else {
+        adminNavs.forEach(el => el.classList.add('hidden'));
+        if (adminSidebar) adminSidebar.classList.add('hidden');
+        if (adminSep) adminSep.classList.add('hidden');
+
+        if (currentUser) {
+          container.innerHTML = `
+            <div class="flex items-center gap-2 bg-slate-800 border border-slate-700 rounded-xl p-1 pl-2.5">
+              <img src="${currentUser.avatarUrl}" class="w-6 h-6 rounded-full">
+              <span class="text-xs font-bold text-white">${currentUser.name}</span>
+              <button onclick="logoutUser()" class="p-1.5 text-slate-400 hover:text-rose-400"><i class="fa-solid fa-right-from-bracket"></i></button>
+            </div>
+          `;
+        } else {
+          container.innerHTML = `<button onclick="openAuthModal()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-xl shadow">Log In</button>`;
+        }
+      }
+    }
+
+    function switchTab(tabName) {
+      const adminOnlyTabs = ['admin', 'inventory', 'analytics', 'revenue'];
+      if (adminOnlyTabs.includes(tabName) && !currentUser?.isAdmin) {
+        return showToast('Admin access required.');
+      }
+
+      const allViews = ['catalog', 'trade', 'auction', 'trade-req', 'inbox', 'holders', 'history', 'dashboard', 'wishlist', 'analytics', 'revenue', 'admin', 'inventory'];
+      allViews.forEach(t => {
+        const v = document.getElementById(`view-${t}`);
+        if (v) v.classList.add('hidden');
+      });
+
+      const activeView = document.getElementById(`view-${tabName}`);
+      if (activeView) activeView.classList.remove('hidden');
+
+      document.querySelectorAll('.ec3a-link').forEach(l => l.classList.remove('active'));
+      const activeSideNav = document.getElementById(`side-nav-${tabName}`);
+      if (activeSideNav) activeSideNav.classList.add('active');
+
+      localStorage.setItem('eugene_current_tab', tabName);
+
+      if (tabName === 'analytics') renderAnalyticsHub();
+      if (tabName === 'revenue') renderRevenueHub();
+      if (tabName === 'admin') renderAdminCommandOverview();
+    }
+
+    // Analytics Hub Rendering
+    function renderAnalyticsHub() {
+      const cards = inventory;
+      let currentValuation = 0;
+      let futureValuation = 0;
+      let premiumCount = 0;
+      let standardCount = 0;
+      let stabilitySum = 0;
+
+      const sc = SCENARIOS[currentScenario];
+
+      const predictiveCards = cards.map(c => {
+        const currentPrice = parseFloat(c.price || c.baseFloorPrice || 100000);
+        const isPremium = c.type === 'PREMIUM';
+        if (isPremium) premiumCount++; else standardCount++;
+
+        const mult12m = isPremium ? sc.prem12m : sc.std12m;
+        const est6m = Math.round(currentPrice * (isPremium ? sc.prem6m : sc.std6m));
+        const est12m = Math.round(currentPrice * mult12m);
+        const estNextTradePrice = Math.round(currentPrice * (isPremium ? sc.tradeBump + 0.02 : sc.tradeBump));
+
+        currentValuation += currentPrice;
+        futureValuation += est12m;
+        stabilitySum += (isPremium ? 98 : 90);
+
+        return {
+          ...c, currentPrice, estNextTradePrice,
+          nextTradeDelta: estNextTradePrice - currentPrice,
+          nextTradePctGain: Math.round(((estNextTradePrice - currentPrice) / currentPrice) * 100),
+          est6m, est12m,
+          stabilityScore: isPremium ? 98 : 90
+        };
+      });
+
+      document.getElementById('stat-total-valuation').innerText = formatIDR(currentValuation);
+      document.getElementById('stat-future-valuation').innerText = formatIDR(futureValuation);
+      document.getElementById('stat-stability-index').innerText = cards.length ? `${Math.round(stabilitySum / cards.length)}%` : '0%';
+      document.getElementById('stat-total-cards').innerText = `Across ${cards.length} database cards`;
+      document.getElementById('premium-count-badge').innerText = premiumCount;
+      document.getElementById('standard-count-badge').innerText = standardCount;
+
+      renderAnalyticsTable(predictiveCards);
+      renderTrendAndForecastChart(currentValuation, futureValuation);
+      renderTierDistributionChart(premiumCount, standardCount);
+    }
+
+    function renderAnalyticsTable(cards) {
+      const tbody = document.getElementById('predictive-table-body');
+      if (!tbody) return;
+      if (!cards.length) {
+        tbody.innerHTML = `<tr><td colspan="9" class="p-6 text-center text-slate-500">No cards in inventory.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = cards.map(c => `
+        <tr class="hover:bg-slate-900/60 border-b border-slate-800">
+          <td class="p-3.5 font-mono font-bold text-amber-400">${c.serial}</td>
+          <td class="p-3.5 font-bold text-white">${c.name}</td>
+          <td class="p-3.5 font-mono text-amber-400">${c.type}</td>
+          <td class="p-3.5 font-mono text-slate-300">${formatIDR(c.currentPrice)}</td>
+          <td class="p-3.5 font-mono text-emerald-400 font-bold">${formatIDR(c.estNextTradePrice)}</td>
+          <td class="p-3.5 font-mono text-emerald-400">+${c.nextTradePctGain}%</td>
+          <td class="p-3.5 font-mono text-indigo-300">${formatIDR(c.est6m)}</td>
+          <td class="p-3.5 font-mono text-indigo-400 font-bold">${formatIDR(c.est12m)}</td>
+          <td class="p-3.5 text-right"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-teal-500/20 text-teal-300">${c.stabilityScore}% Stable</span></td>
+        </tr>
+      `).join('');
+    }
+
+    function renderTrendAndForecastChart(currentVal, futureVal) {
+      const canvas = document.getElementById('trendForecastChart');
+      if (!canvas) return;
+      if (trendChartInstance) trendChartInstance.destroy();
+
+      trendChartInstance = new Chart(canvas.getContext('2d'), {
+        type: 'line',
+        data: {
+          labels: ['Current', '+3 Months', '+6 Months (Est.)', '+9 Months', '+12 Months (Est.)'],
+          datasets: [{
+            label: 'Valuation Forecast (IDR)',
+            data: [currentVal, currentVal*1.1, currentVal*1.25, currentVal*1.4, futureVal],
+            borderColor: '#818cf8', backgroundColor: 'rgba(129, 140, 248, 0.15)', fill: true, tension: 0.35
+          }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+      });
+    }
+
+    function renderTierDistributionChart(premium, standard) {
+      const canvas = document.getElementById('tierDistributionChart');
+      if (!canvas) return;
+      if (tierChartInstance) tierChartInstance.destroy();
+
+      tierChartInstance = new Chart(canvas.getContext('2d'), {
+        type: 'doughnut',
+        data: {
+          labels: ['Premium', 'Standard'],
+          datasets: [{ data: [premium || 1, standard || 1], backgroundColor: ['#fbbf24', '#3b82f6'], borderWidth: 0 }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+      });
+    }
+
+    function setGrowthScenario(key) {
+      currentScenario = key;
+      ['conservative', 'moderate', 'bullish'].forEach(k => {
+        const btn = document.getElementById(`btn-scenario-${k}`);
+        if (btn) btn.className = k === key ? 'px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-500 text-slate-950' : 'px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800 text-slate-400';
+      });
+      renderAnalyticsHub();
+    }
+
+    // Revenue Hub Rendering
+    function renderRevenueHub() {
+      let grossSales = 0;
+      let completedCount = 0;
+      const cardRevenues = {};
+
+      pendingOrders.forEach(ord => {
+        if (ord.grossAmount) {
+          grossSales += ord.grossAmount;
+          completedCount++;
+          if (ord.card) cardRevenues[ord.card.id] = (cardRevenues[ord.card.id] || 0) + ord.grossAmount;
+        }
+      });
+
+      const platformTax = grossSales * 0.02;
+      const aov = completedCount > 0 ? grossSales / completedCount : 0;
+
+      document.getElementById('kpi-gross-sales').innerText = formatIDR(grossSales);
+      document.getElementById('kpi-platform-tax').innerText = formatIDR(platformTax);
+      document.getElementById('kpi-completed-sales').innerText = completedCount;
+      document.getElementById('kpi-avg-order-value').innerText = formatIDR(aov);
+
+      renderRevenueCharts(grossSales, platformTax);
+      renderCardProfitabilityTable(cardRevenues);
+    }
+
+    function renderRevenueCharts(gross, tax) {
+      const trendCanvas = document.getElementById('revenueTrendChart');
+      const mixCanvas = document.getElementById('revenueMixChart');
+      if (!trendCanvas || !mixCanvas) return;
+
+      if (revenueTrendChartInstance) revenueTrendChartInstance.destroy();
+      revenueTrendChartInstance = new Chart(trendCanvas.getContext('2d'), {
+        type: 'line',
+        data: {
+          labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+          datasets: [{ label: 'Sales', data: [0, gross*0.2, gross*0.4, gross*0.5, gross*0.7, gross*0.85, gross], borderColor: '#34d399', backgroundColor: 'rgba(52,211,153,0.1)', fill: true, tension: 0.3 }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+      });
+
+      if (revenueMixChartInstance) revenueMixChartInstance.destroy();
+      revenueMixChartInstance = new Chart(mixCanvas.getContext('2d'), {
+        type: 'doughnut',
+        data: { labels: ['Gross Sales', 'Platform Fee (2%)'], datasets: [{ data: [Math.max(gross, 1), Math.max(tax, 1)], backgroundColor: ['#34d399', '#fbbf24'], borderWidth: 0 }] },
+        options: { responsive: true, maintainAspectRatio: false, cutout: '70%' }
+      });
+
+      document.getElementById('revenue-mix-legend').innerHTML = `
+        <div class="bg-emerald-500/10 p-2 rounded-xl text-center"><span class="text-[9px] text-slate-400">Gross</span><p class="text-xs font-bold text-emerald-300">${formatIDR(gross)}</p></div>
+        <div class="bg-amber-500/10 p-2 rounded-xl text-center"><span class="text-[9px] text-slate-400">2% Fee</span><p class="text-xs font-bold text-amber-300">${formatIDR(tax)}</p></div>
+      `;
+    }
+
+    function renderCardProfitabilityTable(revenues) {
+      const tbody = document.getElementById('card-profitability-tbody');
+      if (!tbody) return;
+
+      if (!inventory.length) {
+        tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-500">No cards found.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = inventory.map(c => `
+        <tr class="hover:bg-slate-900/60 border-b border-slate-800">
+          <td class="p-3.5 font-mono font-bold text-amber-400">${c.serial}</td>
+          <td class="p-3.5 font-bold text-white">${c.name}</td>
+          <td class="p-3.5 font-mono text-slate-300">${formatIDR(c.price)}</td>
+          <td class="p-3.5 font-mono text-emerald-400 font-bold">${formatIDR(revenues[c.id] || 0)}</td>
+          <td class="p-3.5"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${c.status === 'SOLD' ? 'bg-red-500/20 text-red-400' : 'bg-emerald-500/20 text-emerald-400'}">${c.status}</span></td>
+        </tr>
+      `).join('');
+    }
+
+    function renderAdminCommandOverview() {
+      document.getElementById('admin-stat-cards').textContent = inventory.length.toLocaleString();
+      document.getElementById('admin-stat-inventory').textContent = formatIDR(inventory.reduce((a, c) => a + Number(c.price || 0), 0));
+      document.getElementById('admin-stat-collectors').textContent = new Set(inventory.map(c => c.owner).filter(Boolean)).size.toLocaleString();
+      document.getElementById('admin-stat-trades').textContent = pendingOrders.length.toLocaleString();
+    }
+
+    // Standard Grid & UI Renderers
+    function renderCardGrid() {
+      const grid = document.getElementById('card-grid');
+      if (!grid) return;
+      const searchVal = (document.getElementById('search-input')?.value || '').toLowerCase();
+      
+      const filtered = inventory.filter(card => {
+        const matchesFilter = currentFilter === 'ALL' ? true : card.type === currentFilter;
+        const matchesSearch = card.serial.toLowerCase().includes(searchVal) || card.name.toLowerCase().includes(searchVal);
+        return matchesFilter && matchesSearch;
+      });
+
+      grid.innerHTML = filtered.map(card => `
+        <div class="${card.type === 'PREMIUM' ? 'card-holo-premium' : 'card-holo-standard'} rounded-xl p-3 flex flex-col justify-between relative cursor-pointer" onclick="openCardDetailsModal('${card.id}')">
+          <div class="w-full aspect-[4/5] bg-slate-900 rounded-lg border border-slate-800 p-1 mb-2 flex items-center justify-center overflow-hidden">
+            <img src="${card.imgUrl}" class="w-full h-full object-contain rounded">
+          </div>
+          <div>
+            <div class="flex justify-between mb-1"><span class="font-bold text-blue-400 font-mono text-xs">${card.serial}</span><span class="font-mono font-bold text-emerald-400 text-xs">IDR ${card.price.toLocaleString()}</span></div>
+            <p class="text-[11px] font-bold text-white truncate mb-2">${card.name}</p>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderInventoryTable() {
+      const tbody = document.getElementById('inventory-table-body');
+      if (!tbody) return;
+      tbody.innerHTML = inventory.map(card => `
+        <tr class="hover:bg-slate-800/40">
+          <td class="p-3 font-mono font-bold text-blue-400">${card.serial}</td>
+          <td class="p-3 font-semibold text-white">${card.name}</td>
+          <td class="p-3 text-slate-400">${card.edition || 'Beta 3.0'}</td>
+          <td class="p-3">${card.type}</td>
+          <td class="p-3 font-mono text-emerald-400">IDR ${card.price.toLocaleString()}</td>
+          <td class="p-3 font-mono text-slate-400">${card.owner || '-'}</td>
+          <td class="p-3">${card.status}</td>
+          <td class="p-3 text-right">
+            <button onclick="openCardEditorModal('${card.id}')" class="p-1 bg-slate-800 text-amber-300 rounded"><i class="fa-solid fa-pen"></i></button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function updateRemainingCardCount() {
+      const count = inventory.filter(c => c.status === 'AVAILABLE').length;
+      const countEl = document.getElementById('remaining-cards-count');
+      if (countEl) countEl.innerText = count;
+    }
+
+    function formatIDR(amount) {
+      return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(amount);
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toast-msg').innerText = msg;
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 3000);
+    }
+  </script>
+</body>
+</html>
