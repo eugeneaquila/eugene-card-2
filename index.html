@@ -1035,15 +1035,6 @@
 
   <!-- Supabase migration: Firebase legacy block disabled -->
   <script>
-      apiKey: "AIzaSyCm13Nh6k6W9wsL0_OPpjKZNrbSg-pFsuA",
-      authDomain: "eugene-card-marketplace.firebaseapp.com",
-      projectId: "eugene-card-marketplace",
-      storageBucket: "eugene-card-marketplace.firebasestorage.app",
-      messagingSenderId: "789014481646",
-      appId: "1:789014481646:web:3858909b429985005a41ff",
-      measurementId: "G-MRPT21P9M1"
-    };
-
     const db = null; // Firebase disabled - use Supabase data layer
     const auth = null; // Firebase disabled - use Supabase Auth
     const analytics = null; // Firebase disabled - use analytics_events
@@ -2440,8 +2431,7 @@
       renderAuthHeader();
       startAuctionTimer();
 
-      supabaseClient.auth.onAuthStateChange((event, session) => {
-        const user = session?.user;
+      auth.onAuthStateChanged((user) => {
         if (user) {
           handleUserSession(user);
         } else {
@@ -2520,14 +2510,9 @@
     function closeAuthModal() { document.getElementById('auth-modal').classList.add('hidden'); }
 
     async function loginWithGoogle() {
+      const provider = null; // Supabase Google OAuth
       try {
-        const { error } = await supabaseClient.auth.signInWithOAuth({
-          provider: 'google',
-          options: {
-            redirectTo: window.location.origin
-          }
-        });
-        if (error) throw error;
+        await auth.signInWithPopup(provider);
       } catch (error) {
         showToast('Google Login Error: ' + error.message);
       }
@@ -2576,16 +2561,8 @@
       localStorage.setItem(`profile_${email}`, JSON.stringify(profilePayload));
       setCookie(`profile_${email}`, profilePayload, 30);
       try {
-        await supabaseClient.from('profiles').upsert({
-          id: user.uid || user.id,
-          name,
-          username,
-          avatar_url: avatarUrl,
-          bio,
-          is_plus_member: isPlusMember,
-          role: isAdmin ? 'admin' : 'user'
-        });
-      } catch (e) { console.warn('Supabase profile save failed', e); }
+        await db.collection("profiles").doc(email).set(profilePayload, { merge: true });
+      } catch (e) {}
 
       closeAuthModal();
       renderAuthHeader();
@@ -2593,7 +2570,7 @@
     }
 
     async function logoutUser() {
-      await supabaseClient.auth.signOut();
+      await auth.signOut();
       currentUser = null;
       renderAuthHeader();
       switchTab('catalog');
