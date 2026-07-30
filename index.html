@@ -148,6 +148,11 @@
 
       <!-- Auth & Actions -->
       <div class="flex items-center gap-2 shrink-0">
+        <button onclick="showCartModal()" class="relative p-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl border border-slate-700 flex items-center justify-center transition-all" title="View Cart">
+          <i class="fa-solid fa-cart-shopping text-xs text-amber-400"></i>
+          <span id="cart-badge" class="absolute -top-1 -right-1 w-4 h-4 bg-amber-500 text-slate-950 font-bold text-[9px] rounded-full flex items-center justify-center">0</span>
+        </button>
+
         <button id="notif-toggle-btn" onclick="openNotifications()" class="relative p-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl border border-slate-700 flex items-center justify-center transition-all">
           <i class="fa-solid fa-bell text-xs text-blue-400"></i>
           <span id="notification-badge" class="absolute -top-1 -right-1 w-4 h-4 bg-blue-600 text-white font-bold text-[9px] rounded-full flex items-center justify-center">0</span>
@@ -178,6 +183,78 @@
 
       <div id="holder-modal-cards-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 pt-2">
       </div>
+    </div>
+  </div>
+
+  <!-- SHOPPING CART MODAL -->
+  <div id="cart-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 relative shadow-2xl space-y-4">
+      <button onclick="closeCartModal()" class="absolute top-4 right-4 w-7 h-7 rounded-lg bg-slate-800 text-slate-400 hover:text-white text-xs flex items-center justify-center">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <div class="flex items-center gap-2 border-b border-slate-800 pb-3">
+        <i class="fa-solid fa-cart-shopping text-amber-400"></i>
+        <h3 class="text-base font-bold text-white">Your Shopping Cart</h3>
+      </div>
+
+      <div id="cart-items-list" class="space-y-2 max-h-60 overflow-y-auto pr-1 divide-y divide-slate-800">
+      </div>
+
+      <div class="pt-2 border-t border-slate-800 flex justify-between items-center">
+        <span class="text-xs text-slate-400 font-bold uppercase">Total Due</span>
+        <span id="cart-total-price" class="text-base font-mono font-bold text-emerald-400">IDR 0</span>
+      </div>
+
+      <button onclick="checkoutCartQRIS()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow transition-all flex items-center justify-center gap-2">
+        <i class="fa-solid fa-qrcode"></i> Checkout All Items via QRIS
+      </button>
+    </div>
+  </div>
+
+  <!-- TRADE PROPOSAL MODAL -->
+  <div id="trade-proposal-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-4 relative shadow-2xl">
+      <button onclick="closeTradeProposalModal()" class="absolute top-4 right-4 w-7 h-7 rounded-lg bg-slate-800 text-slate-400 hover:text-white text-xs flex items-center justify-center">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <div class="flex items-center gap-2 border-b border-slate-800 pb-3">
+        <i class="fa-solid fa-handshake text-purple-400"></i>
+        <h3 class="text-base font-bold text-white">Propose Card Trade / Offer</h3>
+      </div>
+
+      <form onsubmit="submitTradeProposal(event)" class="space-y-3">
+        <input type="hidden" id="trade-target-card-id">
+
+        <div>
+          <label class="text-[10px] font-bold text-slate-400 uppercase">Target Item</label>
+          <div id="trade-target-summary" class="p-2.5 bg-slate-800/80 rounded-xl border border-slate-700 text-xs font-bold text-blue-400">
+            Selected Item
+          </div>
+        </div>
+
+        <div>
+          <label class="text-[10px] font-bold text-slate-400 uppercase">Select Card to Offer (Optional)</label>
+          <select id="trade-offered-card-id" class="w-full mt-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-purple-500">
+            <option value="">-- No Card Offered (Pure Cash Offer) --</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="text-[10px] font-bold text-slate-400 uppercase">Cash Amount Add-on (IDR)</label>
+          <input type="number" id="trade-cash-addon" min="0" value="0" class="w-full mt-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-purple-500 font-mono">
+        </div>
+
+        <div>
+          <label class="text-[10px] font-bold text-slate-400 uppercase">Proposal Note</label>
+          <textarea id="trade-note" rows="2" placeholder="Write a brief message to the owner..." class="w-full mt-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-purple-500"></textarea>
+        </div>
+
+        <button type="submit" class="w-full py-2.5 bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs rounded-xl shadow transition-all">
+          Submit Trade Proposal
+        </button>
+      </form>
     </div>
   </div>
 
@@ -475,7 +552,7 @@
         </div>
       </div>
 
-      <div id="card-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
+      <div id="card-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
     </section>
 
     <!-- TRADE VIEW -->
@@ -511,10 +588,12 @@
     <section id="view-trade-req" class="hidden space-y-6">
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
         <h2 class="text-xl font-bold text-white uppercase"><i class="fa-solid fa-handshake text-purple-400 mr-2"></i> Active Trade Proposals</h2>
-        <p class="text-xs text-slate-400 mt-1">Review incoming and outgoing trade proposals.</p>
+        <p class="text-xs text-slate-400 mt-1">Review incoming and outgoing card/cash trade proposals.</p>
       </div>
-      <div id="trade-req-content" class="bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center text-xs text-slate-400">
-        No active trade proposals pending.
+      <div id="trade-req-content" class="space-y-3">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center text-xs text-slate-400">
+          No active trade proposals pending.
+        </div>
       </div>
     </section>
 
@@ -596,7 +675,7 @@
 
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
         <h2 class="text-xl font-bold text-white uppercase"><i class="fa-solid fa-vault text-blue-400 mr-2"></i> My Personal Vault</h2>
-        <p class="text-xs text-slate-400 mt-1">Manage and inspect your owned card items.</p>
+        <p class="text-xs text-slate-400 mt-1">Manage, trade, or sell back your owned cards to Admin at floor price.</p>
       </div>
       <div id="owned-cards-grid" class="bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center text-xs text-slate-400">
         Log in with Google to view your owned cards inside your private binder.
@@ -621,15 +700,15 @@
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl">
           <p class="text-[10px] uppercase font-bold text-slate-400">Total Volume</p>
-          <p class="text-xl font-bold font-mono text-emerald-400 mt-1">IDR 12,500,000</p>
+          <p id="analytics-vol" class="text-xl font-bold font-mono text-emerald-400 mt-1">IDR 0</p>
         </div>
         <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl">
-          <p class="text-[10px] uppercase font-bold text-slate-400">Secondary Trades</p>
-          <p class="text-xl font-bold font-mono text-blue-400 mt-1">42 Completed</p>
+          <p class="text-[10px] uppercase font-bold text-slate-400">Recorded Transactions</p>
+          <p id="analytics-count" class="text-xl font-bold font-mono text-blue-400 mt-1">0 Completed</p>
         </div>
         <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl">
           <p class="text-[10px] uppercase font-bold text-slate-400">Active Holders</p>
-          <p class="text-xl font-bold font-mono text-purple-400 mt-1">19 Collectors</p>
+          <p id="analytics-holders" class="text-xl font-bold font-mono text-purple-400 mt-1">0 Collectors</p>
         </div>
       </div>
     </section>
@@ -639,11 +718,11 @@
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex justify-between items-center">
         <div>
           <h2 class="text-xl font-bold text-white uppercase"><i class="fa-solid fa-shield-halved text-rose-400 mr-2"></i> Admin Hub</h2>
-          <p class="text-xs text-slate-400 mt-1">Verify payment submissions and oversee orders.</p>
+          <p class="text-xs text-slate-400 mt-1">Verify payment submissions and oversee orders and sell-backs.</p>
         </div>
       </div>
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-3">
-        <h4 class="text-xs font-bold text-slate-300 uppercase">Pending QRIS Orders Queue</h4>
+        <h4 class="text-xs font-bold text-slate-300 uppercase">Pending Transactions Queue (QRIS & Sell-Backs)</h4>
         <div id="admin-orders-queue" class="space-y-2">
           <p class="text-xs text-slate-500">No pending orders waiting for manual approval.</p>
         </div>
@@ -717,19 +796,102 @@
 
     let currentUser = null;
     let currentFilter = 'ALL';
-    let inventory = [...INITIAL_JSON_BACKUP.cards];
+    
+    // LOAD PERSISTENT INVENTORY OR FALLBACK TO INITIAL
+    let inventory = [];
+    const storedInventory = localStorage.getItem('eugene_inventory_data');
+    if (storedInventory) {
+      try { inventory = JSON.parse(storedInventory); } catch(e) { inventory = [...INITIAL_JSON_BACKUP.cards]; }
+    } else {
+      inventory = [...INITIAL_JSON_BACKUP.cards];
+    }
+
+    // LOAD PERSISTENT WISHLIST
     let wishlist = new Set();
+    const storedWishlist = localStorage.getItem('eugene_wishlist_data');
+    if (storedWishlist) {
+      try { wishlist = new Set(JSON.parse(storedWishlist)); } catch(e) {}
+    }
+
+    // LOAD PERSISTENT TRADE REQUESTS
+    let tradeProposals = [];
+    const storedTrades = localStorage.getItem('eugene_trade_proposals');
+    if (storedTrades) {
+      try { tradeProposals = JSON.parse(storedTrades); } catch(e) {}
+    }
+
+    // LOAD PERSISTENT PENDING ADMIN ORDERS (QRIS & SELL-BACKS)
     let pendingOrders = [];
+    const storedPending = localStorage.getItem('eugene_pending_orders');
+    if (storedPending) {
+      try { pendingOrders = JSON.parse(storedPending); } catch(e) {}
+    }
+
+    // LOAD PERSISTENT HISTORY LEDGER
+    let transactionHistory = [];
+    const storedHistory = localStorage.getItem('eugene_transaction_history');
+    if (storedHistory) {
+      try { transactionHistory = JSON.parse(storedHistory); } catch(e) {}
+    } else {
+      // Default initial ledger record
+      transactionHistory = [
+        { id: 'tx-1', type: 'MINT', cardSerial: '*01', details: 'Genesis Minting of Eugene Premium #01', timestamp: '2026-07-29 10:00 AM' }
+      ];
+    }
+
+    let shoppingCart = new Set();
     let activeCardForAction = null;
     let selectedOwner = null;
 
-    // Chat Inbox Threads State
+    // Chat Inbox Threads State with LocalStorage Persistence
     let chatThreads = [
       { id: 't1', user: 'Eugene', avatar: 'https://api.dicebear.com/7.x/identicon/svg?seed=Eugene', messages: [{ sender: 'Eugene', text: 'Hey! Are you open to trading card *01?' }] },
       { id: 't2', user: 'kenneth_brilliant', avatar: 'https://api.dicebear.com/7.x/identicon/svg?seed=kenneth', messages: [{ sender: 'kenneth_brilliant', text: 'Just bought *005 via QRIS!' }] },
       { id: 't3', user: 'andi_rende', avatar: 'https://api.dicebear.com/7.x/identicon/svg?seed=andi', messages: [{ sender: 'andi_rende', text: 'Welcome to Eugene Card Marketplace.' }] }
     ];
+    const storedChats = localStorage.getItem('eugene_chat_threads');
+    if (storedChats) {
+      try { chatThreads = JSON.parse(storedChats); } catch(e) {}
+    }
     let activeChatThreadId = 't1';
+
+    function saveInventoryState() {
+      localStorage.setItem('eugene_inventory_data', JSON.stringify(inventory));
+    }
+
+    function saveWishlistState() {
+      localStorage.setItem('eugene_wishlist_data', JSON.stringify(Array.from(wishlist)));
+    }
+
+    function saveTradeProposalsState() {
+      localStorage.setItem('eugene_trade_proposals', JSON.stringify(tradeProposals));
+    }
+
+    function savePendingOrdersState() {
+      localStorage.setItem('eugene_pending_orders', JSON.stringify(pendingOrders));
+    }
+
+    function saveHistoryState() {
+      localStorage.setItem('eugene_transaction_history', JSON.stringify(transactionHistory));
+    }
+
+    function saveChatsState() {
+      localStorage.setItem('eugene_chat_threads', JSON.stringify(chatThreads));
+    }
+
+    function addHistoryRecord(type, cardSerial, details) {
+      const record = {
+        id: `tx-${Date.now()}`,
+        type: type,
+        cardSerial: cardSerial,
+        details: details,
+        timestamp: new Date().toLocaleString()
+      };
+      transactionHistory.unshift(record);
+      saveHistoryState();
+      renderHistoryLedger();
+      renderAnalyticsView();
+    }
 
     document.addEventListener('DOMContentLoaded', async () => {
       if (window.supabaseClient) {
@@ -754,6 +916,10 @@
       renderInventoryTable();
       updateRemainingCardCount();
       renderChatThreads();
+      renderHistoryLedger();
+      renderAdminOrdersQueue();
+      renderTradeProposals();
+      document.getElementById('wishlist-count-badge').innerText = wishlist.size;
     });
 
     function isAdminEmail(email) {
@@ -832,11 +998,14 @@
       currentUser = profile;
 
       // MERGE ACCOUNT STEP: Auto-reassign legacy 'Eugene' cards to logged-in profile
+      let modified = false;
       inventory.forEach(card => {
         if (card.owner === 'Eugene') {
           card.owner = currentUser.name;
+          modified = true;
         }
       });
+      if (modified) saveInventoryState();
 
       renderAuthHeader();
       renderUserProfileUI();
@@ -986,12 +1155,320 @@
       socialsContainer.innerHTML = socialHtml;
     }
 
+    // --- CARD GRID & DETAILS WITH OWNERSHIP AND BUY/CART/OFFER FEATURES ---
+    function renderCardGrid() {
+      const grid = document.getElementById('card-grid');
+      if (!grid) return;
+      
+      const searchVal = (document.getElementById('search-input')?.value || '').toLowerCase();
+      const filtered = inventory.filter(card => {
+        const matchesFilter = currentFilter === 'ALL' ? true : card.type === currentFilter;
+        const matchesSearch = card.serial.toLowerCase().includes(searchVal) || card.name.toLowerCase().includes(searchVal);
+        return matchesFilter && matchesSearch;
+      });
+
+      grid.innerHTML = filtered.map(card => {
+        const isOwned = card.owner && card.owner !== 'Unassigned';
+        const inCart = shoppingCart.has(card.id);
+
+        let ownerBadge = '';
+        if (isOwned) {
+          ownerBadge = `<span class="text-[9px] font-bold uppercase px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-400 border border-rose-500/30 truncate max-w-[110px]">OWNED: ${card.owner}</span>`;
+        } else {
+          ownerBadge = `<span class="text-[9px] font-bold uppercase px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">AVAILABLE</span>`;
+        }
+
+        return `
+          <div onclick="openCardDetailsModal('${card.id}')" class="${card.type === 'PREMIUM' ? 'card-holo-premium' : 'card-holo-standard'} rounded-xl p-3 flex flex-col justify-between relative cursor-pointer group">
+            
+            <div class="flex items-center justify-between mb-2 gap-1">
+              ${ownerBadge}
+              <button onclick="event.stopPropagation(); toggleWishlist('${card.id}')" class="text-xs ${wishlist.has(card.id) ? 'text-rose-500' : 'text-slate-500 hover:text-rose-400'}">
+                <i class="fa-solid fa-heart"></i>
+              </button>
+            </div>
+
+            <div class="w-full aspect-[4/5] bg-slate-900 rounded-lg border border-slate-800 p-1 flex flex-col justify-between mb-2 text-center overflow-hidden relative">
+              <img src="${card.imgUrl}" class="w-full h-full object-contain rounded">
+            </div>
+
+            <div>
+              <div class="flex items-center justify-between mb-0.5">
+                <span class="text-center font-bold text-blue-400 font-mono text-xs">${card.serial}</span>
+                <span class="text-xs font-mono font-bold text-emerald-400">IDR ${card.price.toLocaleString()}</span>
+              </div>
+              <p class="text-[11px] font-bold text-white truncate text-left mb-2.5">${card.name}</p>
+
+              <!-- DIRECT ACTION BUTTONS: BUY, CART, OFFER -->
+              <div class="grid grid-cols-3 gap-1 pt-1 border-t border-slate-800" onclick="event.stopPropagation()">
+                <button onclick="quickBuyCard('${card.id}')" class="py-1.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-[10px] rounded-lg transition-all flex items-center justify-center gap-1" title="Buy via QRIS">
+                  <i class="fa-solid fa-qrcode"></i> Buy
+                </button>
+
+                <button onclick="toggleCart('${card.id}')" class="py-1.5 ${inCart ? 'bg-amber-500 text-slate-950 font-bold' : 'bg-slate-800 hover:bg-slate-700 text-amber-400'} text-[10px] rounded-lg border border-slate-700 transition-all flex items-center justify-center gap-1" title="Add to Cart">
+                  <i class="fa-solid fa-cart-shopping"></i> ${inCart ? 'Added' : 'Cart'}
+                </button>
+
+                <button onclick="openTradeProposalModal('${card.id}')" class="py-1.5 bg-slate-800 hover:bg-slate-700 text-purple-400 font-bold text-[10px] rounded-lg border border-slate-700 transition-all flex items-center justify-center gap-1" title="Make Trade Offer">
+                  <i class="fa-solid fa-handshake"></i> Offer
+                </button>
+              </div>
+            </div>
+
+          </div>
+        `;
+      }).join('');
+    }
+
+    // --- TRADE PROPOSALS SYSTEM ---
+    function openTradeProposalModal(targetCardId) {
+      if (!currentUser) return openAuthModal();
+
+      const card = inventory.find(c => c.id === targetCardId);
+      if (!card) return;
+
+      document.getElementById('trade-target-card-id').value = card.id;
+      document.getElementById('trade-target-summary').innerText = `${card.name} (${card.serial}) - Value: IDR ${card.price.toLocaleString()}`;
+
+      // Populate user's owned cards to offer
+      const offerSelect = document.getElementById('trade-offered-card-id');
+      const myCards = inventory.filter(c => c.owner === currentUser.name || c.owner === currentUser.email);
+
+      offerSelect.innerHTML = `<option value="">-- No Card Offered (Pure Cash Offer) --</option>` + 
+        myCards.map(c => `<option value="${c.id}">${c.name} (${c.serial}) - Base: IDR ${c.price.toLocaleString()}</option>`).join('');
+
+      document.getElementById('trade-proposal-modal').classList.remove('hidden');
+    }
+
+    function closeTradeProposalModal() {
+      document.getElementById('trade-proposal-modal').classList.add('hidden');
+    }
+
+    function submitTradeProposal(e) {
+      e.preventDefault();
+      if (!currentUser) return openAuthModal();
+
+      const targetId = document.getElementById('trade-target-card-id').value;
+      const offeredId = document.getElementById('trade-offered-card-id').value;
+      const cashAddon = parseInt(document.getElementById('trade-cash-addon').value || '0', 10);
+      const note = document.getElementById('trade-note').value;
+
+      const targetCard = inventory.find(c => c.id === targetId);
+      const offeredCard = inventory.find(c => c.id === offeredId);
+
+      if (!targetCard) return;
+
+      const proposal = {
+        id: `prop-${Date.now()}`,
+        proposer: currentUser.name,
+        targetCard: targetCard,
+        offeredCard: offeredCard || null,
+        cashAddon: cashAddon,
+        note: note,
+        status: 'PENDING',
+        timestamp: new Date().toLocaleTimeString()
+      };
+
+      tradeProposals.unshift(proposal);
+      saveTradeProposalsState();
+
+      addHistoryRecord('TRADE_OFFER', targetCard.serial, `${currentUser.name} proposed a trade for ${targetCard.serial} (+ IDR ${cashAddon.toLocaleString()})`);
+
+      closeTradeProposalModal();
+      switchTab('trade-req');
+      renderTradeProposals();
+      showToast('Trade proposal submitted successfully!');
+    }
+
+    function renderTradeProposals() {
+      const container = document.getElementById('trade-req-content');
+      if (!container) return;
+
+      if (tradeProposals.length === 0) {
+        container.innerHTML = `<div class="bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center text-xs text-slate-400">No active trade proposals pending.</div>`;
+        return;
+      }
+
+      container.innerHTML = tradeProposals.map((p, idx) => `
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${p.status === 'PENDING' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : p.status === 'ACCEPTED' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'}">${p.status}</span>
+              <span class="text-xs text-slate-400">From: <strong class="text-white">${p.proposer}</strong> • ${p.timestamp}</span>
+            </div>
+            <p class="text-xs text-slate-200">
+              Target: <strong class="text-blue-400">${p.targetCard.name} (${p.targetCard.serial})</strong> 
+              ${p.offeredCard ? ` standard swap with <strong class="text-purple-400">${p.offeredCard.name} (${p.offeredCard.serial})</strong>` : ' (Cash Only Proposal)'}
+              ${p.cashAddon > 0 ? ` + <strong class="text-emerald-400">IDR ${p.cashAddon.toLocaleString()} Cash</strong>` : ''}
+            </p>
+            ${p.note ? `<p class="text-[11px] text-slate-400 italic">"${p.note}"</p>` : ''}
+          </div>
+
+          ${p.status === 'PENDING' ? `
+            <div class="flex items-center gap-2 shrink-0">
+              <button onclick="acceptTradeProposal(${idx})" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow transition-all">Accept</button>
+              <button onclick="rejectTradeProposal(${idx})" class="px-3 py-1.5 bg-slate-800 hover:bg-rose-500/20 text-rose-400 font-bold text-xs rounded-xl border border-slate-700 transition-all">Reject</button>
+            </div>
+          ` : ''}
+        </div>
+      `).join('');
+    }
+
+    function acceptTradeProposal(index) {
+      const p = tradeProposals[index];
+      p.status = 'ACCEPTED';
+
+      // Execute Ownership Swap
+      const target = inventory.find(c => c.id === p.targetCard.id);
+      if (target) {
+        target.owner = p.proposer;
+        target.status = 'SOLD';
+      }
+
+      if (p.offeredCard) {
+        const offered = inventory.find(c => c.id === p.offeredCard.id);
+        if (offered) {
+          offered.owner = p.targetCard.owner || 'Admin';
+        }
+      }
+
+      saveInventoryState();
+      saveTradeProposalsState();
+
+      addHistoryRecord('TRADE_ACCEPTED', p.targetCard.serial, `Trade accepted! ${p.targetCard.serial} transferred to ${p.proposer}.`);
+
+      renderTradeProposals();
+      renderCardGrid();
+      renderInventoryTable();
+      showToast('Trade proposal accepted and card ownership updated!');
+    }
+
+    function rejectTradeProposal(index) {
+      tradeProposals[index].status = 'REJECTED';
+      saveTradeProposalsState();
+      renderTradeProposals();
+      showToast('Trade proposal rejected.');
+    }
+
+    // --- SELL BACK TO ADMIN FEATURE FROM VAULT ---
+    function sellBackCardToAdmin(cardId) {
+      if (!currentUser) return openAuthModal();
+
+      const card = inventory.find(c => c.id === cardId);
+      if (!card) return;
+
+      const floorPrice = card.baseFloorPrice || card.price || 100000;
+
+      pendingOrders.push({
+        id: `sellback-${Date.now()}`,
+        card: card,
+        type: 'SELL_BACK',
+        buyer: 'Admin',
+        seller: currentUser.name,
+        payoutAmount: floorPrice,
+        timestamp: new Date().toLocaleTimeString()
+      });
+
+      savePendingOrdersState();
+      renderAdminOrdersQueue();
+
+      addHistoryRecord('SELL_BACK_REQUEST', card.serial, `${currentUser.name} requested sell-back of ${card.serial} to Admin for IDR ${floorPrice.toLocaleString()}`);
+
+      showToast(`Sell-back request submitted to Admin Hub for IDR ${floorPrice.toLocaleString()}!`);
+    }
+
+    // --- CART MANAGEMENT ---
+    function toggleCart(cardId) {
+      if (shoppingCart.has(cardId)) {
+        shoppingCart.delete(cardId);
+        showToast('Removed from cart.');
+      } else {
+        shoppingCart.add(cardId);
+        showToast('Added to cart!');
+      }
+      document.getElementById('cart-badge').innerText = shoppingCart.size;
+      renderCardGrid();
+    }
+
+    function showCartModal() {
+      const modal = document.getElementById('cart-modal');
+      const list = document.getElementById('cart-items-list');
+      const priceTag = document.getElementById('cart-total-price');
+
+      const items = inventory.filter(c => shoppingCart.has(c.id));
+
+      if (items.length === 0) {
+        list.innerHTML = `<p class="text-xs text-slate-500 py-4 text-center">Your shopping cart is empty.</p>`;
+        priceTag.innerText = `IDR 0`;
+      } else {
+        let total = 0;
+        list.innerHTML = items.map(card => {
+          total += card.price;
+          return `
+            <div class="flex items-center justify-between py-2">
+              <div class="flex items-center gap-2">
+                <img src="${card.imgUrl}" class="w-8 h-8 rounded border border-slate-800 object-contain">
+                <div>
+                  <p class="text-xs font-bold text-white">${card.name}</p>
+                  <p class="text-[10px] font-mono text-blue-400">${card.serial}</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-3">
+                <span class="text-xs font-mono font-bold text-emerald-400">IDR ${card.price.toLocaleString()}</span>
+                <button onclick="toggleCart('${card.id}'); showCartModal();" class="text-slate-500 hover:text-rose-400 text-xs"><i class="fa-solid fa-trash"></i></button>
+              </div>
+            </div>
+          `;
+        }).join('');
+        priceTag.innerText = `IDR ${total.toLocaleString()}`;
+      }
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeCartModal() {
+      document.getElementById('cart-modal').classList.add('hidden');
+    }
+
+    function checkoutCartQRIS() {
+      if (!currentUser) return openAuthModal();
+      if (shoppingCart.size === 0) return showToast('Cart is empty!');
+
+      const items = inventory.filter(c => shoppingCart.has(c.id));
+      const total = items.reduce((acc, c) => acc + c.price, 0);
+
+      closeCartModal();
+
+      document.getElementById('qris-card-title').innerText = `${items.length} Eugene Cards Cart Bundle`;
+      document.getElementById('qris-amount-due').innerText = `IDR ${total.toLocaleString()}`;
+
+      const canvasContainer = document.getElementById('qris-canvas');
+      canvasContainer.innerHTML = '';
+      
+      new QRCode(canvasContainer, {
+        text: QRIS_STRING_PAYLOAD,
+        width: 180,
+        height: 180,
+        colorDark: "#0f172a",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
+      });
+
+      document.getElementById('qris-modal').classList.remove('hidden');
+    }
+
+    function quickBuyCard(cardId) {
+      const card = inventory.find(c => c.id === cardId);
+      if (!card) return;
+      activeCardForAction = card;
+      buyActiveDetailCard();
+    }
+
     // --- CLICKABLE HOLDERS & PUBLIC VAULT INSPECTOR ---
     function renderHoldersLeaderboard() {
       const container = document.getElementById('holders-content');
       if (!container) return;
 
-      // Group cards by owner
       const holderMap = {};
 
       inventory.forEach(card => {
@@ -1129,6 +1606,7 @@
           text: text
         });
         input.value = '';
+        saveChatsState();
         renderChatThreads();
       }
     }
@@ -1245,6 +1723,7 @@
           inventory[idx] = { 
             ...inventory[idx], serial, sn, name, edition, printing, type, price, baseFloorPrice, imgUrl, status, owner: selectedOwner 
           };
+          addHistoryRecord('ADMIN_UPDATE', serial, `Admin updated specs for ${serial}`);
           showToast(`Updated ${serial} details.`);
         }
       } else {
@@ -1255,9 +1734,11 @@
           status, imgUrl
         };
         inventory.unshift(newCard);
+        addHistoryRecord('MINT_CARD', serial, `Newly minted card ${serial} added to network.`);
         showToast(`Minted new card ${serial}!`);
       }
 
+      saveInventoryState();
       renderCardGrid();
       renderInventoryTable();
       updateRemainingCardCount();
@@ -1305,16 +1786,17 @@
             throw new Error('Invalid JSON format. Array of cards missing.');
           }
 
-          // Auto-merge legacy 'Eugene' owners upon import
           if (currentUser) {
             inventory.forEach(c => {
               if (c.owner === 'Eugene') c.owner = currentUser.name;
             });
           }
 
+          saveInventoryState();
           renderCardGrid();
           renderInventoryTable();
           updateRemainingCardCount();
+          addHistoryRecord('IMPORT_JSON', 'SYSTEM', `Admin imported ${inventory.length} cards into inventory.`);
           showToast(`Imported ${inventory.length} cards into inventory!`);
         } catch (err) {
           showToast('Failed to parse JSON file: ' + err.message);
@@ -1323,35 +1805,6 @@
 
       reader.readAsText(file);
       event.target.value = '';
-    }
-
-    // --- CARD GRID & DETAILS ---
-    function renderCardGrid() {
-      const grid = document.getElementById('card-grid');
-      if (!grid) return;
-      
-      const searchVal = (document.getElementById('search-input')?.value || '').toLowerCase();
-      const filtered = inventory.filter(card => {
-        const matchesFilter = currentFilter === 'ALL' ? true : card.type === currentFilter;
-        const matchesSearch = card.serial.toLowerCase().includes(searchVal) || card.name.toLowerCase().includes(searchVal);
-        return matchesFilter && matchesSearch;
-      });
-
-      grid.innerHTML = filtered.map(card => `
-        <div onclick="openCardDetailsModal('${card.id}')" class="${card.type === 'PREMIUM' ? 'card-holo-premium' : 'card-holo-standard'} rounded-xl p-3 flex flex-col justify-between relative cursor-pointer">
-          <div class="flex items-center justify-between mb-2">
-            <span class="text-[9px] font-bold uppercase px-2 py-0.5 rounded-full ${card.type === 'PREMIUM' ? 'bg-indigo-500/20 text-indigo-300' : 'bg-blue-500/20 text-blue-400'}">${card.type}</span>
-            <button onclick="event.stopPropagation(); toggleWishlist('${card.id}')" class="text-xs ${wishlist.has(card.id) ? 'text-rose-500' : 'text-slate-500 hover:text-rose-400'}">
-              <i class="fa-solid fa-heart"></i>
-            </button>
-          </div>
-          <div class="w-full aspect-[4/5] bg-slate-900 rounded-lg border border-slate-800 p-1 flex flex-col justify-between mb-2 text-center overflow-hidden">
-            <img src="${card.imgUrl}" class="w-full h-full object-contain rounded">
-          </div>
-          <p class="text-center font-bold text-blue-400 font-mono mb-1 text-xs">${card.serial}</p>
-          <p class="text-[11px] font-bold text-white truncate text-center">${card.name}</p>
-        </div>
-      `).join('');
     }
 
     function openCardDetailsModal(cardId) {
@@ -1416,9 +1869,13 @@
       pendingOrders.push({
         id: `ord-${Date.now()}`,
         card: activeCardForAction,
+        type: 'PURCHASE',
         buyer: currentUser.name,
         timestamp: new Date().toLocaleTimeString()
       });
+
+      savePendingOrdersState();
+      addHistoryRecord('QRIS_SUBMIT', activeCardForAction.serial, `${currentUser.name} submitted QRIS payment receipt for ${activeCardForAction.serial}`);
 
       showToast('Payment proof submitted! Waiting for Admin verification.');
       closeQrisModal();
@@ -1455,6 +1912,8 @@
       if (tabName === 'dashboard') renderVaultGrid();
       if (tabName === 'inbox') renderChatThreads();
       if (tabName === 'holders') renderHoldersLeaderboard();
+      if (tabName === 'history') renderHistoryLedger();
+      if (tabName === 'analytics') renderAnalyticsView();
     }
 
     function toggleWishlist(cardId) {
@@ -1465,6 +1924,7 @@
         wishlist.add(cardId);
         showToast('Saved to wishlist!');
       }
+      saveWishlistState();
       document.getElementById('wishlist-count-badge').innerText = wishlist.size;
       renderCardGrid();
     }
@@ -1500,7 +1960,6 @@
         return;
       }
 
-      // Vault filter logic unifying account credentials and legacy 'Eugene' owner tags
       const owned = inventory.filter(c => 
         c.owner === currentUser.email || 
         c.owner === currentUser.name || 
@@ -1513,23 +1972,35 @@
         return;
       }
 
-      container.className = "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4";
-      container.innerHTML = owned.map(card => `
-        <div onclick="openCardDetailsModal('${card.id}')" class="card-holo-premium rounded-xl p-3 flex flex-col justify-between relative cursor-pointer">
-          <div class="w-full aspect-[4/5] bg-slate-900 rounded-lg border border-slate-800 p-1 flex flex-col justify-between mb-2 text-center overflow-hidden">
-            <img src="${card.imgUrl}" class="w-full h-full object-contain rounded">
+      container.className = "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4";
+      container.innerHTML = owned.map(card => {
+        const floorPrice = card.baseFloorPrice || card.price || 100000;
+        return `
+          <div class="card-holo-premium rounded-xl p-3 flex flex-col justify-between relative">
+            <div class="w-full aspect-[4/5] bg-slate-900 rounded-lg border border-slate-800 p-1 flex flex-col justify-between mb-2 text-center overflow-hidden cursor-pointer" onclick="openCardDetailsModal('${card.id}')">
+              <img src="${card.imgUrl}" class="w-full h-full object-contain rounded">
+            </div>
+            <p class="text-center font-bold text-blue-400 font-mono mb-0.5 text-xs">${card.serial}</p>
+            <p class="text-[11px] font-bold text-white truncate text-center mb-3">${card.name}</p>
+
+            <!-- VAULT ACTIONS: SELL BACK TO ADMIN & TRADE/SELL -->
+            <div class="grid grid-cols-2 gap-1.5 pt-2 border-t border-slate-800/80">
+              <button onclick="sellBackCardToAdmin('${card.id}')" class="py-1.5 bg-rose-950/60 hover:bg-rose-900 text-rose-300 border border-rose-500/30 font-bold text-[10px] rounded-lg transition-all flex items-center justify-center gap-1" title="Sell back to Admin at floor price">
+                <i class="fa-solid fa-building-columns"></i> Sell Back
+              </button>
+              <button onclick="openTradeProposalModal('${card.id}')" class="py-1.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-[10px] rounded-lg transition-all flex items-center justify-center gap-1" title="List or propose trade">
+                <i class="fa-solid fa-right-left"></i> Trade/Sell
+              </button>
+            </div>
           </div>
-          <p class="text-center font-bold text-blue-400 font-mono mb-1 text-xs">${card.serial}</p>
-          <p class="text-[11px] font-bold text-white truncate text-center">${card.name}</p>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     }
 
     function tradeActiveDetailCard() {
       if (!currentUser) return openAuthModal();
-      showToast(`Trade offer initiated for ${activeCardForAction?.serial}`);
+      openTradeProposalModal(activeCardForAction.id);
       closeCardDetailsModal();
-      switchTab('trade-req');
     }
 
     function createListingFromVault() {
@@ -1540,6 +2011,46 @@
 
     function openNotifications() {
       showToast('No new unread market notifications.');
+    }
+
+    function renderHistoryLedger() {
+      const container = document.getElementById('history-content');
+      if (!container) return;
+
+      if (transactionHistory.length === 0) {
+        container.innerHTML = `<p class="text-xs text-slate-500 py-4 text-center">No transactions recorded yet.</p>`;
+        return;
+      }
+
+      container.innerHTML = transactionHistory.map(h => `
+        <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-xl flex items-center justify-between text-xs">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center font-mono font-bold text-blue-400">
+              ${h.cardSerial || '*'}
+            </div>
+            <div>
+              <p class="font-bold text-white">${h.details}</p>
+              <p class="text-[10px] text-slate-500">${h.timestamp}</p>
+            </div>
+          </div>
+          <span class="text-[9px] font-bold uppercase px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">${h.type}</span>
+        </div>
+      `).join('');
+    }
+
+    function renderAnalyticsView() {
+      let vol = 0;
+      inventory.forEach(c => { if(c.status === 'SOLD') vol += (c.price || 0); });
+      
+      const volEl = document.getElementById('analytics-vol');
+      const countEl = document.getElementById('analytics-count');
+      const holdersEl = document.getElementById('analytics-holders');
+
+      if (volEl) volEl.innerText = `IDR ${vol.toLocaleString()}`;
+      if (countEl) countEl.innerText = `${transactionHistory.length} Recorded`;
+      
+      const uniqueHolders = new Set(inventory.map(c => c.owner).filter(o => o && o !== 'Unassigned')).size;
+      if (holdersEl) holdersEl.innerText = `${uniqueHolders} Collectors`;
     }
 
     function renderInventoryTable() {
@@ -1578,35 +2089,62 @@
         return;
       }
 
-      container.innerHTML = pendingOrders.map((ord, idx) => `
-        <div class="bg-slate-800 p-3 rounded-xl flex items-center justify-between">
-          <div>
-            <p class="text-xs font-bold text-white">${ord.card.name} (${ord.card.serial})</p>
-            <p class="text-[10px] text-slate-400">Buyer: ${ord.buyer} • ${ord.timestamp}</p>
+      container.innerHTML = pendingOrders.map((ord, idx) => {
+        const isSellBack = ord.type === 'SELL_BACK';
+        return `
+          <div class="bg-slate-800 p-3 rounded-xl flex items-center justify-between">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-[9px] font-bold uppercase px-2 py-0.5 rounded-full ${isSellBack ? 'bg-amber-500/20 text-amber-300' : 'bg-blue-500/20 text-blue-400'}">${isSellBack ? 'SELL BACK TO ADMIN' : 'QRIS PURCHASE'}</span>
+                <p class="text-xs font-bold text-white">${ord.card.name} (${ord.card.serial})</p>
+              </div>
+              <p class="text-[10px] text-slate-400 mt-0.5">${isSellBack ? `Seller: ${ord.seller} • Payout Due: IDR ${(ord.payoutAmount||0).toLocaleString()}` : `Buyer: ${ord.buyer}`} • ${ord.timestamp}</p>
+            </div>
+            <button onclick="approveOrder(${idx})" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-lg shadow transition-all">
+              ${isSellBack ? 'Approve & Payout' : 'Approve Payment'}
+            </button>
           </div>
-          <button onclick="approveOrder(${idx})" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-lg">Approve</button>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     }
 
     function approveOrder(index) {
       const order = pendingOrders[index];
       const card = inventory.find(c => c.id === order.card.id);
-      if (card) {
-        card.status = 'SOLD';
-        card.owner = currentUser.name;
+
+      if (order.type === 'SELL_BACK') {
+        if (card) {
+          card.status = 'AVAILABLE';
+          card.owner = 'Admin';
+        }
+        addHistoryRecord('ADMIN_SELLBACK_APPROVED', order.card.serial, `Admin approved sell-back for ${order.card.serial}. Payout of IDR ${(order.payoutAmount||0).toLocaleString()} released to ${order.seller}.`);
+      } else {
+        if (card) {
+          card.status = 'SOLD';
+          card.owner = order.buyer;
+        }
+        addHistoryRecord('PURCHASE_APPROVED', order.card.serial, `QRIS order approved! ${order.card.serial} assigned to ${order.buyer}.`);
       }
+
       pendingOrders.splice(index, 1);
+      savePendingOrdersState();
+      saveInventoryState();
+
       renderAdminOrdersQueue();
       renderCardGrid();
       renderInventoryTable();
       updateRemainingCardCount();
-      showToast('Order approved! Card assigned to owner.');
+      showToast('Transaction approved and ledger updated!');
     }
 
     function deleteCard(cardId) {
       if (!currentUser?.isAdmin) return showToast('Admin permission required.');
+      const card = inventory.find(c => c.id === cardId);
       inventory = inventory.filter(c => c.id !== cardId);
+      saveInventoryState();
+
+      if (card) addHistoryRecord('DELETE_CARD', card.serial, `Admin removed card ${card.serial} from inventory.`);
+
       renderCardGrid();
       renderInventoryTable();
       updateRemainingCardCount();
