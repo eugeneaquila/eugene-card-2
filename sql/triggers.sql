@@ -1,5 +1,0 @@
--- Trigger placeholders for:
--- auction winner update
--- inventory transfer
--- transaction creation
--- notification creation
