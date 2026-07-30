@@ -159,6 +159,28 @@
     </div>
   </header>
 
+  <!-- HOLDER VAULT INSPECTOR MODAL -->
+  <div id="holder-vault-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-2xl w-full p-6 relative shadow-2xl max-h-[85vh] overflow-y-auto space-y-4">
+      <button onclick="closeHolderVaultModal()" class="absolute top-4 right-4 w-7 h-7 rounded-lg bg-slate-800 text-slate-400 hover:text-white text-xs flex items-center justify-center z-10">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <div class="flex items-center gap-3 border-b border-slate-800 pb-4">
+        <div class="w-12 h-12 rounded-xl overflow-hidden bg-slate-800 border border-slate-700">
+          <img id="holder-modal-avatar" src="" class="w-full h-full object-cover">
+        </div>
+        <div>
+          <h3 id="holder-modal-name" class="text-base font-bold text-white">Collector Vault</h3>
+          <p id="holder-modal-sub" class="text-xs text-blue-400 font-mono">0 Cards Owned</p>
+        </div>
+      </div>
+
+      <div id="holder-modal-cards-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 pt-2">
+      </div>
+    </div>
+  </div>
+
   <!-- PROFILE EDIT MODAL -->
   <div id="profile-edit-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-4 relative shadow-2xl">
@@ -530,10 +552,9 @@
     <section id="view-holders" class="hidden space-y-6">
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
         <h2 class="text-xl font-bold text-white uppercase"><i class="fa-solid fa-users text-teal-400 mr-2"></i> Top Card Holders</h2>
-        <p class="text-xs text-slate-400 mt-1">Community leaderboard and collection ranks.</p>
+        <p class="text-xs text-slate-400 mt-1">Community leaderboard and collector ranks. Click any collector to inspect their public Vault!</p>
       </div>
-      <div id="holders-content" class="bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center text-xs text-slate-400">
-        Leaderboard updating...
+      <div id="holders-content" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
       </div>
     </section>
 
@@ -783,7 +804,7 @@
       const name = user.user_metadata?.full_name || user.user_metadata?.name || email.split('@')[0];
       const isAdmin = isAdminEmail(email);
 
-      currentUser = {
+      let profile = {
         id: user.id,
         email: email,
         name: name,
@@ -796,6 +817,19 @@
         isAdmin: isAdmin,
         avatarUrl: user.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/identicon/svg?seed=${email}`
       };
+
+      // READ PERSISTED LOCALSTORAGE PROFILE
+      const savedProfile = localStorage.getItem(`eugene_profile_${email}`);
+      if (savedProfile) {
+        try {
+          const parsed = JSON.parse(savedProfile);
+          profile = { ...profile, ...parsed, id: user.id, email: email, isAdmin: isAdmin };
+        } catch (e) {
+          console.error('Failed to parse saved profile:', e);
+        }
+      }
+
+      currentUser = profile;
 
       // MERGE ACCOUNT STEP: Auto-reassign legacy 'Eugene' cards to logged-in profile
       inventory.forEach(card => {
@@ -905,10 +939,13 @@
       currentUser.x = document.getElementById('edit-profile-x').value;
       currentUser.website = document.getElementById('edit-profile-website').value;
 
+      // PERSIST PROFILE TO BROWSER STORAGE
+      localStorage.setItem(`eugene_profile_${currentUser.email}`, JSON.stringify(currentUser));
+
       renderAuthHeader();
       renderUserProfileUI();
       closeProfileModal();
-      showToast('Profile settings saved successfully!');
+      showToast('Profile saved & persisted locally!');
     }
 
     function renderUserProfileUI() {
@@ -947,6 +984,82 @@
       }
 
       socialsContainer.innerHTML = socialHtml;
+    }
+
+    // --- CLICKABLE HOLDERS & PUBLIC VAULT INSPECTOR ---
+    function renderHoldersLeaderboard() {
+      const container = document.getElementById('holders-content');
+      if (!container) return;
+
+      // Group cards by owner
+      const holderMap = {};
+
+      inventory.forEach(card => {
+        if (card.owner && card.owner !== 'Unassigned') {
+          const ownerName = card.owner;
+          if (!holderMap[ownerName]) {
+            holderMap[ownerName] = [];
+          }
+          holderMap[ownerName].push(card);
+        }
+      });
+
+      const holdersList = Object.keys(holderMap).map(owner => ({
+        ownerName: owner,
+        cards: holderMap[owner],
+        count: holderMap[owner].length
+      })).sort((a, b) => b.count - a.count);
+
+      if (holdersList.length === 0) {
+        container.innerHTML = `<div class="col-span-full bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center text-xs text-slate-400">No active card holders recorded in inventory.</div>`;
+        return;
+      }
+
+      container.innerHTML = holdersList.map((h, rank) => `
+        <div onclick="openHolderVaultModal('${h.ownerName}')" class="bg-slate-900 border border-slate-800 hover:border-teal-500/50 p-4 rounded-2xl cursor-pointer transition-all flex items-center justify-between group">
+          <div class="flex items-center gap-3">
+            <span class="font-mono font-bold text-xs ${rank === 0 ? 'text-amber-400' : 'text-slate-500'}">#${rank + 1}</span>
+            <div class="w-10 h-10 rounded-xl overflow-hidden bg-slate-800 border border-slate-700">
+              <img src="https://api.dicebear.com/7.x/identicon/svg?seed=${encodeURIComponent(h.ownerName)}" class="w-full h-full object-cover">
+            </div>
+            <div>
+              <p class="text-xs font-bold text-white group-hover:text-teal-400 transition-colors">${h.ownerName}</p>
+              <p class="text-[10px] text-slate-400">${h.count} ${h.count === 1 ? 'Card' : 'Cards'} Owned</p>
+            </div>
+          </div>
+          <span class="text-xs text-teal-400 font-bold bg-teal-950/40 px-2.5 py-1 rounded-lg border border-teal-500/20">View Vault <i class="fa-solid fa-chevron-right ml-1 text-[10px]"></i></span>
+        </div>
+      `).join('');
+    }
+
+    function openHolderVaultModal(ownerName) {
+      const ownedCards = inventory.filter(c => c.owner === ownerName);
+      
+      document.getElementById('holder-modal-name').innerText = `${ownerName}'s Vault`;
+      document.getElementById('holder-modal-sub').innerText = `${ownedCards.length} Cards Collection`;
+      document.getElementById('holder-modal-avatar').src = `https://api.dicebear.com/7.x/identicon/svg?seed=${encodeURIComponent(ownerName)}`;
+
+      const grid = document.getElementById('holder-modal-cards-grid');
+
+      if (ownedCards.length === 0) {
+        grid.innerHTML = `<p class="col-span-full text-xs text-slate-400 text-center py-6">This collector currently owns no cards.</p>`;
+      } else {
+        grid.innerHTML = ownedCards.map(card => `
+          <div onclick="closeHolderVaultModal(); openCardDetailsModal('${card.id}')" class="card-holo-standard rounded-xl p-2 cursor-pointer hover:border-blue-500 transition-all">
+            <div class="w-full aspect-[4/5] bg-slate-950 rounded-lg p-1 mb-1.5 flex items-center justify-center">
+              <img src="${card.imgUrl}" class="w-full h-full object-contain rounded">
+            </div>
+            <p class="text-center font-bold text-blue-400 font-mono text-[11px]">${card.serial}</p>
+            <p class="text-[10px] font-bold text-white truncate text-center">${card.name}</p>
+          </div>
+        `).join('');
+      }
+
+      document.getElementById('holder-vault-modal').classList.remove('hidden');
+    }
+
+    function closeHolderVaultModal() {
+      document.getElementById('holder-vault-modal').classList.add('hidden');
     }
 
     // --- LIVE CHAT / INBOX ENGINE ---
@@ -1341,6 +1454,7 @@
       if (tabName === 'wishlist') renderWishlistGrid();
       if (tabName === 'dashboard') renderVaultGrid();
       if (tabName === 'inbox') renderChatThreads();
+      if (tabName === 'holders') renderHoldersLeaderboard();
     }
 
     function toggleWishlist(cardId) {
