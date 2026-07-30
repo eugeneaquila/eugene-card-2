@@ -308,6 +308,7 @@
           <label class="text-[11px] font-bold text-slate-400 uppercase">Status</label>
           <select id="edit-card-status" class="w-full mt-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
             <option value="AVAILABLE">AVAILABLE</option>
+            <option value="SOLD">SOLD</option>
             <option value="OWNED">OWNED</option>
             <option value="RESERVED">RESERVED</option>
           </select>
@@ -340,7 +341,7 @@
         
         <div class="bg-slate-800/80 px-5 py-2.5 rounded-xl border border-slate-700 text-center sm:text-right w-full sm:w-auto">
           <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Remaining Cards</p>
-          <p class="text-xl font-bold font-mono text-blue-400"><span id="remaining-cards-count">50</span> <span class="text-slate-400 text-xs font-normal">/ 50 Available</span></p>
+          <p class="text-xl font-bold font-mono text-blue-400"><span id="remaining-cards-count">50</span> <span class="text-slate-400 text-xs font-normal">Available</span></p>
         </div>
       </div>
 
@@ -493,11 +494,20 @@
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h2 class="text-xl font-bold text-white uppercase"><i class="fa-solid fa-boxes-stacked text-amber-400 mr-2"></i> Inventory Control</h2>
-          <p class="text-xs text-slate-400 mt-1">Manage, edit, or mint new cards in the collection.</p>
+          <p class="text-xs text-slate-400 mt-1">Manage, edit, export backup JSON, or mint new cards.</p>
         </div>
-        <button onclick="openCardEditorModal()" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-xl transition-all shadow flex items-center gap-1.5">
-          <i class="fa-solid fa-plus"></i> Mint / Add New Card
-        </button>
+        <div class="flex flex-wrap items-center gap-2">
+          <button onclick="exportInventoryJSON()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-blue-400 font-bold text-xs rounded-xl border border-slate-700 transition-all flex items-center gap-1.5">
+            <i class="fa-solid fa-download"></i> Export JSON
+          </button>
+          <label class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-purple-400 font-bold text-xs rounded-xl border border-slate-700 transition-all flex items-center gap-1.5 cursor-pointer">
+            <i class="fa-solid fa-upload"></i> Import JSON
+            <input type="file" id="import-file-input" accept=".json" onchange="importInventoryJSON(event)" class="hidden">
+          </label>
+          <button onclick="openCardEditorModal()" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-xl transition-all shadow flex items-center gap-1.5">
+            <i class="fa-solid fa-plus"></i> Mint Card
+          </button>
+        </div>
       </div>
 
       <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
@@ -509,6 +519,7 @@
                 <th class="p-3">Card Name</th>
                 <th class="p-3">Tier</th>
                 <th class="p-3">Price</th>
+                <th class="p-3">Owner</th>
                 <th class="p-3">Status</th>
                 <th class="p-3 text-right">Actions</th>
               </tr>
@@ -538,32 +549,17 @@
       'eugene.aquila06'
     ];
 
-    // Official Configured QRIS Payload String
     const QRIS_STRING_PAYLOAD = "00020101021126610014COM.GO-JEK.WWW01189360091430419400360210G0419400360303UMI51440014ID.CO.QRIS.WWW0215ID10265490344800303UMI5204594453033605802ID5925Eugene Card, Toko Kartu &6012TORAJA UTARA61059183162070703A0163048BD9";
+
+    // Direct Preload of your provided JSON backup dataset
+    const INITIAL_JSON_BACKUP = {"exportedAt":"2026-07-29T13:25:53.048Z","exportedBy":"eugene.aquila06@gmail.com","inventoryCount":50,"cards":[{"id":"card-001","serial":"*001","name":"Eugene Standard #001","type":"STANDARD","price":100000,"baseFloorPrice":100000,"owner":"Eugene","status":"SOLD","imgUrl":"https://iili.io/CeR1tJ2.md.png","edition":"Beta Edition: #0","sn":"001","tier":"100","printing":"1x"},{"id":"card-01","serial":"*01","name":"Eugene Premium #01","type":"PREMIUM","price":500000,"baseFloorPrice":500000,"owner":"Eugene","status":"SOLD","imgUrl":"https://iili.io/CeRhf5v.png","edition":"Beta Edition: #0","sn":"01","tier":"500","printing":"1x"},{"id":"card-002","serial":"*002","name":"Eugene Standard #002","type":"STANDARD","price":100000,"baseFloorPrice":100000,"owner":null,"status":"SOLD","imgUrl":"https://iili.io/CeREczX.md.png","edition":"Beta Edition: #0","sn":"002","tier":"100","printing":"1x"},{"id":"card-02","serial":"*02","name":"Eugene Premium #02","type":"PREMIUM","price":500000,"baseFloorPrice":500000,"owner":null,"status":"AVAILABLE","imgUrl":"https://iili.io/CeRamG4.md.png","edition":"Beta Edition: #0","sn":"02","tier":"500","printing":"1x"},{"id":"card-003","serial":"*003","name":"Eugene Standard #003","type":"STANDARD","price":100000,"baseFloorPrice":100000,"owner":"Eugene","status":"SOLD","imgUrl":"https://iili.io/CeRExsa.md.png","edition":"Beta Edition: #0","sn":"003","tier":"100","printing":"1x"},{"id":"card-03","serial":"*03","name":"Eugene Premium #03","type":"PREMIUM","price":500000,"baseFloorPrice":500000,"owner":null,"status":"AVAILABLE","imgUrl":"https://iili.io/CeRabnf.md.png","edition":"Beta Edition: #0","sn":"03","tier":"500","printing":"1x"},{"id":"card-004","serial":"*004","name":"Eugene Standard #004","type":"STANDARD","price":100000,"baseFloorPrice":100000,"owner":"Eugene","status":"SOLD","imgUrl":"https://iili.io/CeRERJp.md.png","edition":"Beta Edition: #0","sn":"004","tier":"100","printing":"1x"},{"id":"card-04","serial":"*04","name":"Eugene Premium #04","type":"PREMIUM","price":500000,"baseFloorPrice":500000,"owner":null,"status":"AVAILABLE","imgUrl":"https://iili.io/CeRaZjs.md.png","edition":"Beta Edition: #0","sn":"0004","tier":"500","printing":"1x"},{"id":"card-005","serial":"*005","name":"Eugene Standard #005","type":"STANDARD","price":100000,"baseFloorPrice":100000,"owner":"kenneth_brilliant","status":"SOLD","imgUrl":"https://iili.io/CeREheS.md.png","edition":"Beta Edition: #0","sn":"005","tier":"100","printing":"1x"},{"id":"card-05","serial":"*05","name":"Eugene Premium #05","type":"PREMIUM","price":500000,"baseFloorPrice":500000,"owner":null,"status":"AVAILABLE","imgUrl":"https://iili.io/CeRc7oJ.md.png","edition":"Beta Edition: #0","sn":"05","tier":"500","printing":"1x"},{"id":"card-006","serial":"*006","name":"Eugene Standard #006","type":"STANDARD","price":100000,"baseFloorPrice":100000,"owner":"Eugene","status":"SOLD","imgUrl":"https://iili.io/CeRGY3x.md.png","edition":"Beta Edition: #0","sn":"006","tier":"100","printing":"1x"},{"id":"card-06","serial":"*06","name":"Eugene Premium #06","type":"PREMIUM","price":500000,"baseFloorPrice":500000,"owner":null,"status":"AVAILABLE","imgUrl":"https://iili.io/CeRcaPR.md.png","edition":"Beta Edition: #0","sn":"06","tier":"500","printing":"1x"},{"id":"card-007","serial":"*007","name":"Eugene Standard #007","type":"STANDARD","price":100000,"baseFloorPrice":100000,"owner":"andi_rende","status":"SOLD","imgUrl":"https://iili.io/CeRGX6J.md.png","edition":"Beta Edition: #0","sn":"007","tier":"100","printing":"1x"},{"id":"card-07","serial":"*07","name":"Eugene Premium #07","type":"PREMIUM","price":500000,"baseFloorPrice":500000,"owner":null,"status":"AVAILABLE","imgUrl":"https://iili.io/CeRcVNn.md.png","edition":"Beta Edition: #0","sn":"07","tier":"500","printing":"1x"},{"id":"card-008","serial":"*008","name":"Eugene Standard #008","type":"STANDARD","price":100000,"baseFloorPrice":100000,"owner":null,"status":"AVAILABLE","imgUrl":"https://iili.io/CeRGVCg.md.png","edition":"Beta Edition: #0","sn":"008","tier":"100","printing":"1x"},{"id":"card-08","serial":"*08","name":"Eugene Premium #08","type":"PREMIUM","price":500000,"baseFloorPrice":500000,"owner":null,"status":"AVAILABLE","imgUrl":"https://iili.io/CeRcG9t.md.png","edition":"Beta Edition: #0","sn":"08","tier":"500","printing":"1x"},{"id":"card-009","serial":"*009","name":"Eugene Standard #009","type":"STANDARD","price":100000,"baseFloorPrice":100000,"owner":null,"status":"AVAILABLE","imgUrl":"https://iili.io/CeRGOyN.md.png","edition":"Beta Edition: #0","sn":"009","tier":"100","printing":"1x"},{"id":"card-09","serial":"*09","name":"Eugene Premium #09","type":"PREMIUM","price":500000,"baseFloorPrice":500000,"owner":null,"status":"AVAILABLE","imgUrl":"https://iili.io/CeRl9WJ.md.png","edition":"Beta Edition: #0","sn":"09","tier":"500","printing":"1x"},{"id":"card-0010","serial":"*0010","name":"Eugene Standard #0010","type":"STANDARD","price":100000,"baseFloorPrice":100000,"owner":null,"status":"AVAILABLE","imgUrl":"https://iili.io/CeRWdhP.md.png","edition":"Beta Edition: #0","sn":"0010","tier":"100","printing":"1x"},{"id":"card-010","serial":"*010","name":"Eugene Premium #010","type":"PREMIUM","price":500000,"baseFloorPrice":500000,"owner":null,"status":"AVAILABLE","imgUrl":"https://iili.io/CeRldfR.md.png","edition":"Beta Edition: #0","sn":"010","tier":"500","printing":"1x"},{"id":"card-0011","serial":"*0011","name":"Eugene Standard #0011","type":"STANDARD","price":100000,"baseFloorPrice":100000,"owner":null,"status":"AVAILABLE","imgUrl":"https://iili.io/CeRVykQ.md.png","edition":"Beta Edition: #0","sn":"0011","tier":"100","printing":"1x"},{"id":"card-011","serial":"*011","name":"Eugene Premium #011","type":"PREMIUM","price":500000,"baseFloorPrice":500000,"owner":null,"status":"AVAILABLE","imgUrl":"https://iili.io/CeRlKJI.md.png","edition":"Beta Edition: #0","sn":"011","tier":"500","printing":"1x"},{"id":"card-0012","serial":"*0012","name":"Eugene Standard #0012","type":"STANDARD","price":100000,"baseFloorPrice":100000,"owner":null,"status":"AVAILABLE","imgUrl":"https://iili.io/CeRWFCF.md.png","edition":"Beta Edition: #0","sn":"0012","tier":"100","printing":"1x"},{"id":"card-012","serial":"*012","name":"Eugene Premium #012","type":"PREMIUM","price":500000,"baseFloorPrice":500000,"owner":null,"status":"AVAILABLE","imgUrl":"https://iili.io/CeRlqOX.md.png","edition":"Beta Edition: #0","sn":"0012","tier":"500","printing":"1x"},{"id":"card-0013","serial":"*0013","name":"Eugene Standard #0013","type":"STANDARD","price":100000,"baseFloorPrice":100000,"owner":null,"status":"AVAILABLE","imgUrl":"https://iili.io/CeRW2Q1.md.png","edition":"Beta Edition: #0","sn":"0013","tier":"100","printing":"1x"},{"id":"card-013","serial":"*013","name":"Eugene Premium #013","type":"PREMIUM","price":500000,"baseFloorPrice":500000,"owner":null,"status":"AVAILABLE","imgUrl":"https://iili.io/CeRlRJS.md.png","edition":"Beta Edition: #0","sn":"013","tier":"500","printing":"1x"},{"id":"card-0014","serial":"*0014","name":"Eugene Standard #0014","type":"STANDARD","price":100000,"baseFloorPrice":100000,"owner":null,"status":"AVAILABLE","imgUrl":"https://iili.io/CeRWmMX.md.png","edition":"Beta Edition: #0","sn":"0014","tier":"100","printing":"1x"},{"id":"card-014","serial":"*014","name":"Eugene Premium #014","type":"PREMIUM","price":500000,"baseFloorPrice":500000,"owner":null,"status":"AVAILABLE","imgUrl":"https://iili.io/CeRlWdB.md.png","edition":"Beta Edition: #0","sn":"014","tier":"500","printing":"1x"},{"id":"card-0015","serial":"*0015","name":"Eugene Standard #0015","type":"STANDARD","price":100000,"baseFloorPrice":100000,"owner":null,"status":"AVAILABLE","imgUrl":"https://iili.io/CeRXzSj.md.png","edition":"Beta Edition: #0","sn":"0015","tier":"100","printing":"1x"},{"id":"card-015","serial":"*015","name":"Eugene Premium #015","type":"PREMIUM","price":500000,"baseFloorPrice":500000,"owner":null,"status":"AVAILABLE","imgUrl":"https://iili.io/CeRlhe1.md.png","edition":"Beta Edition: #0","sn":"0015","tier":"500","printing":"1x"},{"id":"card-0016","serial":"*0016","name":"Eugene Standard #0016","type":"STANDARD","price":100000,"baseFloorPrice":100000,"owner":null,"status":"AVAILABLE","imgUrl":"https://iili.io/CeRXCPe.md.png","edition":"Beta Edition: #0","sn":"0016","tier":"100","printing":"1x"},{"id":"card-016","serial":"*016","name":"Eugene Premium #016","type":"PREMIUM","price":500000,"baseFloorPrice":500000,"owner":null,"status":"AVAILABLE","imgUrl":"https://iili.io/CeRleLJ.md.png","edition":"Beta Edition: #0","sn":"0016","tier":"500","printing":"1x"},{"id":"card-0017","serial":"*0017","name":"Eugene Standard #0017","type":"STANDARD","price":100000,"baseFloorPrice":100000,"owner":null,"status":"AVAILABLE","imgUrl":"https://iili.io/CeRXYV1.md.png","edition":"Beta Edition: #0","sn":"0017","tier":"100","printing":"1x"},{"id":"card-017","serial":"*017","name":"Eugene Premium #017","type":"PREMIUM","price":500000,"baseFloorPrice":500000,"owner":null,"status":"AVAILABLE","imgUrl":"https://iili.io/CeRlsXs.md.png","edition":"Beta Edition: #0","sn":"017","tier":"500","printing":"1x"},{"id":"card-0018","serial":"*0018","name":"Eugene Standard #0018","type":"STANDARD","price":100000,"baseFloorPrice":100000,"owner":null,"status":"AVAILABLE","imgUrl":"https://iili.io/CeRXgb2.md.png","edition":"Beta Edition: #0","sn":"0018","tier":"100","printing":"1x"},{"id":"card-018","serial":"*018","name":"Eugene Premium #018","type":"PREMIUM","price":500000,"baseFloorPrice":500000,"owner":null,"status":"AVAILABLE","imgUrl":"https://iili.io/CeR0nkP.md.png","edition":"Beta Edition: #0","sn":"018","tier":"500","printing":"1x"},{"id":"card-0019","serial":"*0019","name":"Eugene Standard #0019","type":"STANDARD","price":100000,"baseFloorPrice":100000,"owner":null,"status":"AVAILABLE","imgUrl":"https://iili.io/CeRhdqF.md.png","edition":"Beta Edition: #0","sn":"0019","tier":"100","printing":"1x"},{"id":"card-019","serial":"*019","name":"Eugene Premium #019","type":"PREMIUM","price":500000,"baseFloorPrice":500000,"owner":null,"status":"AVAILABLE","imgUrl":"https://iili.io/CeR0GQs.md.png","edition":"Beta Edition: #0","sn":"019","tier":"500","printing":"1x"},{"id":"card-0020","serial":"*0020","name":"Eugene Standard #0020","type":"STANDARD","price":100000,"baseFloorPrice":100000,"owner":null,"status":"AVAILABLE","imgUrl":"https://iili.io/CeRhKdJ.md.png","edition":"Beta Edition: #0","sn":"0020","tier":"100","printing":"1x"},{"id":"card-020","serial":"*020","name":"Eugene Premium #020","type":"PREMIUM","price":500000,"baseFloorPrice":500000,"owner":null,"status":"AVAILABLE","imgUrl":"https://iili.io/CeR0VCG.md.png","edition":"Beta Edition: #0","sn":"020","tier":"500","printing":"1x"},{"id":"card-0021","serial":"*0021","name":"Eugene Standard #0021","type":"STANDARD","price":100000,"baseFloorPrice":100000,"owner":null,"status":"AVAILABLE","imgUrl":"https://iili.io/CeRhf5v.md.png","edition":"Beta Edition: #0","sn":"0021","tier":"100","printing":"1x"},{"id":"card-021","serial":"*021","name":"Eugene Premium #021","type":"PREMIUM","price":500000,"baseFloorPrice":500000,"owner":null,"status":"AVAILABLE","imgUrl":"https://iili.io/CeR0NvS.md.png","edition":"Beta Edition: #0","sn":"021","tier":"500","printing":"1x"},{"id":"card-0022","serial":"*0022","name":"Eugene Standard #0022","type":"STANDARD","price":100000,"baseFloorPrice":100000,"owner":null,"status":"AVAILABLE","imgUrl":"https://iili.io/CeRhYml.md.png","edition":"Beta Edition: #0","sn":"0022","tier":"100","printing":"1x"},{"id":"card-022","serial":"*022","name":"Eugene Premium #022","type":"PREMIUM","price":500000,"baseFloorPrice":500000,"owner":null,"status":"AVAILABLE","imgUrl":"https://iili.io/CeR1Rte.md.png","edition":"Beta Edition: #0","sn":"022","tier":"500","printing":"1x"},{"id":"card-0023","serial":"*0023","name":"Eugene Standard #0023","type":"STANDARD","price":100000,"baseFloorPrice":100000,"owner":null,"status":"AVAILABLE","imgUrl":"https://iili.io/CeRhLQI.md.png","edition":"Beta Edition: #0","sn":"0023","tier":"100","printing":"1x"},{"id":"card-023","serial":"*023","name":"Eugene Premium #023","type":"PREMIUM","price":500000,"baseFloorPrice":500000,"owner":null,"status":"AVAILABLE","imgUrl":"https://iili.io/CeR1aPj.md.png","edition":"Beta Edition: #0","sn":"023","tier":"500","printing":"1x"},{"id":"card-0024","serial":"*0024","name":"Eugene Standard #0024","type":"STANDARD","price":100000,"baseFloorPrice":100000,"owner":null,"status":"AVAILABLE","imgUrl":"https://iili.io/CeRhZBt.md.png","edition":"Beta Edition: #0","sn":"0024","tier":"100","printing":"1x"},{"id":"card-024","serial":"*024","name":"Eugene Premium #024","type":"PREMIUM","price":500000,"baseFloorPrice":500000,"owner":null,"status":"AVAILABLE","imgUrl":"https://iili.io/CeR10cQ.md.png","edition":"Beta Edition: #0","sn":"024","tier":"500","printing":"1x"},{"id":"card-0025","serial":"*0025","name":"Eugene Standard #0025","type":"STANDARD","price":100000,"baseFloorPrice":100000,"owner":null,"status":"AVAILABLE","imgUrl":"https://iili.io/CeRhtEX.md.png","edition":"Beta Edition: #0","sn":"0025","tier":"100","printing":"1x"},{"id":"card-025","serial":"*025","name":"Eugene Premium #025","type":"PREMIUM","price":500000,"baseFloorPrice":500000,"owner":null,"status":"AVAILABLE","imgUrl":"https://iili.io/CeR1MAP.md.png","edition":"Beta Edition: #0","sn":"025","tier":"500","printing":"1x"}]};
 
     let currentUser = null;
     let currentFilter = 'ALL';
-    let inventory = [];
+    let inventory = [...INITIAL_JSON_BACKUP.cards]; // Loaded directly from your file
     let wishlist = new Set();
     let pendingOrders = [];
     let activeCardForAction = null;
-    let qrisGeneratorInstance = null;
-
-    // Initialize mock card inventory
-    for (let i = 1; i <= 50; i++) {
-      const isPremium = i <= 25;
-      const numStr = String(i).padStart(2, '0');
-      inventory.push({
-        id: `card-${i}`,
-        serial: `*${numStr}`,
-        name: isPremium ? `Eugene Premium #${numStr}` : `Eugene Standard #${numStr}`,
-        type: isPremium ? 'PREMIUM' : 'STANDARD',
-        price: isPremium ? 500000 : 100000,
-        owner: null,
-        status: 'AVAILABLE',
-        imgUrl: `https://placehold.co/1080x1350/1e293b/3b82f6?text=*${numStr}`
-      });
-    }
 
     document.addEventListener('DOMContentLoaded', async () => {
       if (window.supabaseClient) {
@@ -745,6 +741,60 @@
       if (tabName === 'dashboard') renderVaultGrid();
     }
 
+    // --- JSON IMPORT & EXPORT FEATURES ---
+    function exportInventoryJSON() {
+      if (!currentUser?.isAdmin) return showToast('Admin permission required.');
+
+      const backupData = {
+        exportedAt: new Date().toISOString(),
+        exportedBy: currentUser.email,
+        inventoryCount: inventory.length,
+        cards: inventory
+      };
+
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `eugene_inventory_backup_${Date.now()}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+
+      showToast('Inventory backup exported successfully!');
+    }
+
+    function importInventoryJSON(event) {
+      if (!currentUser?.isAdmin) return showToast('Admin permission required.');
+
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          
+          if (parsed && Array.isArray(parsed.cards)) {
+            inventory = parsed.cards;
+          } else if (Array.isArray(parsed)) {
+            inventory = parsed;
+          } else {
+            throw new Error('Invalid JSON format. Array of cards missing.');
+          }
+
+          renderCardGrid();
+          renderInventoryTable();
+          updateRemainingCardCount();
+          showToast(`Imported ${inventory.length} cards into inventory!`);
+        } catch (err) {
+          showToast('Failed to parse JSON file: ' + err.message);
+        }
+      };
+
+      reader.readAsText(file);
+      event.target.value = ''; // Reset input
+    }
+
     // --- CARD GRID & DETAILS ---
     function renderCardGrid() {
       const grid = document.getElementById('card-grid');
@@ -807,7 +857,6 @@
       document.getElementById('qris-card-title').innerText = `${activeCardForAction.name} (${activeCardForAction.serial})`;
       document.getElementById('qris-amount-due').innerText = `IDR ${activeCardForAction.price.toLocaleString()}`;
 
-      // Render Dynamic QRIS Canvas using qrcode.js
       const canvasContainer = document.getElementById('qris-canvas');
       canvasContainer.innerHTML = '';
       
@@ -889,7 +938,7 @@
         return;
       }
 
-      const owned = inventory.filter(c => c.owner === currentUser.email);
+      const owned = inventory.filter(c => c.owner === currentUser.email || c.owner === currentUser.name);
       if (owned.length === 0) {
         container.innerHTML = "You don't own any cards yet. Buy cards via QRIS or propose trades to populate your vault!";
         return;
@@ -934,6 +983,7 @@
             <span class="text-[9px] font-bold uppercase px-2 py-0.5 rounded-full ${card.type === 'PREMIUM' ? 'bg-indigo-500/20 text-indigo-300' : 'bg-blue-500/20 text-blue-400'}">${card.type}</span>
           </td>
           <td class="p-3 font-mono text-emerald-400">IDR ${card.price.toLocaleString()}</td>
+          <td class="p-3 font-mono text-slate-400">${card.owner || '-'}</td>
           <td class="p-3">
             <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${card.status === 'AVAILABLE' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}">${card.status}</span>
           </td>
@@ -971,7 +1021,7 @@
       const order = pendingOrders[index];
       const card = inventory.find(c => c.id === order.card.id);
       if (card) {
-        card.status = 'OWNED';
+        card.status = 'SOLD';
         card.owner = currentUser.email;
       }
       pendingOrders.splice(index, 1);
