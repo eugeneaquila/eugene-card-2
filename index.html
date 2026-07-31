@@ -529,5 +529,20 @@
       setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 3000);
     }
   </script>
+
+<script>
+async function ensureProfileForPurchase(){
+ if(!window.supabaseClient) return true;
+ const {data:{user}}=await supabaseClient.auth.getUser();
+ if(!user){showToast('Please login first.');return false;}
+ let {data:profile}=await supabaseClient.from('profiles').select('*').eq('id',user.id).maybeSingle();
+ if(!profile){
+   const name=(user.user_metadata?.full_name||user.user_metadata?.name||user.email.split('@')[0]);
+   const username=(user.user_metadata?.preferred_username||name.replace(/\s+/g,'').toLowerCase());
+   await supabaseClient.from('profiles').upsert({id:user.id,email:user.email,name,username,avatar_url:user.user_metadata?.avatar_url||null,role:'user'});
+ }
+ return true;
+}
+</script>
 </body>
 </html>
