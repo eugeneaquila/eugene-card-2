@@ -1,548 +1,447 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Eugene Card Marketplace | Beta Edition</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Eugene Card — Registry &amp; Exchange</title>
+<meta name="description" content="A registry and exchange for fifty one-of-one Beta Edition cards. Every card is numbered, owned, and tracked." />
 
-  <!-- Favicon -->
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='42' fill='none' stroke='%233b82f6' stroke-width='5' stroke-dasharray='210 50' transform='rotate(-45 50 50)'/><polygon points='50,18 80,35 80,68 50,85 20,68 20,35' fill='%233b82f6'/><path d='M 32 42 C 38 32, 52 32, 58 40 C 62 46, 48 54, 40 60 C 35 64, 45 70, 60 62' fill='none' stroke='%23ffffff' stroke-width='4' stroke-linecap='round'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            gemini: {
-              bg: '#0f172a',
-              card: '#1e293b',
-              border: '#334155',
-              hover: '#334155',
-              accent: '#3b82f6',
-              accentHover: '#2563eb',
-              muted: '#94a3b8'
-            }
-          },
-          fontFamily: { sans: ['Inter', 'sans-serif'] }
-        }
-      }
-    }
-  </script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          ink: { DEFAULT: '#10141A', 2: '#171C24', 3: '#1D232D', line: '#2A313C' },
+          parchment: { DEFAULT: '#E7E4D4', 2: '#DCD8C4', ink: '#1B1B16', muted: '#5B5A4E' },
+          brass: { DEFAULT: '#C79A46', bright: '#E0B563', dim: '#8A6B32' },
+          emerald: { DEFAULT: '#1F5C48', bright: '#2F8464', dim: '#153F32' },
+          oxblood: { DEFAULT: '#8A3A34', bright: '#B0504A' },
+        },
+        fontFamily: {
+          display: ['Fraunces', 'serif'],
+          mono: ['"IBM Plex Mono"', 'monospace'],
+          sans: ['Inter', 'sans-serif'],
+        },
+      },
+    },
+  };
+</script>
 
-  <!-- Icons, Fonts & QR Code Library -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  :root {
+    --ink: #10141A;
+    --ink-2: #171C24;
+    --ink-3: #1D232D;
+    --line: #2A313C;
+    --parchment: #E7E4D4;
+    --parchment-2: #DCD8C4;
+    --paper-ink: #1B1B16;
+    --paper-muted: #5B5A4E;
+    --brass: #C79A46;
+    --brass-bright: #E0B563;
+    --brass-dim: #8A6B32;
+    --emerald: #1F5C48;
+    --emerald-bright: #2F8464;
+    --oxblood: #8A3A34;
+    --text: #EDEAE0;
+    --text-muted: #9BA3AD;
+  }
 
-  <style>
-    body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #f8fafc; }
-    
-    .card-holo-premium {
-      background: linear-gradient(135deg, #1e1b4b 0%, #311042 50%, #1e293b 100%);
-      border: 1px solid rgba(99, 102, 241, 0.4);
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-      transition: all 0.25s ease;
-    }
-    .card-holo-premium:hover { 
-      border-color: rgba(129, 140, 248, 0.8); 
-      transform: translateY(-3px); 
-      box-shadow: 0 8px 25px rgba(99, 102, 241, 0.25); 
-    }
-    
-    .card-holo-standard {
-      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-      border: 1px solid #334155;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-      transition: all 0.25s ease;
-    }
-    .card-holo-standard:hover { 
-      border-color: #475569; 
-      transform: translateY(-3px); 
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6); 
-    }
+  * { box-sizing: border-box; }
 
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: #0f172a; }
-    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 9999px; }
-  </style>
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--ink);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection { background: var(--brass); color: var(--ink); }
+
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: var(--ink); }
+  ::-webkit-scrollbar-thumb { background: var(--line); border-radius: 6px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--brass-dim); }
+
+  .font-display { font-family: 'Fraunces', serif; }
+  .font-mono { font-family: 'IBM Plex Mono', monospace; }
+
+  .bg-noise {
+    background-image: radial-gradient(circle at 1px 1px, rgba(199,154,70,0.05) 1px, transparent 0);
+    background-size: 22px 22px;
+  }
+
+  .rule {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--line) 20%, var(--line) 80%, transparent);
+  }
+
+  .rule-brass {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--brass-dim) 15%, var(--brass) 50%, var(--brass-dim) 85%, transparent);
+  }
+
+  a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, [tabindex]:focus-visible {
+    outline: 2px solid var(--brass-bright);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* Registry status strip — the signature element */
+  .ledger-strip {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border: 1px solid var(--line);
+    background: var(--ink-2);
+  }
+  .ledger-cell {
+    padding: 18px 14px;
+    border-right: 1px solid var(--line);
+    position: relative;
+    overflow: hidden;
+  }
+  .ledger-cell:last-child { border-right: none; }
+  .ledger-cell::before {
+    content: '';
+    position: absolute; left: 0; right: 0; top: 0; height: 2px;
+    background: var(--cell-accent, var(--brass));
+  }
+  .ledger-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    font-size: clamp(1.6rem, 4vw, 2.6rem);
+    line-height: 1;
+  }
+  .ledger-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-top: 8px;
+    display: block;
+  }
+
+  /* Card registry entry */
+  .card-entry {
+    background: var(--ink-2);
+    border: 1px solid var(--line);
+    transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+  }
+  .card-entry:hover {
+    transform: translateY(-3px);
+    border-color: var(--brass-dim);
+    box-shadow: 0 12px 28px -14px rgba(0,0,0,0.6);
+  }
+  .card-serial {
+    font-family: 'IBM Plex Mono', monospace;
+    letter-spacing: 0.02em;
+  }
+
+  .status-stamp {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border: 1px solid currentColor;
+    border-radius: 2px;
+  }
+
+  .btn-brass {
+    background: var(--brass);
+    color: var(--ink);
+    font-weight: 600;
+    transition: background 150ms ease, transform 150ms ease;
+  }
+  .btn-brass:hover { background: var(--brass-bright); }
+  .btn-brass:active { transform: scale(0.98); }
+  .btn-brass:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .btn-ghost {
+    border: 1px solid var(--line);
+    color: var(--text);
+    transition: border-color 150ms ease, background 150ms ease;
+  }
+  .btn-ghost:hover { border-color: var(--brass-dim); background: rgba(199,154,70,0.06); }
+
+  .tab-btn {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 8px 4px;
+    color: var(--text-muted);
+    border-bottom: 2px solid transparent;
+    transition: color 150ms ease, border-color 150ms ease;
+    white-space: nowrap;
+  }
+  .tab-btn.active { color: var(--brass-bright); border-color: var(--brass); }
+  .tab-btn:hover:not(.active) { color: var(--text); }
+
+  .input-field {
+    background: var(--ink-3);
+    border: 1px solid var(--line);
+    color: var(--text);
+    transition: border-color 150ms ease;
+  }
+  .input-field:focus { border-color: var(--brass-dim); outline: none; }
+  .input-field::placeholder { color: var(--text-muted); }
+
+  .modal-backdrop {
+    background: rgba(8,10,13,0.78);
+    backdrop-filter: blur(3px);
+  }
+
+  .modal-panel {
+    background: var(--ink-2);
+    border: 1px solid var(--line);
+  }
+
+  .parchment-panel {
+    background: var(--parchment);
+    color: var(--paper-ink);
+  }
+
+  .skeleton {
+    background: linear-gradient(90deg, var(--ink-2) 0%, var(--ink-3) 50%, var(--ink-2) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.6s ease-in-out infinite;
+  }
+  @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+  .toast-enter { animation: toast-in 220ms ease-out; }
+  @keyframes toast-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  .fade-in { animation: fade-in 320ms ease-out; }
+  @keyframes fade-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+  .hide-scrollbar::-webkit-scrollbar { display: none; }
+  .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+  [x-view] { display: none; }
+  [x-view].active { display: block; }
+
+  .avatar-ring {
+    background: conic-gradient(from 0deg, var(--brass), var(--emerald), var(--brass));
+    padding: 2px;
+    border-radius: 999px;
+  }
+
+  .notif-dot {
+    box-shadow: 0 0 0 2px var(--ink);
+  }
+</style>
 </head>
-<body class="min-h-screen flex flex-col justify-between selection:bg-blue-600 selection:text-white relative">
+<body class="bg-noise min-h-screen">
 
-  <!-- Embedded Logo SVG -->
-  <svg style="display: none;">
-    <defs>
-      <g id="eugene-logo-mark">
-        <circle cx="50" cy="50" r="42" fill="none" stroke="#3b82f6" stroke-width="5" stroke-dasharray="210 50" transform="rotate(-45 50 50)"/>
-        <polygon points="50,18 80,35 80,68 50,85 20,68 20,35" fill="#3b82f6"/>
-        <path d="M 32 42 C 38 32, 52 32, 58 40 C 62 46, 48 54, 40 60 C 35 64, 45 70, 60 62" fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/>
-      </g>
-    </defs>
-  </svg>
+<!-- ============ TOAST CONTAINER ============ -->
+<div id="toast-container" class="fixed bottom-5 right-5 z-[100] flex flex-col gap-2 items-end"></div>
 
-  <!-- Header -->
-  <header class="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 lg:px-8 py-3">
-    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
-      
-      <!-- Brand Logo -->
-      <div class="flex items-center gap-3 cursor-pointer shrink-0" onclick="switchTab('catalog')">
-        <div class="w-9 h-9 rounded-xl overflow-hidden bg-slate-800 border border-slate-700 p-1 flex items-center justify-center">
-          <svg viewBox="0 0 100 100" class="w-full h-full"><use href="#eugene-logo-mark"/></svg>
-        </div>
-        <div>
-          <div class="flex items-center gap-2">
-            <h1 class="font-bold text-sm tracking-wide text-white uppercase">EUGENE CARD</h1>
-            <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/30">Beta Edition</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Navigation Tabs -->
-      <nav class="flex items-center gap-1 bg-slate-800/80 p-1 rounded-2xl border border-slate-700 overflow-x-auto max-w-full">
-        <button id="nav-catalog" onclick="switchTab('catalog')" class="px-3 py-1.5 rounded-xl text-xs font-medium text-white bg-slate-700 flex items-center gap-1.5 whitespace-nowrap transition-all">
-          <i class="fa-solid fa-layer-group text-blue-400"></i> Collection
-        </button>
-        <button id="nav-trade" onclick="switchTab('trade')" class="px-3 py-1.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white flex items-center gap-1.5 whitespace-nowrap transition-all">
-          <i class="fa-solid fa-right-left text-blue-400"></i> Trade
-        </button>
-        <button id="nav-auction" onclick="switchTab('auction')" class="px-3 py-1.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white flex items-center gap-1.5 whitespace-nowrap transition-all">
-          <i class="fa-solid fa-gavel text-emerald-400"></i> Auction
-        </button>
-        <button id="nav-trade-req" onclick="switchTab('trade-req')" class="px-3 py-1.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white flex items-center gap-1.5 whitespace-nowrap transition-all">
-          <i class="fa-solid fa-handshake text-purple-400"></i> Trade Requests
-        </button>
-        <button id="nav-inbox" onclick="switchTab('inbox')" class="px-3 py-1.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white flex items-center gap-1.5 whitespace-nowrap transition-all relative">
-          <i class="fa-solid fa-comments text-indigo-400"></i> Private Inbox
-          <span id="unread-inbox-badge" class="w-2 h-2 rounded-full bg-indigo-500 hidden"></span>
-        </button>
-        <button id="nav-holders" onclick="switchTab('holders')" class="px-3 py-1.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white flex items-center gap-1.5 whitespace-nowrap transition-all">
-          <i class="fa-solid fa-users text-teal-400"></i> Holders
-        </button>
-        <button id="nav-history" onclick="switchTab('history')" class="px-3 py-1.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white flex items-center gap-1.5 whitespace-nowrap transition-all">
-          <i class="fa-solid fa-clock-rotate-left text-cyan-400"></i> History
-        </button>
-
-        <div class="h-4 w-px bg-slate-700 mx-1 self-center hidden sm:block"></div>
-
-        <button id="nav-dashboard" onclick="switchTab('dashboard')" class="px-3 py-1.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white flex items-center gap-1.5 whitespace-nowrap transition-all">
-          <i class="fa-solid fa-vault text-blue-400"></i> My Vault
-        </button>
-        <button id="nav-wishlist" onclick="switchTab('wishlist')" class="px-3 py-1.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white flex items-center gap-1.5 whitespace-nowrap transition-all">
-          <i class="fa-solid fa-heart text-rose-400"></i> Wishlist (<span id="wishlist-count-badge">0</span>)
-        </button>
-
-        <div id="admin-nav-separator" class="h-4 w-px bg-slate-700 mx-1 self-center hidden"></div>
-
-        <button id="nav-analytics" onclick="switchTab('analytics')" class="admin-only-nav hidden px-3 py-1.5 rounded-xl text-xs font-medium text-amber-300 hover:text-white flex items-center gap-1.5 whitespace-nowrap bg-amber-950/30 border border-amber-500/30">
-          <i class="fa-solid fa-chart-line text-amber-400"></i> Analytics
-        </button>
-        <button id="nav-admin" onclick="switchTab('admin')" class="admin-only-nav hidden px-3 py-1.5 rounded-xl text-xs font-medium text-rose-400 hover:text-white flex items-center gap-1.5 whitespace-nowrap bg-rose-950/30 border border-rose-500/30">
-          <i class="fa-solid fa-shield-halved"></i> Admin Hub
-        </button>
-        <button id="nav-inventory" onclick="switchTab('inventory')" class="admin-only-nav hidden px-3 py-1.5 rounded-xl text-xs font-medium text-amber-300 hover:text-white flex items-center gap-1.5 whitespace-nowrap bg-amber-950/30 border border-amber-500/30">
-          <i class="fa-solid fa-boxes-stacked"></i> Inventory
-        </button>
-      </nav>
-
-      <!-- Auth & Actions -->
-      <div class="flex items-center gap-2 shrink-0">
-        <button onclick="showCartModal()" class="relative p-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl border border-slate-700 flex items-center justify-center transition-all" title="View Cart">
-          <i class="fa-solid fa-cart-shopping text-xs text-amber-400"></i>
-          <span id="cart-badge" class="absolute -top-1 -right-1 w-4 h-4 bg-amber-500 text-slate-950 font-bold text-[9px] rounded-full flex items-center justify-center">0</span>
-        </button>
-
-        <button id="notif-toggle-btn" onclick="openNotifications()" class="relative p-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl border border-slate-700 flex items-center justify-center transition-all">
-          <i class="fa-solid fa-bell text-xs text-blue-400"></i>
-          <span id="notification-badge" class="absolute -top-1 -right-1 w-4 h-4 bg-blue-600 text-white font-bold text-[9px] rounded-full flex items-center justify-center">0</span>
-        </button>
-
-        <div id="auth-header-container"></div>
-      </div>
-
-    </div>
-  </header>
-
-  <!-- ADVANCED ADMIN CARD EDITOR MODAL -->
-  <div id="card-editor-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 space-y-4 relative shadow-2xl max-h-[90vh] overflow-y-auto">
-      <button onclick="closeCardEditorModal()" class="absolute top-4 right-4 w-7 h-7 rounded-lg bg-slate-800 text-slate-400 hover:text-white text-xs flex items-center justify-center">
-        <i class="fa-solid fa-xmark"></i>
+<!-- ============ TOP NAV ============ -->
+<header class="sticky top-0 z-40 bg-ink/95 backdrop-blur border-b border-ink-line" style="border-color:var(--line)">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6">
+    <div class="flex items-center justify-between h-16 gap-4">
+      <button onclick="setView('marketplace')" class="flex items-baseline gap-2 shrink-0">
+        <span class="font-display text-xl sm:text-2xl tracking-tight text-parchment">Eugene <em class="not-italic text-brass">Card</em></span>
       </button>
 
-      <div class="flex items-center gap-2">
-        <i class="fa-solid fa-boxes-stacked text-amber-400"></i>
-        <h3 id="editor-modal-title" class="text-base font-bold text-white">Edit Card Specs & Ownership</h3>
-      </div>
+      <nav class="hidden md:flex items-center gap-6 overflow-x-auto hide-scrollbar" id="main-nav">
+        <button class="tab-btn active" data-view="marketplace" onclick="setView('marketplace')">Registry</button>
+        <button class="tab-btn" data-view="auctions" onclick="setView('auctions')">Live Lot</button>
+        <button class="tab-btn" data-view="trades" onclick="setView('trades')">Exchange</button>
+        <button class="tab-btn" data-view="wishlist" onclick="setView('wishlist')">Wishlist</button>
+        <button class="tab-btn" data-view="vault" onclick="setView('vault')">Your Vault</button>
+        <button class="tab-btn hidden" data-view="admin" id="admin-tab-btn" onclick="setView('admin')">Registrar</button>
+      </nav>
 
-      <form id="card-editor-form" onsubmit="saveCardEdit(event)" class="space-y-3">
-        <input type="hidden" id="edit-card-id">
+      <div class="flex items-center gap-3 shrink-0">
+        <button onclick="openCartModal()" class="relative btn-ghost rounded-full w-9 h-9 flex items-center justify-center" aria-label="Cart">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+          <span id="cart-count" class="hidden absolute -top-1.5 -right-1.5 bg-brass text-ink text-[10px] font-mono font-bold rounded-full w-4 h-4 items-center justify-center">0</span>
+        </button>
 
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="text-[11px] font-bold text-slate-400 uppercase">Serial Tag (*01 / *001)</label>
-            <input type="text" id="edit-card-serial" required placeholder="*01" class="w-full mt-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500 font-mono">
-          </div>
-          <div>
-            <label class="text-[11px] font-bold text-slate-400 uppercase">Serial Number (SN)</label>
-            <input type="text" id="edit-card-sn" required placeholder="001" class="w-full mt-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500 font-mono">
-          </div>
-        </div>
-
-        <div>
-          <label class="text-[11px] font-bold text-slate-400 uppercase">Card Name</label>
-          <input type="text" id="edit-card-name" required placeholder="Eugene Premium #01" class="w-full mt-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
-        </div>
-
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="text-[11px] font-bold text-slate-400 uppercase">Edition</label>
-            <input type="text" id="edit-card-edition" required placeholder="Beta Edition: #0" class="w-full mt-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
-          </div>
-          <div>
-            <label class="text-[11px] font-bold text-slate-400 uppercase">Printing Multiplier</label>
-            <input type="text" id="edit-card-printing" required placeholder="1x" class="w-full mt-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500 font-mono">
-          </div>
-        </div>
-
-        <div class="grid grid-cols-3 gap-3">
-          <div>
-            <label class="text-[11px] font-bold text-slate-400 uppercase">Card Tier</label>
-            <select id="edit-card-type" class="w-full mt-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
-              <option value="PREMIUM">PREMIUM</option>
-              <option value="STANDARD">STANDARD</option>
-            </select>
-          </div>
-          <div>
-            <label class="text-[11px] font-bold text-slate-400 uppercase">Price (IDR)</label>
-            <input type="number" id="edit-card-price" required min="0" class="w-full mt-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500 font-mono">
-          </div>
-          <div>
-            <label class="text-[11px] font-bold text-slate-400 uppercase">Base Floor Price</label>
-            <input type="number" id="edit-card-basefloor" required min="0" class="w-full mt-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500 font-mono">
-          </div>
-        </div>
-
-        <!-- SEARCHABLE OWNER DROPDOWN -->
         <div class="relative">
-          <label class="text-[11px] font-bold text-slate-400 uppercase flex justify-between">
-            <span>Assigned Owner</span>
-            <span id="current-owner-label" class="text-blue-400 font-mono">Unassigned</span>
-          </label>
-          <input type="text" id="edit-card-owner-search" oninput="filterOwnerOptions(this.value)" placeholder="Search collector name or type custom..." class="w-full mt-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
-          
-          <div id="owner-dropdown-list" class="absolute left-0 right-0 top-full mt-1 bg-slate-800 border border-slate-700 rounded-xl max-h-36 overflow-y-auto hidden z-20 shadow-xl divide-y divide-slate-700/50">
-          </div>
+          <button onclick="toggleNotifPanel()" class="relative btn-ghost rounded-full w-9 h-9 flex items-center justify-center" aria-label="Notifications">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <span id="notif-dot" class="hidden notif-dot absolute -top-0.5 -right-0.5 bg-oxblood-bright rounded-full w-2.5 h-2.5" style="background:var(--oxblood)"></span>
+          </button>
+          <div id="notif-panel" class="hidden absolute right-0 mt-2 w-80 max-h-96 overflow-y-auto modal-panel rounded-lg shadow-2xl p-2 z-50"></div>
         </div>
 
-        <div>
-          <label class="text-[11px] font-bold text-slate-400 uppercase">Image URL</label>
-          <input type="text" id="edit-card-img" required class="w-full mt-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500 font-mono">
-        </div>
+        <div id="auth-slot"></div>
 
-        <div>
-          <label class="text-[11px] font-bold text-slate-400 uppercase">Status</label>
-          <select id="edit-card-status" class="w-full mt-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
-            <option value="AVAILABLE">AVAILABLE</option>
-            <option value="SOLD">SOLD</option>
-            <option value="OWNED">OWNED</option>
-            <option value="RESERVED">RESERVED</option>
-          </select>
-        </div>
+        <button onclick="toggleMobileNav()" class="md:hidden btn-ghost rounded-md w-9 h-9 flex items-center justify-center" aria-label="Menu">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+      </div>
+    </div>
 
-        <div class="pt-2 flex items-center justify-end gap-2">
-          <button type="button" onclick="closeCardEditorModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl transition-all">Cancel</button>
-          <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-xl shadow transition-all">Save Changes</button>
-        </div>
-      </form>
+    <nav id="mobile-nav" class="hidden md:hidden flex flex-col pb-3 gap-1">
+      <button class="tab-btn active text-left !border-b-0 py-2" data-view="marketplace" onclick="setView('marketplace')">Registry</button>
+      <button class="tab-btn text-left !border-b-0 py-2" data-view="auctions" onclick="setView('auctions')">Live Lot</button>
+      <button class="tab-btn text-left !border-b-0 py-2" data-view="trades" onclick="setView('trades')">Exchange</button>
+      <button class="tab-btn text-left !border-b-0 py-2" data-view="wishlist" onclick="setView('wishlist')">Wishlist</button>
+      <button class="tab-btn text-left !border-b-0 py-2" data-view="vault" onclick="setView('vault')">Your Vault</button>
+      <button class="tab-btn hidden text-left !border-b-0 py-2" data-view="admin" id="admin-tab-btn-mobile" onclick="setView('admin')">Registrar</button>
+    </nav>
+  </div>
+</header>
+
+<!-- ============ HERO / REGISTRY STATUS (signature element) ============ -->
+<section class="border-b" style="border-color:var(--line)">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-8">
+    <p class="font-mono text-[0.65rem] tracking-[0.2em] uppercase text-brass mb-3">Registry of One-of-One Cards · Beta Edition</p>
+    <h1 class="font-display text-3xl sm:text-4xl md:text-5xl leading-[1.08] text-parchment max-w-3xl">
+      Fifty cards exist.<br class="hidden sm:block"> Every one is numbered, owned, and traceable.
+    </h1>
+    <p class="text-text-muted mt-4 max-w-xl text-sm sm:text-base" style="color:var(--text-muted)">
+      No reprints, no duplicates. Each entry below is a single physical card with a serial, a provenance, and — right now — an owner or an opening.
+    </p>
+  </div>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 pb-10">
+    <div class="ledger-strip rounded-sm overflow-hidden">
+      <div class="ledger-cell" style="--cell-accent:var(--brass)">
+        <span class="ledger-num text-parchment" id="stat-total">—</span>
+        <span class="ledger-label">Minted</span>
+      </div>
+      <div class="ledger-cell" style="--cell-accent:var(--emerald-bright)">
+        <span class="ledger-num" style="color:var(--emerald-bright)" id="stat-available">—</span>
+        <span class="ledger-label">Available</span>
+      </div>
+      <div class="ledger-cell" style="--cell-accent:#7C8CA6">
+        <span class="ledger-num" style="color:#B9C2D0" id="stat-owned">—</span>
+        <span class="ledger-label">In Collectors' Vaults</span>
+      </div>
+      <div class="ledger-cell" style="--cell-accent:var(--oxblood-bright)">
+        <span class="ledger-num" style="color:#D98E86" id="stat-auction">—</span>
+        <span class="ledger-label">Under the Hammer</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MAIN ============ -->
+<main class="max-w-7xl mx-auto px-4 sm:px-6 py-10">
+
+  <!-- MARKETPLACE VIEW -->
+  <div x-view id="view-marketplace" class="active fade-in">
+    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6">
+      <div>
+        <h2 class="font-display text-2xl text-parchment">The Registry</h2>
+        <p class="text-sm mt-1" style="color:var(--text-muted)">Browse every card by tier, edition, or serial.</p>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <input id="search-input" type="text" placeholder="Search name or serial…" class="input-field rounded-md px-3 py-2 text-sm w-full sm:w-56" oninput="renderMarketplace()">
+        <select id="filter-status" class="input-field rounded-md px-3 py-2 text-sm" onchange="renderMarketplace()">
+          <option value="">All statuses</option>
+          <option value="AVAILABLE">Available</option>
+          <option value="SOLD">Owned</option>
+          <option value="PENDING">Pending</option>
+        </select>
+        <select id="filter-tier" class="input-field rounded-md px-3 py-2 text-sm" onchange="renderMarketplace()">
+          <option value="">All tiers</option>
+        </select>
+        <select id="sort-order" class="input-field rounded-md px-3 py-2 text-sm" onchange="renderMarketplace()">
+          <option value="serial">Sort: Serial</option>
+          <option value="price-asc">Sort: Price ↑</option>
+          <option value="price-desc">Sort: Price ↓</option>
+        </select>
+      </div>
+    </div>
+    <div id="marketplace-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4"></div>
+  </div>
+
+  <!-- AUCTIONS VIEW -->
+  <div x-view id="view-auctions" class="fade-in">
+    <div class="mb-6">
+      <h2 class="font-display text-2xl text-parchment">Live Lot</h2>
+      <p class="text-sm mt-1" style="color:var(--text-muted)">Only one card goes under the hammer at a time.</p>
+    </div>
+    <div id="auction-content"></div>
+    <div class="mt-10">
+      <h3 class="font-display text-lg text-parchment mb-3">Past Lots</h3>
+      <div id="auction-history" class="space-y-2"></div>
     </div>
   </div>
 
-  <!-- Main Marketplace Body -->
-  <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 lg:p-8 space-y-8">
-    
-    <!-- CATALOG VIEW -->
-    <section id="view-catalog" class="space-y-6">
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
-        <div class="flex items-center gap-4">
-          <div class="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 p-1 flex items-center justify-center">
-            <svg viewBox="0 0 100 100" class="w-full h-full"><use href="#eugene-logo-mark"/></svg>
-          </div>
-          <div>
-            <span class="text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 tracking-wider">LIMITED EDITION</span>
-            <h2 class="text-base font-bold text-white mt-0.5">Beta Edition Card Stock</h2>
-            <p class="text-xs text-slate-400">Official Primary Market Availability (2% Tax Included)</p>
-          </div>
-        </div>
-        
-        <div class="bg-slate-800/80 px-5 py-2.5 rounded-xl border border-slate-700 text-center sm:text-right w-full sm:w-auto">
-          <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Remaining Cards</p>
-          <p class="text-xl font-bold font-mono text-blue-400"><span id="remaining-cards-count">0</span> <span class="text-slate-400 text-xs font-normal">Available</span></p>
-        </div>
-      </div>
-
-      <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-slate-900 p-2.5 rounded-xl border border-slate-800">
-        <div class="relative flex-1">
-          <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
-          <input type="text" id="search-input" oninput="renderCardGrid()" placeholder="Search serial (*01 / *001) or card name..." class="w-full bg-slate-800 border border-slate-700 rounded-lg pl-9 pr-4 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
-        </div>
-        <div class="flex items-center gap-1.5">
-          <button onclick="setFilter('ALL')" id="filter-ALL" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 text-white transition-all">All</button>
-          <button onclick="setFilter('PREMIUM')" id="filter-PREMIUM" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-400 hover:text-white transition-all">Premium</button>
-          <button onclick="setFilter('STANDARD')" id="filter-STANDARD" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-400 hover:text-white transition-all">Standard</button>
-        </div>
-      </div>
-
-      <div id="card-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
-    </section>
-
-    <!-- INVENTORY VIEW (ADMIN ONLY) -->
-    <section id="view-inventory" class="hidden space-y-6">
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h2 class="text-xl font-bold text-white uppercase"><i class="fa-solid fa-boxes-stacked text-amber-400 mr-2"></i> Inventory Control</h2>
-          <p class="text-xs text-slate-400 mt-1">Manage specs, edit owners, export backup JSON, or mint new cards.</p>
-        </div>
-        <div class="flex flex-wrap items-center gap-2">
-          <button onclick="exportInventoryJSON()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-blue-400 font-bold text-xs rounded-xl border border-slate-700 transition-all flex items-center gap-1.5">
-            <i class="fa-solid fa-download"></i> Export JSON
-          </button>
-          <label class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-purple-400 font-bold text-xs rounded-xl border border-slate-700 transition-all flex items-center gap-1.5 cursor-pointer">
-            <i class="fa-solid fa-upload"></i> Import JSON
-            <input type="file" id="import-file-input" accept=".json" onchange="importInventoryJSON(event)" class="hidden">
-          </label>
-          <button onclick="openCardEditorModal()" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-xl transition-all shadow flex items-center gap-1.5">
-            <i class="fa-solid fa-plus"></i> Mint Card
-          </button>
-        </div>
-      </div>
-
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs text-slate-300">
-            <thead class="bg-slate-800/80 text-[10px] uppercase text-slate-400 font-semibold border-b border-slate-800">
-              <tr>
-                <th class="p-3">Serial</th>
-                <th class="p-3">Card Name</th>
-                <th class="p-3">Edition</th>
-                <th class="p-3">Tier</th>
-                <th class="p-3">Price</th>
-                <th class="p-3">Owner</th>
-                <th class="p-3">Status</th>
-                <th class="p-3 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody id="inventory-table-body" class="divide-y divide-slate-800">
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-  </main>
-
-  <!-- TOAST NOTIFICATION -->
-  <div id="toast" class="fixed bottom-6 right-6 z-[10000] bg-slate-900 border border-blue-500/40 text-blue-400 text-xs font-semibold px-4 py-3 rounded-xl shadow-2xl transform translate-y-20 opacity-0 transition-all pointer-events-none">
-    <span id="toast-msg">Action completed.</span>
+  <!-- TRADES VIEW -->
+  <div x-view id="view-trades" class="fade-in">
+    <div class="mb-6">
+      <h2 class="font-display text-2xl text-parchment">The Exchange Desk</h2>
+      <p class="text-sm mt-1" style="color:var(--text-muted)">Offer a card, offer cash, or both — collectors settle payment between themselves.</p>
+    </div>
+    <div class="flex gap-6 border-b mb-6" style="border-color:var(--line)">
+      <button class="tab-btn active" data-tradetab="incoming" onclick="setTradeTab('incoming')">Incoming</button>
+      <button class="tab-btn" data-tradetab="outgoing" onclick="setTradeTab('outgoing')">Outgoing</button>
+      <button class="tab-btn" data-tradetab="history" onclick="setTradeTab('history')">History</button>
+    </div>
+    <div id="trades-content" class="space-y-3"></div>
   </div>
 
-  <!-- Supabase JS Client Library -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/supabase-init.js"></script>
+  <!-- WISHLIST VIEW -->
+  <div x-view id="view-wishlist" class="fade-in">
+    <div class="mb-6">
+      <h2 class="font-display text-2xl text-parchment">Wishlist</h2>
+      <p class="text-sm mt-1" style="color:var(--text-muted)">Cards you're watching.</p>
+    </div>
+    <div id="wishlist-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4"></div>
+  </div>
 
-  <script>
-    let inventory = [];
-    let currentUser = null;
-    let currentFilter = 'ALL';
-    let selectedOwner = null;
+  <!-- VAULT (PROFILE) VIEW -->
+  <div x-view id="view-vault" class="fade-in">
+    <div id="vault-content"></div>
+  </div>
 
-    // FETCH INVENTORY LIVE FROM SUPABASE FOR EVERY USER
-    async function fetchDatabaseInventory() {
-      if (window.supabaseClient) {
-        const { data, error } = await supabaseClient
-          .from('inventory')
-          .select('*')
-          .order('id', { ascending: true });
+  <!-- ADMIN VIEW -->
+  <div x-view id="view-admin" class="fade-in">
+    <div class="mb-6">
+      <h2 class="font-display text-2xl text-parchment">Registrar's Office</h2>
+      <p class="text-sm mt-1" style="color:var(--text-muted)">Manage the registry and review submitted payments.</p>
+    </div>
+    <div class="flex gap-6 border-b mb-6 overflow-x-auto hide-scrollbar" style="border-color:var(--line)">
+      <button class="tab-btn active" data-admintab="orders" onclick="setAdminTab('orders')">Pending Orders</button>
+      <button class="tab-btn" data-admintab="cards" onclick="setAdminTab('cards')">Manage Cards</button>
+      <button class="tab-btn" data-admintab="auction" onclick="setAdminTab('auction')">Auction Control</button>
+    </div>
+    <div id="admin-content"></div>
+  </div>
 
-        if (!error && data && data.length > 0) {
-          inventory = data;
-          saveInventoryLocalCache();
-          renderCardGrid();
-          renderInventoryTable();
-          updateRemainingCardCount();
-          return;
-        }
-      }
+</main>
 
-      const storedInventory = localStorage.getItem('eugene_inventory_data');
-      if (storedInventory) {
-        try { inventory = JSON.parse(storedInventory); } catch(e) {}
-      }
-      renderCardGrid();
-      renderInventoryTable();
-      updateRemainingCardCount();
-    }
+<footer class="border-t mt-10" style="border-color:var(--line)">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 py-8 flex flex-col sm:flex-row justify-between gap-3 text-xs" style="color:var(--text-muted)">
+    <p class="font-mono">EUGENE CARD REGISTRY · 50 / 50 SERIALIZED</p>
+    <p>Beta Edition · One card, one owner, one record.</p>
+  </div>
+</footer>
 
-    function saveInventoryLocalCache() {
-      localStorage.setItem('eugene_inventory_data', JSON.stringify(inventory));
-    }
-
-    // SAVE & PUSH CARD EDITS DIRECTLY TO SUPABASE DATABASE
-    async function saveCardEdit(event) {
-      event.preventDefault();
-
-      const cardId = document.getElementById('edit-card-id').value;
-      const serial = document.getElementById('edit-card-serial').value;
-      const sn = document.getElementById('edit-card-sn').value;
-      const name = document.getElementById('edit-card-name').value;
-      const edition = document.getElementById('edit-card-edition').value;
-      const printing = document.getElementById('edit-card-printing').value;
-      const type = document.getElementById('edit-card-type').value;
-      const price = parseInt(document.getElementById('edit-card-price').value, 10);
-      const baseFloorPrice = parseInt(document.getElementById('edit-card-basefloor').value, 10);
-      const imgUrl = document.getElementById('edit-card-img').value;
-      const status = document.getElementById('edit-card-status').value;
-
-      const cardData = {
-        serial, sn, name, edition, printing, type, price, baseFloorPrice, imgUrl, status, owner: selectedOwner
-      };
-
-      if (cardId) {
-        cardData.id = cardId;
-        const idx = inventory.findIndex(c => c.id === cardId);
-        if (idx !== -1) {
-          inventory[idx] = { ...inventory[idx], ...cardData };
-        }
-        
-        // Push update live to Supabase Database
-        if (window.supabaseClient) {
-          await supabaseClient
-            .from('inventory')
-            .update(cardData)
-            .eq('id', cardId);
-        }
-        showToast(`Updated ${serial} details live for everyone!`);
-      } else {
-        const newId = `card-${Date.now()}`;
-        cardData.id = newId;
-        inventory.unshift(cardData);
-
-        // Push new card live to Supabase Database
-        if (window.supabaseClient) {
-          await supabaseClient
-            .from('inventory')
-            .insert([cardData]);
-        }
-        showToast(`Minted new card ${serial} live!`);
-      }
-
-      saveInventoryLocalCache();
-      renderCardGrid();
-      renderInventoryTable();
-      updateRemainingCardCount();
-      closeCardEditorModal();
-    }
-
-    // DELETE CARD FROM SUPABASE LIVE
-    async function deleteCard(cardId) {
-      if (!currentUser?.isAdmin) return showToast('Admin permission required.');
-      inventory = inventory.filter(c => c.id !== cardId);
-      saveInventoryLocalCache();
-
-      if (window.supabaseClient) {
-        await supabaseClient
-          .from('inventory')
-          .delete()
-          .eq('id', cardId);
-      }
-
-      renderCardGrid();
-      renderInventoryTable();
-      updateRemainingCardCount();
-      showToast('Card deleted live from database.');
-    }
-
-    // IMPORT JSON AND PUSH ALL CARDS TO SUPABASE
-    async function importInventoryJSON(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = async function(e) {
-        try {
-          const parsed = JSON.parse(e.target.result);
-          const newCards = Array.isArray(parsed.cards) ? parsed.cards : parsed;
-
-          if (window.supabaseClient && newCards.length > 0) {
-            await supabaseClient.from('inventory').upsert(newCards);
-            await fetchDatabaseInventory();
-          } else {
-            inventory = newCards;
-            saveInventoryLocalCache();
-            renderCardGrid();
-            renderInventoryTable();
-            updateRemainingCardCount();
-          }
-          showToast(`Imported ${newCards.length} cards live!`);
-        } catch (err) {
-          showToast('Failed to parse JSON: ' + err.message);
-        }
-      };
-      reader.readAsText(file);
-      event.target.value = '';
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      fetchDatabaseInventory();
-
-      // Subscribe to real-time changes across all users
-      if (window.supabaseClient) {
-        supabaseClient
-          .channel('public:inventory')
-          .on('postgres_changes', { event: '*', schema: 'public', table: 'inventory' }, () => {
-            fetchDatabaseInventory();
-          })
-          .subscribe();
-      }
-    });
-
-    function setFilter(type) {
-      currentFilter = type;
-      renderCardGrid();
-    }
-
-    function updateRemainingCardCount() {
-      const count = inventory.filter(c => c.status === 'AVAILABLE').length;
-      const countEl = document.getElementById('remaining-cards-count');
-      if (countEl) countEl.innerText = count;
-    }
-
-    function closeCardEditorModal() {
-      document.getElementById('card-editor-modal').classList.add('hidden');
-    }
-
-    function showToast(msg) {
-      const toast = document.getElementById('toast');
-      document.getElementById('toast-msg').innerText = msg;
-      toast.classList.remove('translate-y-20', 'opacity-0');
-      setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 3000);
-    }
-  </script>
+<!-- ============ MODALS (populated by JS) ============ -->
+<div id="modal-root"></div>
 
 <script>
-async function ensureProfileForPurchase(){
- if(!window.supabaseClient) return true;
- const {data:{user}}=await supabaseClient.auth.getUser();
- if(!user){showToast('Please login first.');return false;}
- let {data:profile}=await supabaseClient.from('profiles').select('*').eq('id',user.id).maybeSingle();
- if(!profile){
-   const name=(user.user_metadata?.full_name||user.user_metadata?.name||user.email.split('@')[0]);
-   const username=(user.user_metadata?.preferred_username||name.replace(/\s+/g,'').toLowerCase());
-   await supabaseClient.from('profiles').upsert({id:user.id,email:user.email,name,username,avatar_url:user.user_metadata?.avatar_url||null,role:'user'});
- }
- return true;
-}
+/* =====================================================================
+   EUGENE CARD — REGISTRY & EXCHANGE
+   Single-file marketplace backed by Supabase (project: eugene-card-2)
+   ===================================================================== */
 </script>
 </body>
 </html>
