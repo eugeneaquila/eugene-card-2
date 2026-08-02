@@ -248,9 +248,6 @@
     <button id="nav-admin" onclick="switchTab('admin')" class="admin-only-nav hidden bottom-nav-item px-3 py-2 rounded-xl text-xs font-semibold text-rose-400 hover:text-white flex flex-col sm:flex-row items-center gap-1.5 whitespace-nowrap bg-rose-950/40 border border-rose-500/30">
       <i class="fa-solid fa-shield-halved"></i> <span data-i18n="navAdmin">Admin</span>
     </button>
-    <button id="nav-admin-manage" onclick="switchTab('admin-manage')" class="admin-only-nav hidden bottom-nav-item px-3 py-2 rounded-xl text-xs font-semibold text-rose-400 hover:text-white flex flex-col sm:flex-row items-center gap-1.5 whitespace-nowrap bg-rose-950/40 border border-rose-500/30">
-      <i class="fa-solid fa-sliders"></i> <span data-i18n="navAdminManage">Admin Manage</span>
-    </button>
   </nav>
 
   <!-- DIRECT CHAT DRAWER OVERLAY -->
@@ -682,64 +679,6 @@
         <h4 class="text-xs font-extrabold text-purple-200 uppercase tracking-wider" data-i18n="pendingOrdersTitle">Pending QRIS Orders Requiring Action</h4>
         <div id="admin-pending-orders-list" class="space-y-3">
           <p class="text-xs text-purple-300/50" data-i18n="noPendingOrders">No pending transactions requiring approval.</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- ADMIN MANAGEMENT VIEW (ADMIN CONTROLS TAB) -->
-    <section id="view-admin-manage" class="hidden space-y-6">
-      <div class="bg-violet-950/60 border border-purple-500/20 rounded-3xl p-6 flex justify-between items-center">
-        <div>
-          <h2 class="text-2xl font-black text-white uppercase tracking-wide">
-            <i class="fa-solid fa-sliders text-rose-400 mr-2"></i> Admin Controls & Management
-          </h2>
-          <p class="text-xs text-purple-200/60 mt-1">Configure global platform settings, fee percentages, and system toggles.</p>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- Platform Fee & Controls -->
-        <div class="bg-violet-950/60 border border-purple-500/20 rounded-3xl p-6 space-y-4">
-          <h3 class="text-sm font-bold text-white uppercase tracking-wider"><i class="fa-solid fa-percent text-purple-400 mr-2"></i> Fee & Tax Configuration</h3>
-          <div class="space-y-3 text-xs">
-            <div>
-              <label class="block font-bold text-purple-200/80 mb-1">Marketplace Platform Fee (%)</label>
-              <input type="number" id="admin-config-fee" value="2" class="w-full bg-violet-900/60 border border-purple-500/30 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-purple-500">
-            </div>
-            <div>
-              <label class="block font-bold text-purple-200/80 mb-1">Official Payment QRIS Code String</label>
-              <textarea id="admin-config-qris" rows="3" class="w-full bg-violet-900/60 border border-purple-500/30 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-purple-500 font-mono text-[10px] resize-y">00020101021126610014COM.GO-JEK.WWW01189360091430419400360210G0419400360303UMI51440014ID.CO.QRIS.WWW0215ID10265490344800303UMI5204594453033605802ID5925Eugene Card, Toko Kartu &6012TORAJA UTARA61059183162070703A0163048BD9</textarea>
-            </div>
-            <button onclick="showToast('Platform configuration saved.')" class="w-full py-2.5 bg-rose-600 hover:bg-rose-500 text-white font-extrabold rounded-xl transition-all shadow">Save Configurations</button>
-          </div>
-        </div>
-
-        <!-- Global Marketplace Toggles -->
-        <div class="bg-violet-950/60 border border-purple-500/20 rounded-3xl p-6 space-y-4">
-          <h3 class="text-sm font-bold text-white uppercase tracking-wider"><i class="fa-solid fa-toggle-on text-rose-400 mr-2"></i> Feature Switches</h3>
-          <div class="space-y-3 text-xs">
-            <div class="flex items-center justify-between p-3 bg-violet-900/40 rounded-xl border border-purple-500/20">
-              <div>
-                <p class="font-bold text-white">Enable P2P Card Trading</p>
-                <p class="text-[10px] text-purple-200/60">Allow collectors to trade cards directly</p>
-              </div>
-              <input type="checkbox" checked class="w-4 h-4 accent-purple-500">
-            </div>
-            <div class="flex items-center justify-between p-3 bg-violet-900/40 rounded-xl border border-purple-500/20">
-              <div>
-                <p class="font-bold text-white">Enable Live Card Auctions</p>
-                <p class="text-[10px] text-purple-200/60">Allow bids on active auction items</p>
-              </div>
-              <input type="checkbox" checked class="w-4 h-4 accent-purple-500">
-            </div>
-            <div class="flex items-center justify-between p-3 bg-violet-900/40 rounded-xl border border-purple-500/20">
-              <div>
-                <p class="font-bold text-white">Enable Instant Admin Sell-Back</p>
-                <p class="text-[10px] text-purple-200/60">Allow users to sell cards back to house</p>
-              </div>
-              <input type="checkbox" checked class="w-4 h-4 accent-purple-500">
-            </div>
-          </div>
         </div>
       </div>
     </section>
@@ -1386,7 +1325,6 @@
         navWishlist: "Wishlist",
         navInventory: "Inventory",
         navAdmin: "Admin Hub",
-        navAdminManage: "Admin Manage",
         notifHeader: "Cookie & Activity Logs",
         clearAll: "Clear All",
         noNotifications: "No recent notifications.",
@@ -1582,7 +1520,6 @@
         navWishlist: "Keinginan",
         navInventory: "Inventaris",
         navAdmin: "Admin Hub",
-        navAdminManage: "Admin Kelola",
         notifHeader: "Cookie & Catatan Aktivitas",
         clearAll: "Hapus Semua",
         noNotifications: "Tidak ada notifikasi terbaru.",
@@ -3906,19 +3843,21 @@
       if (!confirm('Reject this trade request?')) return;
 
       try {
-await db.collection("tradeRequests").doc(reqId).update({ status: 'REJECTED' });
+        await db.collection("tradeRequests").doc(reqId).update({ status: 'REJECTED' });
         showToast('Trade offer rejected.');
         addNotification('Trade Offer Rejected', `Rejected offer from ${req.proposer} for ${req.serial}.`, 'fa-xmark text-rose-400');
         await fetchTradeRequests();
       } catch (e) {
-        showToast('Error rejecting trade offer: ' + e.message);
+        showToast('Error rejecting trade: ' + e.message);
       }
     }
 
     function openCounterOfferModal(reqId) {
-      if (!currentUser) return showToast('Please log in.');
+      const req = tradeRequestsList.find(r => r.id === reqId);
+      if (!req) return;
+
       document.getElementById('counter-req-id-target').value = reqId;
-      document.getElementById('counter-notes-input').value = '';
+      document.getElementById('counter-notes-input').value = `Counter QRIS offer to ${req.proposer}: `;
       document.getElementById('counter-offer-modal').classList.remove('hidden');
     }
 
@@ -3926,22 +3865,802 @@ await db.collection("tradeRequests").doc(reqId).update({ status: 'REJECTED' });
       document.getElementById('counter-offer-modal').classList.add('hidden');
     }
 
+    function showConfirmModal({ title, message, confirmText, confirmClass, icon, onConfirm }) {
+      document.getElementById('generic-confirm-title').innerText = title || 'Are you sure?';
+      document.getElementById('generic-confirm-message').innerText = message || '';
+
+      const iconEl = document.getElementById('generic-confirm-icon');
+      iconEl.className = `fa-solid ${icon || 'fa-triangle-exclamation text-purple-400'} text-xl`;
+
+      const btn = document.getElementById('generic-confirm-btn');
+      btn.innerText = confirmText || 'Confirm';
+      btn.className = `flex-1 py-2.5 font-extrabold text-xs rounded-xl transition-all ${confirmClass || 'bg-purple-600 hover:bg-purple-500 text-white'}`;
+
+      pendingConfirmAction = typeof onConfirm === 'function' ? onConfirm : null;
+      document.getElementById('generic-confirm-modal').classList.remove('hidden');
+    }
+
+    function closeConfirmModal() {
+      document.getElementById('generic-confirm-modal').classList.add('hidden');
+      pendingConfirmAction = null;
+    }
+
+    function handleConfirmModalAccept() {
+      const action = pendingConfirmAction;
+      closeConfirmModal();
+      if (action) action();
+    }
+
     async function submitCounterOffer() {
       const reqId = document.getElementById('counter-req-id-target').value;
-      const notes = document.getElementById('counter-notes-input').value.trim();
-      if (!notes) return showToast('Please enter counter offer terms.');
+      const counterNotes = document.getElementById('counter-notes-input').value.trim();
+      const req = tradeRequestsList.find(r => r.id === reqId);
+
+      if (!req || !counterNotes) return showToast('Invalid details.');
 
       try {
         await db.collection("tradeRequests").doc(reqId).update({
-          status: 'COUNTERED',
-          notes: `COUNTER OFFER: ${notes}`
+          notes: counterNotes,
+          status: 'COUNTERED'
         });
+
         closeCounterOfferModal();
         showToast('Counter offer sent!');
-        addNotification('Counter Offer Sent', `Sent counter terms for request ${reqId}.`, 'fa-pen-to-square text-purple-400');
+        addNotification('Counter Offer Sent', `Submitted counter offer for ${req.serial}.`, 'fa-pen-to-square text-purple-400');
         await fetchTradeRequests();
       } catch (e) {
         showToast('Error submitting counter offer: ' + e.message);
+      }
+    }
+
+    function renderTradeRequests() {
+      const grid = document.getElementById('trade-requests-grid');
+      if (!grid) return;
+
+      if (tradeRequestsList.length === 0) {
+        grid.innerHTML = `<div class="col-span-full text-center py-12 text-purple-300/50 text-xs">No active trade requests or offers currently pending.</div>`;
+        return;
+      }
+
+      grid.innerHTML = tradeRequestsList.map(req => {
+        const myIdent = currentUser ? (currentUser.username || currentUser.name) : '';
+        const isProposer = currentUser && (req.proposer === currentUser.name || req.proposer === currentUser.username);
+        const isTargetOwner = currentUser && (req.targetOwner === currentUser.name || req.targetOwner === currentUser.username || currentUser.isAdmin);
+        const isCountered = req.status === 'COUNTERED';
+        const isAccepted = req.status === 'ACCEPTED';
+        const isRejected = req.status === 'REJECTED';
+
+        let statusBadge = `<span class="text-[9px] font-extrabold px-2 py-0.5 rounded ${req.offerType === 'BUY' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-purple-500/20 text-purple-300'}">${req.offerType}</span>`;
+        if (isCountered) statusBadge = `<span class="text-[9px] font-extrabold px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30"><i class="fa-solid fa-arrows-rotate mr-1"></i>COUNTERED</span>`;
+        if (isAccepted) statusBadge = `<span class="text-[9px] font-extrabold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">ACCEPTED</span>`;
+        if (isRejected) statusBadge = `<span class="text-[9px] font-extrabold px-2 py-0.5 rounded bg-rose-500/20 text-rose-400 border border-rose-500/30">REJECTED</span>`;
+
+        return `
+<div class="bg-violet-950/60 border ${isCountered ? 'border-purple-500/40 bg-purple-950/20' : 'border-purple-500/20'} rounded-2xl p-4 flex flex-col justify-between space-y-3 shadow-md">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex items-center gap-3">
+                <img src="${req.cardImg || 'https://placehold.co/1080x1350/1e1b4b/a855f7?text=Card'}" class="w-12 h-12 object-contain rounded-xl bg-violet-900 border border-purple-500/20 shrink-0">
+                <div>
+                  <div class="flex items-center gap-2">
+                    <h4 class="font-extrabold text-white text-xs">${req.serial || '*--'} ${req.cardName ? `• ${req.cardName}` : ''}</h4>
+                    ${statusBadge}
+                  </div>
+                  <p class="text-[10px] text-purple-200/60 mt-0.5">Owner: <strong class="text-purple-300">${req.targetOwner}</strong> | Proposer: <strong class="text-white">${req.proposer}</strong></p>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-violet-900/40 p-2.5 rounded-xl border border-purple-500/20 text-xs text-purple-200 space-y-1">
+              <p class="text-[10px] font-bold text-purple-300/60 uppercase">Proposal Terms & Notes</p>
+              <p class="font-medium text-white">${req.notes || 'No extra notes.'}</p>
+            </div>
+
+            <div class="flex items-center justify-between pt-1 border-t border-purple-500/10 gap-2">
+              <button onclick="openDirectChat('${isProposer ? req.targetOwner : req.proposer}', 'Trade Offer #${req.id}')" class="px-3 py-1.5 bg-violet-900/60 hover:bg-violet-800 text-purple-300 font-bold text-[10px] rounded-xl border border-purple-500/30 flex items-center gap-1">
+                <i class="fa-solid fa-comments"></i> Chat
+              </button>
+
+              <div class="flex items-center gap-1.5">
+                ${!isAccepted && !isRejected ? `
+                  ${isTargetOwner && !isCountered ? `
+                    <button onclick="acceptTradeRequest('${req.id}')" class="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-[10px] rounded-xl transition-all shadow">Accept</button>
+                    <button onclick="openCounterOfferModal('${req.id}')" class="px-3 py-1.5 bg-purple-600 hover:bg-purple-500 text-white font-black text-[10px] rounded-xl transition-all shadow">Counter</button>
+                    <button onclick="rejectTradeRequest('${req.id}')" class="px-2.5 py-1.5 bg-rose-950/60 hover:bg-rose-900 text-rose-300 font-bold text-[10px] rounded-xl border border-rose-500/30 transition-all">Reject</button>
+                  ` : ''}
+
+                  ${isProposer && isCountered ? `
+                    <button onclick="acceptCounterOffer('${req.id}')" class="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-[10px] rounded-xl transition-all shadow">Accept Counter</button>
+                    <button onclick="rejectCounterOffer('${req.id}')" class="px-2.5 py-1.5 bg-rose-950/60 hover:bg-rose-900 text-rose-300 font-bold text-[10px] rounded-xl border border-rose-500/30 transition-all">Reject Counter</button>
+                  ` : ''}
+
+                  ${isProposer && !isCountered ? `
+                    <button onclick="withdrawTradeRequest('${req.id}')" class="px-3 py-1.5 bg-violet-900/60 hover:bg-rose-900 text-rose-300 font-bold text-[10px] rounded-xl border border-purple-500/30 transition-all">Withdraw</button>
+                  ` : ''}
+                ` : ''}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderP2PListings() {
+      const grid = document.getElementById('p2p-listings-grid');
+      if (!grid) return;
+
+      if (activeListings.length === 0) {
+        grid.innerHTML = `<div class="col-span-full text-center py-12 text-purple-300/50 text-xs">No active secondary market listings available.</div>`;
+        return;
+      }
+
+      grid.innerHTML = activeListings.map(item => `
+        <div class="card-holo-standard rounded-2xl p-4 flex flex-col justify-between space-y-3 relative">
+          <div class="flex justify-between items-center">
+            <span class="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">${item.type || 'STANDARD'}</span>
+            <span class="text-[10px] font-mono text-purple-300/70">Seller: <strong class="text-white">${item.seller || 'Collector'}</strong></span>
+          </div>
+
+          <div class="w-full aspect-[4/5] max-h-48 bg-violet-950/80 rounded-xl border border-purple-500/20 p-2 text-center flex items-center justify-center overflow-hidden">
+            <img src="${item.imgUrl || 'https://placehold.co/1080x1350/1e1b4b/a855f7?text=Card'}" loading="lazy" class="w-full h-full object-contain">
+          </div>
+
+          <div class="space-y-1 text-center">
+            <p class="font-black text-purple-400 font-mono text-base">${item.serial}</p>
+            <p class="text-xs font-bold text-white truncate">${item.name}</p>
+            <p class="text-sm font-black text-emerald-400 font-mono">${formatIDR(item.price)}</p>
+          </div>
+
+          <div class="flex items-center gap-2 pt-1">
+            <button onclick="addToCart('${item.cardId}')" class="flex-1 py-2 bg-purple-600 hover:bg-purple-500 text-white font-extrabold text-xs rounded-xl transition-all shadow">${i18nDict[currentLanguage].btnAddToCart}</button>
+            <button onclick="openDirectChat('${item.seller}', 'Listing ${item.serial}')" class="p-2 bg-violet-900/60 hover:bg-violet-800 text-purple-300 rounded-xl border border-purple-500/30 text-xs" title="Chat Seller"><i class="fa-solid fa-comments"></i></button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function placeAuctionBid() {
+      if (!currentUser) return showToast('Please log in to place an auction bid.');
+      if (!activeAuction) return showToast('No active auction available.');
+
+      const bidInput = document.getElementById('bid-input-amount');
+      const bidAmount = parseFloat(bidInput ? bidInput.value : 0);
+
+      const currentBidValue = Number(activeAuction.currentBid || activeAuction.startingPrice || 0);
+
+      if (isNaN(bidAmount) || bidAmount <= currentBidValue) {
+        return showToast(`Bid must be higher than ${formatIDR(currentBidValue)}`);
+      }
+
+      const isOwnAuction = currentUser.name === activeAuction.owner || currentUser.username === activeAuction.owner;
+      if (isOwnAuction) {
+        return showToast("You cannot place bids on your own card auction.");
+      }
+
+      const activeUserIdent = currentUser.username || currentUser.name;
+
+      const updatedHistory = Array.isArray(activeAuction.bidHistory) ? activeAuction.bidHistory : [];
+      updatedHistory.push({
+        bidder: activeUserIdent,
+        amount: bidAmount,
+        timestamp: new Date().toISOString()
+      });
+
+      try {
+        await db.collection("system").doc("activeAuction").update({
+          currentBid: bidAmount,
+          highBidder: activeUserIdent,
+          bidHistory: updatedHistory
+        });
+
+        if (bidInput) bidInput.value = '';
+        showToast(`Successfully placed bid of ${formatIDR(bidAmount)}!`);
+        addNotification('Auction Bid Placed', `Bid ${formatIDR(bidAmount)} placed on ${activeAuction.serial}.`, 'fa-gavel text-emerald-400');
+        await fetchActiveAuction();
+      } catch (e) {
+        showToast('Error placing bid: ' + e.message);
+      }
+    }
+
+    async function cancelActiveAuction() {
+      if (!currentUser) return showToast('Please log in.');
+      if (!activeAuction) return;
+
+      const canCancel = currentUser.isAdmin || currentUser.name === activeAuction.owner || currentUser.username === activeAuction.owner;
+      if (!canCancel) return showToast('Permission denied.');
+
+      if (!confirm(`Cancel the active auction for ${activeAuction.serial}?`)) return;
+
+      try {
+        await db.collection("system").doc("activeAuction").delete();
+        showToast('Auction canceled.');
+        addNotification('Auction Canceled', `Auction for ${activeAuction.serial} was canceled.`, 'fa-ban text-rose-400');
+        await fetchActiveAuction();
+      } catch (e) {
+        showToast('Error canceling auction: ' + e.message);
+      }
+    }
+
+    function renderOwnedCards() {
+      const grid = document.getElementById('owned-cards-grid');
+      const heading = document.getElementById('dashboard-heading');
+      const subheading = document.getElementById('dashboard-subheading');
+      const socialBanner = document.getElementById('collector-social-banner');
+      
+      if (!grid) return;
+
+      let targetUserIdent = currentUser ? (currentUser.username || currentUser.name) : null;
+      let targetProfile = currentUser;
+
+      if (viewedCollectorFilter) {
+        targetUserIdent = viewedCollectorFilter;
+        targetProfile = getCollectorProfile(viewedCollectorFilter) || { name: viewedCollectorFilter, username: viewedCollectorFilter };
+      }
+
+      if (socialBanner) {
+        if (targetProfile) {
+          socialBanner.classList.remove('hidden');
+          const avatarEl = document.getElementById('dashboard-banner-avatar');
+          const nameEl = document.getElementById('dashboard-banner-name');
+          const usernameEl = document.getElementById('dashboard-banner-username');
+          const bioEl = document.getElementById('dashboard-banner-bio');
+          const linksEl = document.getElementById('dashboard-banner-links');
+
+          if (avatarEl) avatarEl.src = getCollectorAvatar(targetUserIdent);
+          if (nameEl) nameEl.innerText = targetProfile.name || targetUserIdent;
+          if (usernameEl) usernameEl.innerText = targetProfile.username ? `@${targetProfile.username}` : `@${targetUserIdent}`;
+          if (bioEl) bioEl.innerText = targetProfile.bio || 'Collector & Trading Card Enthusiast';
+
+          if (linksEl) {
+            let linksHtml = '';
+            if (targetProfile.socialIg) {
+              const url = targetProfile.socialIg.startsWith('http') ? targetProfile.socialIg : `https://instagram.com/${targetProfile.socialIg.replace(/^@/, '')}`;
+              linksHtml += `<a href="${url}" target="_blank" class="w-8 h-8 rounded-xl bg-pink-500/20 text-pink-400 border border-pink-500/30 flex items-center justify-center hover:bg-pink-500 hover:text-white transition-all"><i class="fa-brands fa-instagram text-xs"></i></a>`;
+            }
+            if (targetProfile.socialTwitter) {
+              const url = targetProfile.socialTwitter.startsWith('http') ? targetProfile.socialTwitter : `https://twitter.com/${targetProfile.socialTwitter.replace(/^@/, '')}`;
+              linksHtml += `<a href="${url}" target="_blank" class="w-8 h-8 rounded-xl bg-purple-500/20 text-purple-300 border border-purple-500/30 flex items-center justify-center hover:bg-purple-600 hover:text-white transition-all"><i class="fa-brands fa-x-twitter text-xs"></i></a>`;
+            }
+            if (targetProfile.socialTiktok) {
+              const url = targetProfile.socialTiktok.startsWith('http') ? targetProfile.socialTiktok : `https://tiktok.com/@${targetProfile.socialTiktok.replace(/^@/, '')}`;
+              linksHtml += `<a href="${url}" target="_blank" class="w-8 h-8 rounded-xl bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 flex items-center justify-center hover:bg-cyan-500 hover:text-slate-950 transition-all"><i class="fa-brands fa-tiktok text-xs"></i></a>`;
+            }
+            if (targetProfile.socialWeb) {
+              const url = targetProfile.socialWeb.startsWith('http') ? targetProfile.socialWeb : `https://${targetProfile.socialWeb}`;
+              linksHtml += `<a href="${url}" target="_blank" class="w-8 h-8 rounded-xl bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 flex items-center justify-center hover:bg-indigo-600 hover:text-white transition-all"><i class="fa-solid fa-globe text-xs"></i></a>`;
+            }
+            linksEl.innerHTML = linksHtml;
+          }
+        } else {
+          socialBanner.classList.add('hidden');
+        }
+      }
+
+      if (viewedCollectorFilter) {
+        if (heading) heading.innerHTML = `<i class="fa-solid fa-vault text-purple-400 mr-2"></i> ${targetUserIdent}'s Vault / Binder`;
+        if (subheading) subheading.innerText = `Viewing collection binder owned by ${targetUserIdent}.`;
+      } else {
+        if (heading) heading.innerHTML = `<i class="fa-solid fa-vault text-purple-400 mr-2"></i> ${i18nDict[currentLanguage].vaultTitle}`;
+        if (subheading) subheading.innerText = i18nDict[currentLanguage].vaultSubtitle;
+      }
+
+      if (!targetUserIdent) {
+        grid.innerHTML = `<div class="col-span-full text-center py-16 text-purple-300/50 text-xs">Please log in to view your owned card vault.</div>`;
+        return;
+      }
+
+      const owned = inventory.filter(c => {
+        const ownerLower = (c.owner || '').trim().toLowerCase();
+        const targetLower = targetUserIdent.trim().toLowerCase();
+        return ownerLower === targetLower || (currentUser && targetLower === (currentUser.name || '').toLowerCase() && ownerLower === (currentUser.username || '').toLowerCase());
+      });
+
+      if (owned.length === 0) {
+        grid.innerHTML = `<div class="col-span-full text-center py-16 text-purple-300/50 text-xs">No cards currently in this vault binder.</div>`;
+        return;
+      }
+
+      const isViewingSelf = currentUser && (targetUserIdent === currentUser.name || targetUserIdent === currentUser.username);
+
+      grid.innerHTML = owned.map(card => `
+        <div class="card-holo-premium rounded-2xl p-4 flex flex-col justify-between space-y-3 relative">
+          <div class="flex justify-between items-center">
+            <span class="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">${card.type}</span>
+            <span class="text-[10px] font-mono text-emerald-400 font-bold">${formatIDR(card.price)}</span>
+          </div>
+
+          <div class="w-full aspect-[4/5] max-h-48 bg-violet-950/80 rounded-xl border border-purple-500/20 p-2 text-center flex items-center justify-center overflow-hidden cursor-pointer" onclick="openCardDetailModal('${card.id}')">
+            <img src="${card.imgUrl}" loading="lazy" class="w-full h-full object-contain">
+          </div>
+
+          <div class="text-center space-y-0.5">
+            <p class="font-black text-purple-400 font-mono text-base">${card.serial}</p>
+            <p class="text-xs font-bold text-white truncate">${card.name}</p>
+          </div>
+
+          ${isViewingSelf ? `
+            <div class="grid grid-cols-2 gap-1.5 pt-1">
+              <button onclick="sellBackToAdmin('${card.id}')" class="py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-[10px] rounded-xl transition-all shadow">Sell Back</button>
+              <button onclick="openListCardModal('${card.id}', 'trade')" class="py-2 bg-purple-600 hover:bg-purple-500 text-white font-extrabold text-[10px] rounded-xl transition-all shadow">List Trade</button>
+            </div>
+          ` : `
+            <button onclick="openProposeTradeModal(); selectTradeCardOption('${card.id}', '${card.serial} - ${card.name}');" class="w-full py-2 bg-purple-600 hover:bg-purple-500 text-white font-extrabold text-xs rounded-xl transition-all shadow">Propose Trade</button>
+          `}
+        </div>
+      `).join('');
+    }
+
+    function viewCollectorVault(ownerName) {
+      viewedCollectorFilter = ownerName;
+      switchTab('dashboard');
+    }
+
+    function renderWishlistPage() {
+      const grid = document.getElementById('wishlist-page-grid');
+      if (!grid) return;
+
+      const wishlistedCards = inventory.filter(c => wishlist.has(c.id));
+
+      if (wishlistedCards.length === 0) {
+        grid.innerHTML = `<div class="col-span-full text-center py-16 text-purple-300/50 text-xs">Your wishlist is empty. Heart cards in the Collection view to save them here!</div>`;
+        return;
+      }
+
+      grid.innerHTML = wishlistedCards.map(card => `
+        <div class="card-holo-standard rounded-2xl p-3 flex flex-col justify-between relative cursor-pointer" onclick="openCardDetailModal('${card.id}')">
+          <div class="flex items-center justify-between mb-2" onclick="event.stopPropagation()">
+            <span class="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">${card.type}</span>
+            <button onclick="toggleWishlist('${card.id}')" class="text-xs text-pink-500"><i class="fa-solid fa-heart"></i></button>
+          </div>
+
+          <div class="w-full aspect-[4/5] bg-violet-950/80 rounded-xl border border-purple-500/20 p-1.5 flex items-center justify-center overflow-hidden mb-2">
+            <img src="${card.imgUrl}" loading="lazy" class="w-full h-full object-contain">
+          </div>
+
+          <p class="text-center font-black text-purple-400 font-mono mb-1">${card.serial}</p>
+          <p class="text-[11px] font-extrabold text-white truncate text-center mb-2">${card.name}</p>
+
+          <button onclick="event.stopPropagation(); addToCart('${card.id}')" class="w-full py-1.5 bg-purple-600 hover:bg-purple-500 text-white font-extrabold text-[10px] rounded-xl transition-all shadow">${i18nDict[currentLanguage].btnAddToCart}</button>
+        </div>
+      `).join('');
+    }
+
+    function toggleWishlist(cardId) {
+      if (wishlist.has(cardId)) {
+        wishlist.delete(cardId);
+        showToast('Removed from wishlist.');
+      } else {
+        wishlist.add(cardId);
+        showToast('Added to wishlist!');
+      }
+      saveWishlistToStorage();
+      renderCardGrid();
+      if (!document.getElementById('view-wishlist').classList.contains('hidden')) renderWishlistPage();
+    }
+
+    function clearWishlist() {
+      wishlist.clear();
+      saveWishlistToStorage();
+      renderWishlistPage();
+      renderCardGrid();
+      showToast('Wishlist cleared.');
+    }
+
+    function renderHoldersTable() {
+      const tbody = document.getElementById('holders-table-body');
+      if (!tbody) return;
+
+      const ownerMap = {};
+      inventory.forEach(card => {
+        if (card.owner) {
+          if (!ownerMap[card.owner]) ownerMap[card.owner] = [];
+          ownerMap[card.owner].push(card);
+        }
+      });
+
+      const owners = Object.keys(ownerMap);
+
+      if (owners.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-purple-300/50">No secondary card holders found yet.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = owners.map(owner => {
+        const cards = ownerMap[owner];
+        const serialsFormatted = cards.map(c => `<span onclick="event.stopPropagation(); openCardDetailModal('${c.id}')" class="inline-block bg-violet-950 px-2 py-0.5 rounded border border-purple-500/30 text-purple-300 font-mono text-[10px] cursor-pointer hover:border-purple-400 transition-colors mr-1 mb-1">${c.serial}</span>`).join('');
+        const isAdmin = isUserAdmin(owner);
+        const avatarUrl = getCollectorAvatar(owner);
+
+        return `
+          <tr class="hover:bg-violet-900/20 transition-colors cursor-pointer" onclick="viewCollectorVault('${owner}')">
+            <td class="p-3">
+              <div class="flex items-center gap-2.5">
+                <img src="${avatarUrl}" class="w-8 h-8 rounded-full object-cover border border-purple-500/30 bg-violet-950 shrink-0">
+                <div>
+                  <div class="flex items-center gap-1.5">
+                    <p class="font-extrabold text-white text-xs">${owner}</p>
+                    ${isAdmin ? `<span class="text-[9px] font-black px-1.5 py-0.2 rounded bg-rose-500/20 text-rose-400 border border-rose-500/30">ADMIN</span>` : ''}
+                  </div>
+                  <p class="text-[10px] text-purple-200/60">Collector Binder</p>
+                </div>
+              </div>
+            </td>
+            <td class="p-3 font-mono font-bold text-emerald-400 text-xs">${cards.length} Cards</td>
+            <td class="p-3">${serialsFormatted}</td>
+            <td class="p-3 text-right" onclick="event.stopPropagation()">
+              <button onclick="openDirectChat('${owner}', 'Holder Direct Message')" class="px-3 py-1.5 bg-purple-600 hover:bg-purple-500 text-white font-bold text-[10px] rounded-xl transition-all shadow">
+                <i class="fa-solid fa-comments"></i> Chat
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function addToCart(cardId) {
+      const card = inventory.find(c => c.id === cardId);
+      if (!card) return;
+
+      if (card.status === 'SOLD') return showToast('This card is already sold.');
+      if (cart.some(i => i.id === cardId)) return showToast('Card is already in your cart.');
+
+      cart.push(card);
+      saveCartToStorage();
+      updateCartTotals();
+      showToast(`Added ${card.serial} to cart!`);
+    }
+
+    function removeFromCart(cardId) {
+      cart = cart.filter(i => i.id !== cardId);
+      saveCartToStorage();
+      updateCartTotals();
+      showToast('Item removed from cart.');
+    }
+
+    function updateCartTotals() {
+      const badge = document.getElementById('cart-badge-count');
+      const container = document.getElementById('cart-items-container');
+      
+      if (badge) badge.innerText = cart.length;
+      if (!container) return;
+
+      if (cart.length === 0) {
+        container.innerHTML = `<div class="p-8 text-center text-xs text-purple-300/50">Your QRIS cart is empty.</div>`;
+        document.getElementById('cart-subtotal').innerText = formatIDR(0);
+        document.getElementById('cart-tax').innerText = formatIDR(0);
+        document.getElementById('cart-grand-total').innerText = formatIDR(0);
+        return;
+      }
+
+      container.innerHTML = cart.map(item => `
+        <div class="bg-violet-900/40 p-3 rounded-2xl border border-purple-500/20 flex items-center justify-between gap-3 text-xs">
+          <div class="flex items-center gap-3">
+            <img src="${item.imgUrl}" class="w-10 h-10 object-contain rounded bg-violet-950 border border-purple-500/20">
+            <div>
+              <p class="font-extrabold text-white">${item.name}</p>
+              <p class="font-mono text-purple-400 font-bold">${item.serial}</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="font-mono text-emerald-400 font-black">${formatIDR(item.price)}</span>
+            <button onclick="removeFromCart('${item.id}')" class="text-purple-300/60 hover:text-rose-400 p-1"><i class="fa-solid fa-trash"></i></button>
+          </div>
+        </div>
+      `).join('');
+
+      const subtotal = cart.reduce((sum, item) => sum + item.price, 0);
+      const tax = subtotal * TRADE_FEE_PERCENT;
+      const grandTotal = subtotal + tax;
+
+      document.getElementById('cart-subtotal').innerText = formatIDR(subtotal);
+      document.getElementById('cart-tax').innerText = formatIDR(tax);
+      document.getElementById('cart-grand-total').innerText = formatIDR(grandTotal);
+    }
+
+    function toggleCartDrawer() {
+      const drawer = document.getElementById('cart-drawer');
+      const overlay = document.getElementById('cart-drawer-overlay');
+      drawer.classList.toggle('translate-x-full');
+      overlay.classList.toggle('hidden');
+    }
+
+    function proceedToCheckout() {
+      if (!currentUser) {
+        toggleCartDrawer();
+        openAuthModal();
+        return showToast('Please log in to proceed to QRIS payment.');
+      }
+
+      if (cart.length === 0) return showToast('Cart is empty.');
+
+      const subtotal = cart.reduce((sum, item) => sum + item.price, 0);
+      const grandTotal = subtotal + (subtotal * TRADE_FEE_PERCENT);
+
+      document.getElementById('qris-amount-display').innerText = formatIDR(grandTotal);
+      document.getElementById('qris-img-element').src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(OFFICIAL_QRIS_STRING)}`;
+
+      document.getElementById('qris-proof-img-data').value = '';
+      document.getElementById('qris-proof-file-input').value = '';
+      document.getElementById('qris-proof-preview-container').classList.add('hidden');
+
+      toggleCartDrawer();
+      document.getElementById('checkout-modal').classList.remove('hidden');
+    }
+
+    function closeCheckoutModal() { document.getElementById('checkout-modal').classList.add('hidden'); }
+
+    async function submitOrderWithProof() {
+      if (!currentUser) return showToast('Please log in.');
+
+      const proofUrl = document.getElementById('qris-proof-img-data').value;
+      if (!proofUrl) return showToast('Please upload your QRIS transfer receipt screenshot.');
+
+      const subtotal = cart.reduce((sum, item) => sum + item.price, 0);
+      const grandTotal = subtotal + (subtotal * TRADE_FEE_PERCENT);
+
+      const orderRef = 'ORD-' + Math.floor(100000 + Math.random() * 900000);
+      const activeUserIdent = currentUser.username || currentUser.name;
+
+      const orderPayload = {
+        id: orderRef,
+        user_name: activeUserIdent,
+        user_email: currentUser.email || '',
+        items: cart.map(i => ({ id: i.id, serial: i.serial, name: i.name, price: i.price })),
+        total_amount: grandTotal,
+        qrisProofUrl: proofUrl,
+        status: 'PENDING',
+        created_at: new Date().toISOString()
+      };
+
+      try {
+        await db.collection("transactions").doc(orderRef).set(orderPayload);
+        
+        cart = [];
+        saveCartToStorage();
+        updateCartTotals();
+
+        closeCheckoutModal();
+        showToast(`Order ${orderRef} submitted! Waiting for Admin verification.`);
+        addNotification('Order Submitted', `QRIS payment submitted for order ${orderRef}.`, 'fa-circle-check text-emerald-400');
+
+        switchTab('history');
+      } catch (e) {
+        showToast('Error submitting order: ' + e.message);
+      }
+    }
+
+    async function loadPendingTransactions() {
+      const listEl = document.getElementById('admin-pending-orders-list');
+      if (!listEl) return;
+
+      try {
+        const snapshot = await db.collection("transactions").where("status", "==", "PENDING").get();
+        
+        if (snapshot.empty) {
+          listEl.innerHTML = `<p class="text-xs text-purple-300/50">${i18nDict[currentLanguage].noPendingOrders}</p>`;
+          return;
+        }
+
+        const pendingList = [];
+        snapshot.forEach(doc => pendingList.push({ id: doc.id, ...doc.data() }));
+
+        listEl.innerHTML = pendingList.map(tx => {
+          const isSellback = tx.type === 'SELLBACK';
+          const itemsStr = Array.isArray(tx.items) ? tx.items.map(i => i.serial || 'Card').join(', ') : 'Items';
+
+          return `
+            <div class="bg-violet-950 border border-purple-500/30 p-4 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-3 text-xs">
+              <div class="space-y-1">
+                <div class="flex items-center gap-2">
+                  <span class="font-extrabold text-white font-mono">${tx.id}</span>
+                  <span class="text-[9px] font-black px-2 py-0.5 rounded ${isSellback ? 'bg-purple-500/20 text-purple-300' : 'bg-emerald-500/20 text-emerald-400'}">${isSellback ? 'SELLBACK REQUEST' : 'BUY ORDER'}</span>
+                </div>
+                <p class="text-purple-200/70">Collector: <strong class="text-white">${tx.user_name}</strong> • Items: <strong class="text-purple-300">${itemsStr}</strong></p>
+                <p class="font-mono text-emerald-400 font-extrabold">${formatIDR(tx.total_amount)}</p>
+              </div>
+
+              <div class="flex items-center gap-2 w-full md:w-auto">
+                ${tx.qrisProofUrl || tx.payoutQrisUrl ? `
+                  <button onclick="openImagePreviewModal('Transfer Receipt - ${tx.id}', '${tx.qrisProofUrl || tx.payoutQrisUrl}')" class="px-3 py-2 bg-violet-900/60 text-purple-300 font-bold text-[10px] rounded-xl border border-purple-500/30 flex items-center gap-1 hover:bg-violet-800 transition-all">
+                    <i class="fa-solid fa-image"></i> View Receipt
+                  </button>
+                ` : ''}
+
+                ${isSellback ? `
+                  <button onclick="openSendReceiptModal('${tx.id}', '${tx.user_name}', '${itemsStr}')" class="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs rounded-xl shadow transition-all">
+                    Confirm &amp; Send Receipt
+                  </button>
+                ` : `
+                  <button onclick="approveTransaction('${tx.id}')" class="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs rounded-xl shadow transition-all">
+                    Approve Order
+                  </button>
+                `}
+
+                <button onclick="rejectTransaction('${tx.id}')" class="px-3 py-2 bg-rose-950/60 hover:bg-rose-900 text-rose-300 font-bold text-xs rounded-xl border border-rose-500/30 transition-all">
+                  Reject
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      } catch (e) {
+        console.warn('Pending tx fetch error:', e);
+      }
+    }
+
+    function openImagePreviewModal(title, imgUrl) {
+      document.getElementById('image-preview-title').innerText = title;
+      document.getElementById('image-preview-img').src = imgUrl;
+      document.getElementById('image-preview-download').href = imgUrl;
+      document.getElementById('image-preview-modal').classList.remove('hidden');
+    }
+
+    function closeImagePreviewModal() {
+      document.getElementById('image-preview-modal').classList.add('hidden');
+    }
+
+    function openSendReceiptModal(txId, sellerName, serialStr) {
+      document.getElementById('receipt-payout-id-target').value = txId;
+      document.getElementById('receipt-modal-seller').innerText = sellerName;
+      document.getElementById('receipt-modal-serial').innerText = serialStr;
+
+      document.getElementById('receipt-img-data').value = '';
+      document.getElementById('receipt-file-input').value = '';
+      document.getElementById('receipt-preview-container').classList.add('hidden');
+      document.getElementById('receipt-preview-img').src = '';
+
+      document.getElementById('send-receipt-modal').classList.remove('hidden');
+    }
+
+    function closeSendReceiptModal() {
+      document.getElementById('send-receipt-modal').classList.add('hidden');
+    }
+
+    function handleReceiptUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        document.getElementById('receipt-img-data').value = e.target.result;
+        document.getElementById('receipt-preview-img').src = e.target.result;
+        document.getElementById('receipt-preview-container').classList.remove('hidden');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function submitPayoutReceipt() {
+      const txId = document.getElementById('receipt-payout-id-target').value;
+      const receiptImg = document.getElementById('receipt-img-data').value;
+
+      if (!receiptImg) return showToast('Please upload payment confirmation receipt screenshot.');
+
+      try {
+        const txDoc = await db.collection("transactions").doc(txId).get();
+        if (!txDoc.exists) return showToast('Transaction not found.');
+        const txData = txDoc.data();
+
+        const batch = db.batch();
+
+        if (Array.isArray(txData.items)) {
+          txData.items.forEach(item => {
+            const cardRef = db.collection("cards").doc(item.id);
+            batch.update(cardRef, { owner: null, status: 'AVAILABLE' });
+          });
+        }
+
+        const txRef = db.collection("transactions").doc(txId);
+        batch.update(txRef, {
+          status: 'APPROVED',
+          payoutReceiptUrl: receiptImg
+        });
+
+        await batch.commit();
+
+        closeSendReceiptModal();
+        showToast(`Sell-back payout confirmed for ${txId}!`);
+        addNotification('Payout Confirmed', `Confirmed sell-back payout for order ${txId}.`, 'fa-circle-check text-emerald-400');
+
+        await loadAppState();
+        refreshAdminHub();
+      } catch (e) {
+        showToast('Error confirming payout: ' + e.message);
+      }
+    }
+
+    async function approveTransaction(txId) {
+      if (!currentUser?.isAdmin) return showToast('Admin access required.');
+
+      try {
+        const txDoc = await db.collection("transactions").doc(txId).get();
+        if (!txDoc.exists) return showToast('Transaction not found.');
+
+        const txData = txDoc.data();
+        const batch = db.batch();
+
+        if (Array.isArray(txData.items)) {
+          txData.items.forEach(item => {
+            const cardRef = db.collection("cards").doc(item.id);
+            batch.update(cardRef, { owner: txData.user_name, status: 'SOLD' });
+          });
+        }
+
+        const txRef = db.collection("transactions").doc(txId);
+        batch.update(txRef, { status: 'APPROVED' });
+
+        await batch.commit();
+
+        showToast(`Approved order ${txId}! Card ownership assigned to ${txData.user_name}.`);
+        addNotification('Order Approved', `Approved QRIS payment for ${txId}.`, 'fa-circle-check text-emerald-400');
+
+        await loadAppState();
+        refreshAdminHub();
+      } catch (e) {
+        showToast('Error approving order: ' + e.message);
+      }
+    }
+
+    async function rejectTransaction(txId) {
+      if (!currentUser?.isAdmin) return showToast('Admin access required.');
+
+      try {
+        await db.collection("transactions").doc(txId).update({ status: 'REJECTED' });
+        showToast(`Rejected transaction ${txId}.`);
+        addNotification('Order Rejected', `Order ${txId} was marked as rejected.`, 'fa-xmark text-rose-400');
+
+        await fetchTransactionHistory();
+        refreshAdminHub();
+      } catch (e) {
+        showToast('Error rejecting order: ' + e.message);
+      }
+    }
+
+    function refreshAdminHub() {
+      loadPendingTransactions();
+      renderInventoryTable();
+    }
+
+    function switchTab(viewName) {
+      const views = ['catalog', 'trade', 'auction', 'trade-req', 'analytics', 'revenue', 'inbox', 'holders', 'history', 'dashboard', 'wishlist', 'admin', 'inventory'];
+      
+      if (viewName !== 'dashboard') {
+        viewedCollectorFilter = null;
+      }
+
+      views.forEach(v => {
+        const sec = document.getElementById(`view-${v}`);
+        const nav = document.getElementById(`nav-${v}`);
+        
+        if (sec) {
+          if (v === viewName) sec.classList.remove('hidden');
+          else sec.classList.add('hidden');
+        }
+
+        if (nav) {
+          if (v === viewName) nav.classList.add('active');
+          else nav.classList.remove('active');
+        }
+      });
+
+      if (viewName === 'analytics') renderMarketAnalytics();
+      if (viewName === 'revenue') renderRevenueTab();
+      if (viewName === 'inbox') loadUserInboxThreads();
+      if (viewName === 'wishlist') renderWishlistPage();
+      if (viewName === 'holders') renderHoldersTable();
+      if (viewName === 'dashboard') renderOwnedCards();
+      if (viewName === 'admin') refreshAdminHub();
+      if (viewName === 'inventory') renderInventoryTable();
+    }
+
+    function formatIDR(amount) {
+      return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(amount || 0);
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      const msg = document.getElementById('toast-msg');
+      if (toast && msg) {
+        msg.innerText = message;
+        toast.classList.remove('translate-y-20', 'opacity-0');
+        setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 3000);
       }
     }
   </script>
