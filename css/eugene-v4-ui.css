@@ -1,0 +1,69 @@
+/* Eugene Card V4 UI Layer - visual only. Existing JS hooks preserved. */
+:root{--ec-gold:#c98f2c;--ec-bg:#080706;--ec-panel:#15120f;--ec-line:rgba(255,255,255,.08)}
+body{background:radial-gradient(circle at top,rgba(201,143,44,.12),transparent 35%),#080706!important;color:#f1ece0}
+.card,.panel,.glass,.rounded-xl,.rounded-2xl{backdrop-filter:blur(14px)}
+#inbox-threads-list > div{border:1px solid var(--ec-line);background:linear-gradient(135deg,rgba(255,255,255,.04),rgba(255,255,255,.015));transition:.25s;}
+#inbox-threads-list > div:hover{transform:translateY(-2px);border-color:rgba(201,143,44,.45);box-shadow:0 15px 40px rgba(0,0,0,.35)}
+button{transition:.2s!important}button:hover{filter:brightness(1.1)}
+img{object-fit:cover}
+/* unread visual helpers */
+.unread-message{border-left:3px solid #c98f2c!important;background:rgba(201,143,44,.12)!important}
+.unread-message .message-title{font-weight:800}
+.ec-badge{background:#c98f2c;color:#080706;border-radius:999px;padding:.2rem .55rem;font-size:.65rem;font-weight:800}
+@media(max-width:768px){.sidebar{width:100%}.desktop-only{display:none!important}}
+
+/* Eugene Card V4 Purple Gold Premium Theme */
+:root {
+  --ec-bg: #070711;
+  --ec-panel: #11111f;
+  --ec-panel-2: #17152a;
+  --ec-purple: #7c3aed;
+  --ec-violet: #a855f7;
+  --ec-gold: #f59e0b;
+  --ec-text: #f8fafc;
+  --ec-muted: #a1a1aa;
+  --ec-border: rgba(168,85,247,.25);
+}
+
+body {
+  background: radial-gradient(circle at top, #1b1235 0%, var(--ec-bg) 45%);
+  color: var(--ec-text);
+}
+
+.card, .panel, .glass, .modal-content {
+  background: linear-gradient(145deg, rgba(17,17,31,.96), rgba(23,21,42,.9));
+  border: 1px solid var(--ec-border);
+  box-shadow: 0 10px 40px rgba(0,0,0,.35), inset 0 0 30px rgba(124,58,237,.05);
+}
+
+button, .btn, .primary-btn {
+  background: linear-gradient(135deg, var(--ec-purple), var(--ec-violet));
+  border: 0;
+  color: white;
+  box-shadow: 0 8px 25px rgba(124,58,237,.35);
+}
+
+button:hover, .btn:hover, .primary-btn:hover {
+  filter: brightness(1.15);
+}
+
+.badge, .premium, .gold {
+  background: linear-gradient(135deg, #f59e0b, #fbbf24);
+  color: #111827;
+}
+
+input, textarea, select {
+  background: #0f0f1a !important;
+  border-color: rgba(168,85,247,.3) !important;
+  color: white !important;
+}
+
+.sidebar, nav {
+  background: rgba(7,7,17,.85);
+  border-right: 1px solid rgba(168,85,247,.2);
+}
+
+.unread, .message-unread {
+  background: rgba(124,58,237,.14) !important;
+  border-color: rgba(168,85,247,.5) !important;
+}
