@@ -1,0 +1,11 @@
+
+/* Eugene Card V5 Premium UI Theme Override */
+:root{--ec-bg:#070711;--ec-panel:#11111f;--ec-purple:#8b5cf6;--ec-gold:#f59e0b;--ec-text:#f8fafc;--ec-muted:#94a3b8}
+body{background:radial-gradient(circle at top,#24104f 0%,var(--ec-bg) 45%);color:var(--ec-text)}
+.card,.panel,.dashboard-card,.modal,.glass,.container-card{background:rgba(17,17,31,.78)!important;border:1px solid rgba(139,92,246,.22)!important;backdrop-filter:blur(14px)}
+button,.btn,.primary-btn{background:linear-gradient(135deg,var(--ec-purple),#c084fc)!important;color:white!important;border:none!important;box-shadow:0 8px 30px rgba(139,92,246,.25)}
+.gold,.premium,.badge-gold{color:#fbbf24!important;border-color:rgba(245,158,11,.4)!important}
+.sidebar{background:rgba(7,7,17,.85)!important}
+input,textarea,select{background:#0f1020!important;color:white!important;border-color:rgba(139,92,246,.25)!important}
+#inbox-threads-list>*{transition:.25s ease}
+#inbox-threads-list>*:hover{transform:translateY(-2px);border-color:#8b5cf6!important}
