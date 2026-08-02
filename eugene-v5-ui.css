@@ -1,0 +1,55 @@
+/* Eugene Card V5 Modern Purple UI Theme */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root{
+ --ec-bg:#080810;
+ --ec-panel:#12121d;
+ --ec-purple:#8b5cf6;
+ --ec-cyan:#38bdf8;
+ --ec-text:#f1f5f9;
+ --ec-muted:#94a3b8;
+}
+
+*{font-family:'Inter',system-ui,-apple-system,sans-serif!important}
+
+body{
+ background:radial-gradient(circle at top,#1e1b4b 0%,var(--ec-bg) 48%);
+ color:var(--ec-text);
+}
+
+.card,.panel,.dashboard-card,.modal,.glass,.container-card{
+ background:rgba(18,18,29,.82)!important;
+ border:1px solid rgba(139,92,246,.20)!important;
+ backdrop-filter:blur(16px);
+}
+
+button,.btn,.primary-btn{
+ background:linear-gradient(135deg,var(--ec-purple),var(--ec-cyan))!important;
+ color:white!important;
+ border:none!important;
+ box-shadow:0 8px 30px rgba(139,92,246,.25);
+}
+
+.gold,.premium,.badge-gold{
+ color:inherit!important;
+ border-color:rgba(139,92,246,.25)!important;
+}
+
+.sidebar{
+ background:rgba(8,8,16,.9)!important;
+}
+
+input,textarea,select{
+ background:#0f1020!important;
+ color:white!important;
+ border-color:rgba(139,92,246,.25)!important;
+}
+
+#inbox-threads-list>*{
+ transition:.25s ease;
+}
+
+#inbox-threads-list>*:hover{
+ transform:translateY(-2px);
+ border-color:#38bdf8!important;
+}
