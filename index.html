@@ -135,7 +135,6 @@
       border: 1px dashed rgba(168, 85, 247, 0.25);
     }
 
-    /* Fixed Bottom Nav Active Styling */
     .bottom-nav-item.active {
       color: #c084fc;
       background: rgba(168, 85, 247, 0.15);
@@ -146,17 +145,12 @@
       padding-bottom: calc(85px + env(safe-area-inset-bottom));
     }
 
-    /* Prevent iOS Safari from auto-zooming the page when a form field is focused
-       (triggered by any font-size under 16px) without changing the visual size
-       of text on larger screens. */
     @media (max-width: 640px) {
       input, select, textarea {
         font-size: 16px !important;
       }
     }
 
-    /* Bottom nav: allow horizontal scroll on crowded mobile widths without
-       showing a scrollbar, and snap items into place for a cleaner feel. */
     #bottom-nav-scroll {
       scrollbar-width: none;
       -ms-overflow-style: none;
@@ -166,14 +160,10 @@
     #bottom-nav-scroll::-webkit-scrollbar { display: none; }
     #bottom-nav-scroll > button { scroll-snap-align: start; flex-shrink: 0; }
 
-    /* Keep the fixed bottom nav clear of the home-indicator / gesture area
-       on notched phones. */
     #bottom-nav-scroll {
       margin-bottom: env(safe-area-inset-bottom);
     }
 
-    /* Belt-and-braces: never allow any element to force horizontal scrolling
-       on narrow viewports. */
     @media (max-width: 480px) {
       html, body { max-width: 100%; overflow-x: hidden; }
     }
@@ -248,7 +238,6 @@
       <i class="fa-solid fa-handshake text-purple-400"></i> <span data-i18n="navRequests">Requests</span>
     </button>
 
-    <!-- Analytics & Admin Options -->
     <button id="nav-analytics" onclick="switchTab('analytics')" class="analytics-nav-btn hidden bottom-nav-item px-3 py-2 rounded-xl text-xs font-semibold text-purple-200 hover:text-white flex flex-col sm:flex-row items-center gap-1.5 whitespace-nowrap bg-purple-950/40 border border-purple-500/30">
       <i class="fa-solid fa-chart-line text-purple-400"></i> <span data-i18n="navAnalytics">Analytics</span>
     </button>
@@ -273,7 +262,6 @@
       <i class="fa-solid fa-heart text-pink-400"></i> <span data-i18n="navWishlist">Wishlist</span>
     </button>
 
-    <!-- Admin Specific Navigation Items -->
     <button id="nav-inventory" onclick="switchTab('inventory')" class="admin-only-nav hidden bottom-nav-item px-3 py-2 rounded-xl text-xs font-semibold text-rose-400 hover:text-white flex flex-col sm:flex-row items-center gap-1.5 whitespace-nowrap bg-rose-950/40 border border-rose-500/30">
       <i class="fa-solid fa-boxes-stacked"></i> <span data-i18n="navInventory">Inventory</span>
     </button>
@@ -303,12 +291,10 @@
       <button onclick="closeChatDrawer()" class="w-8 h-8 rounded-xl bg-violet-900/60 text-purple-300 text-xs flex items-center justify-center hover:bg-violet-800"><i class="fa-solid fa-xmark"></i></button>
     </div>
 
-    <!-- Messages List Container -->
     <div id="chat-messages-container" class="flex-1 py-4 space-y-3 overflow-y-auto max-h-[65vh]">
       <div class="text-center py-10 text-purple-300/50 text-xs" data-i18n="noChatMessages">No chat messages yet. Start the conversation!</div>
     </div>
 
-    <!-- Send Chat Input -->
     <div class="pt-3 border-t border-purple-500/20 space-y-2">
       <div id="chat-image-preview-box" class="hidden p-2 bg-violet-900/60 border border-purple-500/30 rounded-xl relative">
         <button onclick="clearChatImageAttachment()" class="absolute top-1 right-1 w-5 h-5 rounded-full bg-violet-800 text-purple-300 text-[10px] flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
@@ -326,7 +312,7 @@
     </div>
   </div>
 
-  <!-- FIXED FLOATING NOTIFICATION OVERLAY PANEL -->
+  <!-- FLOATING NOTIFICATION OVERLAY PANEL -->
   <div id="notification-dropdown" class="fixed top-16 right-4 sm:right-8 w-[calc(100vw-2rem)] max-w-sm sm:w-96 bg-violet-950/95 border border-purple-500/40 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] z-[9999] hidden overflow-hidden backdrop-blur-2xl">
     <div class="p-3.5 border-b border-purple-500/20 flex items-center justify-between bg-violet-900/50">
       <div class="flex items-center gap-2">
@@ -482,7 +468,6 @@
         </button>
       </div>
 
-      <!-- ANALYTICS METRIC CARDS -->
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
         <div class="bg-violet-950/60 border border-purple-500/20 rounded-2xl p-4 space-y-1">
           <p class="text-[10px] font-bold text-purple-300/70 uppercase" data-i18n="totalVolume">Total Marketplace Volume</p>
@@ -506,7 +491,6 @@
         </div>
       </div>
 
-      <!-- RECENT PRICE TRENDS TABLE -->
       <div class="bg-violet-950/60 border border-purple-500/20 rounded-3xl p-6 space-y-4">
         <h3 class="text-xs font-extrabold text-white uppercase tracking-wider" data-i18n="topValuationIndex">Top Card Valuation Index</h3>
         <div id="analytics-valuation-list" class="space-y-2"></div>
@@ -528,7 +512,6 @@
         </div>
       </div>
 
-      <!-- REVENUE METRIC CARDS -->
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
         <div class="bg-violet-950/60 border border-purple-500/20 rounded-2xl p-4 space-y-1">
           <p class="text-[10px] font-bold text-purple-300/70 uppercase" data-i18n="kpiGrossSales">GROSS SALES REVENUE</p>
@@ -548,7 +531,6 @@
         </div>
       </div>
 
-      <!-- CARD-LEVEL PROFITABILITY -->
       <div class="bg-violet-950/60 border border-purple-500/20 rounded-3xl p-6 space-y-4">
         <h3 class="text-xs font-extrabold text-white uppercase tracking-wider" data-i18n="breakdownTitle">CARD-LEVEL PROFITABILITY BREAKDOWN</h3>
         <div id="rev-tab-card-list" class="space-y-2"></div>
@@ -567,7 +549,6 @@
         </button>
       </div>
 
-      <!-- SEARCH & START CHAT WITH OTHER USERS -->
       <div class="bg-violet-950/60 border border-purple-500/20 rounded-3xl p-5 space-y-3">
         <h3 class="text-xs font-extrabold text-purple-200 uppercase tracking-wider"><i class="fa-solid fa-user-plus text-purple-400 mr-1.5"></i> <span data-i18n="findCollector">Find & Chat Collector</span></h3>
         <div class="relative">
@@ -577,7 +558,6 @@
         <div id="user-chat-search-results" class="space-y-2 hidden max-h-48 overflow-y-auto"></div>
       </div>
 
-      <!-- EXISTING CHAT THREADS -->
       <div id="inbox-threads-list" class="space-y-3">
         <p class="text-xs text-purple-300/50 text-center py-10" data-i18n="loadingMessages">Loading messages...</p>
       </div>
@@ -630,7 +610,6 @@
         </button>
       </div>
 
-      <!-- COLLECTOR SOCIAL LINKS CARD -->
       <div id="collector-social-banner" class="hidden bg-violet-950/60 border border-purple-500/20 rounded-3xl p-5 flex flex-wrap items-center justify-between gap-4">
         <div class="flex items-center gap-3">
           <img id="dashboard-banner-avatar" src="" class="w-12 h-12 rounded-full object-cover border-2 border-purple-500/40 bg-violet-950">
@@ -692,7 +671,6 @@
         </button>
       </div>
 
-      <!-- PERSONA SWITCHER FOR ADMIN TESTING -->
       <div class="bg-violet-950 p-4 rounded-3xl border border-rose-500/30 space-y-3">
         <label class="block text-xs font-bold text-rose-400 uppercase tracking-wider"><i class="fa-solid fa-users-gear mr-1"></i> <span data-i18n="personaSwitcherTitle">Admin Persona Switcher (Test Accounts)</span></label>
         <p class="text-[11px] text-purple-200/60" data-i18n="personaSwitcherSub">Switch active account persona to test standard collector views versus admin privileges.</p>
@@ -706,7 +684,6 @@
         </div>
       </div>
 
-      <!-- PENDING ORDERS -->
       <div class="bg-violet-950/60 border border-purple-500/20 rounded-3xl p-6 space-y-4">
         <h4 class="text-xs font-extrabold text-purple-200 uppercase tracking-wider" data-i18n="pendingOrdersTitle">Pending Orders Requiring Action</h4>
         <div id="admin-pending-orders-list" class="space-y-3">
@@ -723,7 +700,6 @@
           <p class="text-xs text-purple-200/60 mt-1" data-i18n="inventorySubtitle">Manage, edit, export, or import complete inventory backup state JSON.</p>
         </div>
         
-        <!-- BACKUP & IMPORT CONTROLS -->
         <div class="flex items-center gap-2 w-full sm:w-auto">
           <button onclick="exportInventoryBackup()" class="flex-1 sm:flex-initial px-3.5 py-2 bg-violet-900/60 hover:bg-violet-800 text-purple-300 border border-purple-500/30 text-xs font-extrabold rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm">
             <i class="fa-solid fa-download"></i> <span data-i18n="backupJson">Backup JSON</span>
@@ -820,14 +796,12 @@
           </select>
         </div>
 
-        <!-- DYNAMIC FIELD FOR OFFERED CARD (OWNED BY USER) -->
         <div id="trade-my-card-container" class="hidden">
           <label class="block font-bold text-purple-400 mb-1" data-i18n="selectMyCardOffer">Select Your Card to Offer in Trade</label>
           <select id="trade-my-card-select" class="w-full bg-violet-900/60 border border-purple-500/50 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-purple-400">
           </select>
         </div>
 
-        <!-- DYNAMIC FIELD FOR PLUS AMOUNT (TOP UP IDR) -->
         <div id="trade-plus-amount-container" class="hidden">
           <label class="block font-bold text-pink-400 mb-1" data-i18n="plusAmountLabel">Plus Cash / Top-up Amount (IDR - Optional)</label>
           <input type="number" id="trade-plus-amount-input" placeholder="e.g. 50000" class="w-full bg-violet-900/60 border border-pink-500/40 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-pink-400">
@@ -887,7 +861,7 @@
       <input type="hidden" id="sellback-card-id-target">
 
       <div class="text-left space-y-2 bg-violet-900/40 p-3 rounded-2xl border border-purple-500/30 text-xs">
-        <label class="block font-bold text-purple-200">Upload DANA / GoPay / OVO / Wise / Bank Screenshot or QR</label>
+        <label class="block font-bold text-purple-200">Upload QRIS / Wise / GoPay / OVO / Bank Screenshot or QR</label>
         <input type="file" id="sellback-qris-file-input" accept="image/*" onchange="handleSellbackQrisUpload(event)" class="w-full text-[11px] text-purple-200/60 bg-violet-950 border border-purple-500/30 rounded-xl p-2 file:mr-2 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-[10px] file:font-bold file:bg-purple-600 file:text-white">
         <input type="hidden" id="sellback-qris-img-data" value="">
         <div id="sellback-qris-preview-container" class="hidden text-center pt-2">
@@ -1034,7 +1008,6 @@
           <textarea id="profile-edit-bio-input" rows="3" placeholder="e.g. Genesis Card Enthusiast" class="w-full bg-violet-900/60 border border-purple-500/30 rounded-xl px-3 py-2 text-white focus:border-purple-500 focus:outline-none resize-y" data-i18n-placeholder="bioPlaceholder"></textarea>
         </div>
 
-        <!-- SOCIAL MEDIA LINKS -->
         <div class="p-3 bg-violet-900/40 rounded-2xl border border-purple-500/30 space-y-2">
           <label class="block font-bold text-purple-400 uppercase text-[10px]"><i class="fa-solid fa-share-nodes mr-1"></i> <span data-i18n="socialsTitle">Social Media & Links (Optional)</span></label>
           <div>
@@ -1257,30 +1230,46 @@
     </div>
   </div>
 
-  <!-- CHECKOUT MODAL WITH PROOF UPLOAD -->
+  <!-- CHECKOUT MODAL WITH QRIS & WISE -->
   <div id="checkout-modal" class="fixed inset-0 bg-violet-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
     <div class="bg-violet-950 border border-purple-500/30 rounded-3xl max-w-md w-full p-6 space-y-4 relative shadow-2xl text-center max-h-[90vh] overflow-y-auto">
       <button onclick="closeCheckoutModal()" class="absolute top-4 right-4 w-8 h-8 rounded-xl bg-violet-900/60 text-purple-300 text-xs flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
-      <h3 class="text-lg font-black text-white" data-i18n="scanPayQris">Pay via E-Wallet / Wise / Bank Transfer</h3>
+      <h3 class="text-lg font-black text-white" data-i18n="scanPayQris">Pay via QRIS, Wise, GoPay, or Bank Transfer</h3>
       <p class="text-[10px] text-purple-200/60"><span data-i18n="merchantLabel">Merchant</span>: <strong class="text-white">Eugene Card Marketplace</strong></p>
       
-      <!-- Integrated Payment Method Details Box -->
-      <div class="bg-violet-900/50 p-4 rounded-2xl border border-purple-500/30 text-left text-xs space-y-2">
+      <!-- Interactive Tab for QRIS vs Transfer Info -->
+      <div class="flex items-center gap-1 bg-violet-900/60 p-1 rounded-xl border border-purple-500/20 text-xs">
+        <button type="button" onclick="switchCheckoutPaymentTab('qris')" id="pay-tab-qris" class="flex-1 py-1.5 rounded-lg font-bold bg-purple-600 text-white transition-all">
+          <i class="fa-solid fa-qrcode mr-1"></i> QRIS
+        </button>
+        <button type="button" onclick="switchCheckoutPaymentTab('manual')" id="pay-tab-manual" class="flex-1 py-1.5 rounded-lg font-bold text-purple-300 hover:text-white transition-all">
+          <i class="fa-solid fa-building-columns mr-1"></i> Wise / Bank
+        </button>
+      </div>
+
+      <!-- Option 1: QRIS Barcode Image Container -->
+      <div id="qris-image-container" class="space-y-2">
+        <img id="qris-img-element" src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=00020101021126580014ID.CO.QRIS.WWW011893600911000000000002152011234567890303UME51440014ID.CO.QRIS.WWW021520112345678905204581253033605802ID5911EUGENE_CARD6007JAKARTA61051234062070703A0163040000" class="w-48 h-48 mx-auto bg-white p-2 rounded-2xl shadow-inner border border-purple-500/30 object-contain">
+        <p class="text-[10px] text-purple-300/70">Scan QR Code above using GoPay, OVO, Dana, ShopeePay, or Mobile Banking.</p>
+      </div>
+
+      <!-- Option 2: Account Details Box (Wise, GoPay, Phone) -->
+      <div id="manual-payment-details-box" class="hidden bg-violet-900/50 p-4 rounded-2xl border border-purple-500/30 text-left text-xs space-y-2">
         <div class="flex justify-between border-b border-purple-500/20 pb-1.5">
           <span class="text-purple-300/70 font-bold">Account Holder:</span>
           <span class="text-white font-extrabold">Eugene Card</span>
         </div>
         <div class="flex justify-between border-b border-purple-500/20 pb-1.5">
-          <span class="text-purple-300/70 font-bold">Email:</span>
+          <span class="text-purple-300/70 font-bold">Wise Email:</span>
           <span class="text-purple-300 font-mono">eugenecard.market@gmail.com</span>
         </div>
         <div class="flex justify-between border-b border-purple-500/20 pb-1.5">
-          <span class="text-purple-300/70 font-bold">Phone Number:</span>
+          <span class="text-purple-300/70 font-bold">GoPay / Phone:</span>
           <span class="text-white font-mono">+6285163702260</span>
         </div>
         <div class="flex justify-between border-b border-purple-500/20 pb-1.5">
-          <span class="text-purple-300/70 font-bold">Supported Options:</span>
-          <span class="text-emerald-400 font-bold">GoPay / Wise</span>
+          <span class="text-purple-300/70 font-bold">Supported Methods:</span>
+          <span class="text-emerald-400 font-bold">QRIS / Wise / GoPay</span>
         </div>
         <div class="flex justify-between pt-0.5">
           <span class="text-purple-300/70 font-bold">Platform Fee:</span>
@@ -1311,7 +1300,7 @@
     <span id="toast-msg">Action completed.</span>
   </div>
 
-  <!-- JAVASCRIPT LOGIC WITH FIREBASE CONFIG -->
+  <!-- JAVASCRIPT LOGIC -->
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyCm13Nh6k6W9wsL0_OPpjKZNrbSg-pFsuA",
@@ -1360,7 +1349,6 @@
     const CARDS_PER_BATCH = 10;
     let scrollObserver = null;
 
-    // Comprehensive i18n Dictionary
     const i18nDict = {
       EN: {
         brandTitle: "EUGENE CARD",
@@ -1551,7 +1539,7 @@
         platformTax: "Platform Fee (2%)",
         totalIncTax: "Total (Inc. 2% Fee)",
         proceedQrisBtn: "Proceed to Payment",
-        scanPayQris: "Pay via GoPay / Wise / Bank Transfer",
+        scanPayQris: "Pay via QRIS, Wise, GoPay, or Bank Transfer",
         merchantLabel: "Merchant",
         totalPayAmount: "Total Payment Amount (Inc. 2% Platform Fee)",
         uploadReceiptLabel: "Upload Transfer Receipt Screenshot",
@@ -1746,13 +1734,32 @@
         platformTax: "Biaya Platform (2%)",
         totalIncTax: "Total (Termasuk Biaya 2%)",
         proceedQrisBtn: "Lanjutkan ke Pembayaran",
-        scanPayQris: "Bayar via GoPay / Wise / Transfer Bank",
+        scanPayQris: "Bayar via QRIS, Wise, GoPay, atau Transfer Bank",
         merchantLabel: "Pedagang",
         totalPayAmount: "Total Pembayaran (Termasuk Biaya 2%)",
         uploadReceiptLabel: "Unggah Tangkapan Layar Struk Transfer",
         submitQrisOrderBtn: "Kirim Pesanan untuk Persetujuan Admin"
       }
     };
+
+    function switchCheckoutPaymentTab(tab) {
+      const qrisBox = document.getElementById('qris-image-container');
+      const manualBox = document.getElementById('manual-payment-details-box');
+      const qrisTabBtn = document.getElementById('pay-tab-qris');
+      const manualTabBtn = document.getElementById('pay-tab-manual');
+
+      if (tab === 'qris') {
+        qrisBox.classList.remove('hidden');
+        manualBox.classList.add('hidden');
+        qrisTabBtn.className = 'flex-1 py-1.5 rounded-lg font-bold bg-purple-600 text-white transition-all';
+        manualTabBtn.className = 'flex-1 py-1.5 rounded-lg font-bold text-purple-300 hover:text-white transition-all';
+      } else {
+        qrisBox.classList.add('hidden');
+        manualBox.classList.remove('hidden');
+        manualTabBtn.className = 'flex-1 py-1.5 rounded-lg font-bold bg-purple-600 text-white transition-all';
+        qrisTabBtn.className = 'flex-1 py-1.5 rounded-lg font-bold text-purple-300 hover:text-white transition-all';
+      }
+    }
 
     function toggleLanguage() {
       currentLanguage = currentLanguage === 'EN' ? 'ID' : 'EN';
@@ -3651,7 +3658,6 @@
         myCardContainer.classList.remove('hidden');
         plusAmountContainer.classList.remove('hidden');
 
-        // Populate dropdown with user's owned cards from Vault
         const myCardSelect = document.getElementById('trade-my-card-select');
         if (myCardSelect && currentUser) {
           const myCards = inventory.filter(c => c.owner === currentUser.name || c.owner === currentUser.username);
@@ -3919,17 +3925,21 @@
     }
 
     function showConfirmModal({ title, message, confirmText, confirmClass, icon, onConfirm }) {
-      document.getElementById('generic-confirm-title').innerText = title || 'Are you sure?';
+document.getElementById('generic-confirm-title').innerText = title || 'Are you sure?';
       document.getElementById('generic-confirm-message').innerText = message || '';
 
-      const iconEl = document.getElementById('generic-confirm-icon');
-      iconEl.className = `fa-solid ${icon || 'fa-triangle-exclamation text-purple-400'} text-xl`;
-
       const btn = document.getElementById('generic-confirm-btn');
-      btn.innerText = confirmText || 'Confirm';
-      btn.className = `flex-1 py-2.5 font-extrabold text-xs rounded-xl transition-all ${confirmClass || 'bg-purple-600 hover:bg-purple-500 text-white'}`;
+      if (btn) {
+        btn.innerText = confirmText || 'Confirm';
+        btn.className = `flex-1 py-2.5 text-white font-extrabold text-xs rounded-xl transition-all ${confirmClass || 'bg-purple-600 hover:bg-purple-500'}`;
+      }
 
-      pendingConfirmAction = typeof onConfirm === 'function' ? onConfirm : null;
+      const iconEl = document.getElementById('generic-confirm-icon');
+      if (iconEl && icon) {
+        iconEl.className = icon;
+      }
+
+      pendingConfirmAction = onConfirm;
       document.getElementById('generic-confirm-modal').classList.remove('hidden');
     }
 
@@ -3939,30 +3949,30 @@
     }
 
     function handleConfirmModalAccept() {
-      const action = pendingConfirmAction;
+      if (typeof pendingConfirmAction === 'function') {
+        pendingConfirmAction();
+      }
       closeConfirmModal();
-      if (action) action();
     }
 
     async function submitCounterOffer() {
       const reqId = document.getElementById('counter-req-id-target').value;
-      const counterNotes = document.getElementById('counter-notes-input').value.trim();
-      const req = tradeRequestsList.find(r => r.id === reqId);
+      const notes = document.getElementById('counter-notes-input').value.trim();
 
-      if (!req || !counterNotes) return showToast('Invalid details.');
+      if (!notes) return showToast('Please enter counter offer notes.');
 
       try {
         await db.collection("tradeRequests").doc(reqId).update({
-          notes: counterNotes,
-          status: 'COUNTERED'
+          status: 'COUNTERED',
+          notes: notes
         });
 
         closeCounterOfferModal();
         showToast('Counter offer sent!');
-        addNotification('Counter Offer Sent', `Submitted counter offer for ${req.serial}.`, 'fa-pen-to-square text-purple-400');
+        addNotification('Counter Offer Sent', `Sent counter offer details for trade request ${reqId}.`, 'fa-pen-to-square text-amber-400');
         await fetchTradeRequests();
       } catch (e) {
-        showToast('Error submitting counter offer: ' + e.message);
+        showToast('Error sending counter offer: ' + e.message);
       }
     }
 
@@ -3971,11 +3981,11 @@
       if (!grid) return;
 
       if (tradeRequestsList.length === 0) {
-        grid.innerHTML = `<div class="col-span-full text-center py-12 text-purple-300/50 text-xs">No active trade requests or offers currently pending.</div>`;
+        grid.innerHTML = `<div class="col-span-full text-center py-16 text-purple-300/50 text-xs">No active trade requests right now.</div>`;
         return;
       }
 
-grid.innerHTML = tradeRequestsList.map(req => {
+      grid.innerHTML = tradeRequestsList.map(req => {
         const isMyReq = currentUser && (currentUser.name === req.proposer || currentUser.username === req.proposer);
         const isTargetMe = currentUser && (currentUser.name === req.targetOwner || currentUser.username === req.targetOwner);
         const isAdmin = currentUser && currentUser.isAdmin;
