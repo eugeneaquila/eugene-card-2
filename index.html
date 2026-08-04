@@ -6,7 +6,7 @@
   <title>Eugene Card Marketplace | Beta Edition</title>
 
   <!-- Browser Tab Favicon -->
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='42' fill='none' stroke='%23c98f2c' stroke-width='5' stroke-dasharray='210 50' transform='rotate(-45 50 50)'/><polygon points='50,18 80,35 80,68 50,85 20,68 20,35' fill='%231a1712'/><path d='M 32 42 C 38 32, 52 32, 58 40 C 62 46, 48 54, 40 60 C 35 64, 45 70, 60 62' fill='none' stroke='%23f1ece0' stroke-width='4' stroke-linecap='round'/></svg>">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='42' fill='none' stroke='%238b5cf6' stroke-width='5' stroke-dasharray='210 50' transform='rotate(-45 50 50)'/><polygon points='50,18 80,35 80,68 50,85 20,68 20,35' fill='%23a855f7'/><path d='M 32 42 C 38 32, 52 32, 58 40 C 62 46, 48 54, 40 60 C 35 64, 45 70, 60 62' fill='none' stroke='%23ffffff' stroke-width='4' stroke-linecap='round'/></svg>">
 
   <!-- Google Firebase Compatibility SDKs (v10.7.1) -->
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -22,26 +22,11 @@
       theme: {
         extend: {
           colors: {
-            slate: { 50: '#f9f9f8', 100: '#f1f0ef', 200: '#e1dcd6', 300: '#c9c0b6', 400: '#aa9d8d', 500: '#8d7c68', 600: '#726455', 700: '#584d41', 800: '#3c352c', 900: '#26211d', 950: '#13110e' },
-            violet: { 50: '#f9f9f8', 100: '#f1f0ef', 200: '#e1dcd6', 300: '#c9c0b6', 400: '#aa9d8d', 500: '#8d7c68', 600: '#726455', 700: '#584d41', 800: '#3c352c', 900: '#26211d', 950: '#13110e' },
-            purple: { 50: '#fbf9f7', 100: '#f5f1eb', 200: '#f2e1c4', 300: '#e8ca96', 400: '#dbad5c', 500: '#c98f2c', 600: '#a37424', 700: '#7d5a1c', 800: '#563d13', 900: '#34260e', 950: '#1a1307' },
-            amber: { 50: '#fbf9f7', 100: '#f5f1eb', 200: '#f2e1c4', 300: '#e8ca96', 400: '#dbad5c', 500: '#c98f2c', 600: '#a37424', 700: '#7d5a1c', 800: '#563d13', 900: '#34260e', 950: '#1a1307' },
-            emerald: { 50: '#f7faf9', 100: '#ecf3f1', 200: '#ccebe2', 300: '#a3dbca', 400: '#70c7ad', 500: '#45b090', 600: '#388f75', 700: '#2b6e5a', 800: '#1d4b3d', 900: '#142e26', 950: '#0a1713' },
-            rose: { 50: '#faf7f7', 100: '#f4ecec', 200: '#efccc8', 300: '#e2a49d', 400: '#d17166', 500: '#bc4638', 600: '#99382e', 700: '#762b23', 800: '#511e18', 900: '#311411', 950: '#190a09' },
-            pink: { 50: '#faf7f7', 100: '#f4edec', 200: '#edcdc9', 300: '#dfa69f', 400: '#cd746a', 500: '#b8493d', 600: '#953c32', 700: '#732e26', 800: '#4e1f1a', 900: '#301512', 950: '#180b09' },
-            indigo: { 50: '#f7f8fa', 100: '#eceef3', 200: '#cad2ec', 300: '#a1aede', 400: '#6c80cb', 500: '#4059b5', 600: '#344893', 700: '#283871', 800: '#1b264d', 900: '#13192f', 950: '#090d18' },
-            blue: { 50: '#f7f9fa', 100: '#ecf0f3', 200: '#cbddec', 300: '#a2c3dd', 400: '#6ea2c9', 500: '#4282b3', 600: '#366a91', 700: '#295170', 800: '#1c374c', 900: '#13232f', 950: '#0a1117' },
-            teal: { 50: '#f7fafa', 100: '#edf2f2', 200: '#cee8e6', 300: '#a8d6d2', 400: '#78bfb8', 500: '#4ea69e', 600: '#408780', 700: '#316863', 800: '#214743', 900: '#162c2a', 950: '#0b1615' },
-            cyan: { 50: '#f7f9fa', 100: '#edf2f3', 200: '#cde4ea', 300: '#a6cfd9', 400: '#74b3c3', 500: '#4998ab', 600: '#3c7b8b', 700: '#2e5f6b', 800: '#1f4149', 900: '#15282d', 950: '#0b1417' },
-            red: { 50: '#fbf7f7', 100: '#f4ebec', 200: '#f1c6c9', 300: '#e6999e', 400: '#d76068', 500: '#c4313b', 600: '#9f2830', 700: '#7a1f25', 800: '#541519', 900: '#330f12', 950: '#1a0809' },
-            brass: '#c98f2c',
-            bone: '#f1ece0'
+            purple: { 400: '#c084fc', 500: '#a855f7', 600: '#9333ea' },
+            violet: { 400: '#a78bfa', 500: '#8b5cf6', 600: '#7c3aed', 950: '#0f0728' },
+            emerald: { 400: '#34d399', 500: '#10b981', 600: '#059669' }
           },
-          fontFamily: {
-            sans: ['Inter', 'sans-serif'],
-            serif: ['Fraunces', 'serif'],
-            mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace']
-          }
+          fontFamily: { sans: ['Inter', 'sans-serif'] }
         }
       }
     }
@@ -49,29 +34,22 @@
 
   <!-- FontAwesome Icons & Google Fonts -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
   <style>
-    /* =========================================================
-       EUGENE CARD — "THE VAULT LEDGER" DESIGN SYSTEM
-       A grading-house aesthetic: engraved plates, brass fixtures,
-       ledger typography, foil authentication seals.
-    ========================================================= */
+    body { font-family: 'Inter', sans-serif; background-color: #070314; color: #f3f4f6; }
+    
+    /* Modern Glassmorphism & Cyber Theme */
     :root {
-      --ink: #0c0a08; --ink-2: #13110e; --panel: #1a1712; --panel-2: #201c16;
-      --hairline: rgba(241,236,224,.09); --hairline-strong: rgba(241,236,224,.16);
-      --brass: #c98f2c; --brass-light: #dbad5c; --brass-dim: #7d5a1c;
-      --verdant: #45b090; --wine: #bc4638; --sapphire: #6c80cb;
-      --bone: #f1ece0; --bone-dim: #a79a8b;
+      --ec-glow: rgba(168, 85, 247, 0.25);
+      --ec-panel: rgba(15, 7, 40, 0.75);
     }
-
-    body { font-family: 'Inter', sans-serif; background-color: var(--ink); color: var(--bone); }
 
     body {
       background:
-        radial-gradient(circle at 15% 10%, rgba(201,143,44,.11), transparent 40%),
-        radial-gradient(circle at 85% 85%, rgba(69,176,144,.09), transparent 40%),
-        var(--ink);
+        radial-gradient(circle at 15% 10%, rgba(139, 92, 246, 0.18), transparent 40%),
+        radial-gradient(circle at 85% 85%, rgba(236, 72, 153, 0.15), transparent 40%),
+        #070314;
       overflow-x: hidden;
     }
 
@@ -81,79 +59,70 @@
       inset: 0;
       pointer-events: none;
       background-image:
-        linear-gradient(rgba(241,236,224,.02) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(241,236,224,.02) 1px, transparent 1px);
+        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
       background-size: 36px 36px;
       mask-image: linear-gradient(to bottom, black, transparent);
       z-index: -1;
     }
 
-    h1, h2, h3, .font-display { font-family: 'Fraunces', serif; letter-spacing: -.01em; }
-    .ec-plate { font-family: 'JetBrains Mono', ui-monospace, monospace; letter-spacing: .03em; }
-    ::selection { background: var(--brass); color: #1a1307; }
-    :focus-visible { outline: 2px solid var(--brass-light); outline-offset: 2px; border-radius: 6px; }
-    @media (prefers-reduced-motion: reduce) { *,*::before,*::after { transition-duration:.001ms!important; animation-duration:.001ms!important; } }
-
-    /* ---- Graded slab card component ---- */
     .card-holo-premium {
-      background: linear-gradient(165deg, #1f1a10 0%, #191510 55%, #150f0a 100%);
-      border: 1px solid rgba(201,143,44,.35);
-      box-shadow: 0 0 0 1px rgba(201,143,44,.06) inset, 0 14px 30px rgba(0,0,0,.35);
-      transition: transform .3s cubic-bezier(.4,0,.2,1), box-shadow .3s ease, border-color .3s ease;
+      background: linear-gradient(135deg, rgba(30, 27, 75, 0.8) 0%, rgba(76, 29, 149, 0.6) 50%, rgba(131, 24, 67, 0.6) 100%);
+      border: 1px solid rgba(216, 180, 254, 0.4);
+      box-shadow: 0 0 25px rgba(168, 85, 247, 0.2);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    .card-holo-premium:hover { border-color: rgba(219,173,92,.75); transform: translateY(-5px); box-shadow: 0 18px 34px rgba(201,143,44,.16); }
-
+    .card-holo-premium:hover { border-color: rgba(216, 180, 254, 0.9); transform: translateY(-5px) scale(1.02); box-shadow: 0 12px 30px rgba(168, 85, 247, 0.35); }
+    
     .card-holo-standard {
-      background: linear-gradient(165deg, #171a1f 0%, #141519 55%, #100f10 100%);
-      border: 1px solid rgba(108,128,203,.28);
-      box-shadow: 0 0 0 1px rgba(108,128,203,.05) inset, 0 14px 30px rgba(0,0,0,.35);
-      transition: transform .3s cubic-bezier(.4,0,.2,1), box-shadow .3s ease, border-color .3s ease;
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.8) 0%, rgba(30, 27, 75, 0.7) 100%);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      box-shadow: 0 0 15px rgba(139, 92, 246, 0.15);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    .card-holo-standard:hover { border-color: rgba(108,128,203,.7); transform: translateY(-5px); box-shadow: 0 18px 34px rgba(108,128,203,.14); }
-
+    .card-holo-standard:hover { border-color: rgba(139, 92, 246, 0.8); transform: translateY(-5px) scale(1.02); box-shadow: 0 12px 30px rgba(139, 92, 246, 0.25); }
+    
     ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: var(--ink); }
-    ::-webkit-scrollbar-thumb { background: #35302a; border-radius: 9999px; }
+    ::-webkit-scrollbar-track { background: #070314; }
+    ::-webkit-scrollbar-thumb { background: #2e1065; border-radius: 9999px; }
 
     .premium-panel {
-      background: linear-gradient(165deg, var(--panel-2), var(--ink-2));
+      background: linear-gradient(145deg, rgba(20, 10, 48, 0.85), rgba(7, 3, 20, 0.8));
       backdrop-filter: blur(20px);
-      border: 1px solid var(--hairline);
-      border-top-color: var(--hairline-strong);
+      border: 1px solid rgba(168, 85, 247, 0.2);
       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
     }
 
-    button, a, input, select { transition: all .2s ease; }
-    button:hover:not(:disabled), a:hover { transform: translateY(-1px); }
+    button, a, input, select {
+      transition: all .2s ease;
+    }
 
-    .card-holo-premium, .card-holo-standard { position: relative; overflow: hidden; }
-    .ec-label-premium { background: linear-gradient(90deg, #dbad5c, #c98f2c 55%, #a37424); box-shadow: 0 1px 0 rgba(0,0,0,.25); }
-    .ec-label-standard { background: linear-gradient(90deg, #a1aede, #6c80cb 55%, #4059b5); box-shadow: 0 1px 0 rgba(0,0,0,.25); }
+    button:hover:not(:disabled), a:hover {
+      transform: translateY(-1px);
+    }
+
+    .card-holo-premium, .card-holo-standard {
+      position: relative;
+      overflow: hidden;
+    }
 
     .card-holo-premium::before, .card-holo-standard::before {
       content: "";
       position: absolute;
       inset: -80%;
-      background: linear-gradient(115deg, transparent 42%, rgba(241,236,224,.09) 50%, transparent 58%);
-      transform: translateX(-55%) rotate(14deg);
-      transition: transform .9s cubic-bezier(.2,0,.1,1);
+      background: linear-gradient(120deg, transparent 35%, rgba(255, 255, 255, 0.15), transparent 65%);
+      transform: translateX(-60%) rotate(20deg);
+      transition: .7s;
       pointer-events: none;
     }
-    .card-holo-premium:hover::before, .card-holo-standard:hover::before { transform: translateX(55%) rotate(14deg); }
 
-    /* corner authentication seal */
-    .card-holo-premium::after, .card-holo-standard::after {
-      content: "✓";
-      position: absolute; top: 8px; right: 8px; width: 18px; height: 18px;
-      border-radius: 999px; display: flex; align-items: center; justify-content: center;
-      font-size: 9px; font-weight: 700; pointer-events: none; z-index: 2;
+    .card-holo-premium:hover::before, .card-holo-standard:hover::before {
+      transform: translateX(60%) rotate(20deg);
     }
-    .card-holo-premium::after { background: conic-gradient(from 200deg, #f2e1c4, #c98f2c, #7d5a1c, #dbad5c, #f2e1c4); color: #2a1c07; box-shadow: 0 1px 4px rgba(0,0,0,.5); }
-    .card-holo-standard::after { background: conic-gradient(from 200deg, #cad2ec, #6c80cb, #283871, #a1aede, #cad2ec); color: #10142a; box-shadow: 0 1px 4px rgba(0,0,0,.5); }
 
     .stat-card {
-      background: linear-gradient(160deg, var(--panel-2), var(--ink-2));
-      border: 1px solid var(--hairline);
+      background: linear-gradient(135deg, rgba(30, 27, 75, 0.75), rgba(7, 3, 20, 0.8));
+      border: 1px solid rgba(168, 85, 247, 0.2);
       border-radius: 1.25rem;
       padding: 1rem;
     }
@@ -162,25 +131,16 @@
       padding: 3rem;
       text-align: center;
       border-radius: 1.5rem;
-      background: rgba(26,23,18,.55);
-      border: 1px dashed var(--hairline-strong);
-      color: var(--bone-dim);
+      background: rgba(15, 7, 40, 0.6);
+      border: 1px dashed rgba(168, 85, 247, 0.25);
     }
 
     /* Fixed Bottom Nav Active Styling */
     .bottom-nav-item.active {
-      color: var(--brass-light);
-      background: rgba(201,143,44,.15);
-      border-color: rgba(201,143,44,.4);
+      color: #c084fc;
+      background: rgba(168, 85, 247, 0.15);
+      border-color: rgba(168, 85, 247, 0.4);
     }
-    .bottom-nav-item.active::after {
-      content: "";
-      position: absolute;
-      bottom: -6px; left: 22%; right: 22%; height: 2px;
-      background: linear-gradient(90deg, transparent, var(--brass-light), transparent);
-      border-radius: 999px;
-    }
-    .bottom-nav-item { position: relative; }
 
     .mobile-safe-bottom {
       padding-bottom: calc(85px + env(safe-area-inset-bottom));
@@ -219,16 +179,15 @@
     }
   </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between selection:bg-amber-500 selection:text-slate-950 relative pb-24 md:pb-28">
+<body class="min-h-screen flex flex-col justify-between selection:bg-purple-500 selection:text-white relative pb-24 md:pb-28">
 
   <!-- Embedded Logo SVG -->
   <svg style="display: none;">
     <defs>
       <g id="eugene-logo-mark">
-        <circle cx="50" cy="50" r="42" fill="none" stroke="#c98f2c" stroke-width="5" stroke-dasharray="210 50" transform="rotate(-45 50 50)"/>
-        <polygon points="50,18 80,35 80,68 50,85 20,68 20,35" fill="#1a1712"/>
-        <polygon points="50,18 80,35 80,68 50,85 20,68 20,35" fill="none" stroke="#dbad5c" stroke-width="1.5"/>
-        <path d="M 32 42 C 38 32, 52 32, 58 40 C 62 46, 48 54, 40 60 C 35 64, 45 70, 60 62" fill="none" stroke="#f1ece0" stroke-width="4" stroke-linecap="round"/>
+        <circle cx="50" cy="50" r="42" fill="none" stroke="#8b5cf6" stroke-width="5" stroke-dasharray="210 50" transform="rotate(-45 50 50)"/>
+        <polygon points="50,18 80,35 80,68 50,85 20,68 20,35" fill="#a855f7"/>
+        <path d="M 32 42 C 38 32, 52 32, 58 40 C 62 46, 48 54, 40 60 C 35 64, 45 70, 60 62" fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/>
       </g>
     </defs>
   </svg>
@@ -3108,43 +3067,41 @@
         const isWishlisted = wishlist.has(card.id);
 
         return `
-          <div class="${isPremium ? 'card-holo-premium' : 'card-holo-standard'} rounded-2xl flex flex-col justify-between relative cursor-pointer" onclick="openCardDetailModal('${card.id}')">
-            <div class="${isPremium ? 'ec-label-premium' : 'ec-label-standard'} rounded-t-2xl flex items-center justify-between px-2.5 py-1.5" onclick="event.stopPropagation()">
-              <span class="text-[8px] font-black uppercase tracking-[0.14em] ${isPremium ? 'text-amber-950' : 'text-blue-950'}">${card.type}</span>
-              <button onclick="toggleWishlist('${card.id}')" class="text-xs ${isWishlisted ? 'text-rose-700' : (isPremium ? 'text-amber-950/55 hover:text-rose-700' : 'text-blue-950/55 hover:text-rose-700')} transition-colors">
+          <div class="${isPremium ? 'card-holo-premium' : 'card-holo-standard'} rounded-2xl p-3 flex flex-col justify-between relative cursor-pointer" onclick="openCardDetailModal('${card.id}')">
+            <div class="flex items-center justify-between mb-2" onclick="event.stopPropagation()">
+              <span class="text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${isPremium ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' : 'bg-violet-500/20 text-violet-300 border border-violet-500/30'}">${card.type}</span>
+              <button onclick="toggleWishlist('${card.id}')" class="text-xs ${isWishlisted ? 'text-pink-500' : 'text-purple-300/40 hover:text-pink-400'} transition-colors">
                 <i class="fa-solid fa-heart"></i>
               </button>
             </div>
 
-            <div class="p-3 flex flex-col justify-between flex-1">
-              <div class="w-full aspect-[4/5] bg-slate-950/80 rounded-xl border border-slate-800 p-1.5 flex flex-col justify-between mb-2 text-center overflow-hidden">
-                <div class="w-full h-full flex items-center justify-center overflow-hidden rounded-lg bg-slate-900">
-                  <img src="${card.imgUrl}" loading="lazy" class="w-full h-full object-contain">
-                </div>
+            <div class="w-full aspect-[4/5] bg-violet-950/80 rounded-xl border border-purple-500/20 p-1.5 flex flex-col justify-between mb-2 text-center overflow-hidden">
+              <div class="w-full h-full flex items-center justify-center overflow-hidden rounded-lg bg-violet-900/40">
+                <img src="${card.imgUrl}" loading="lazy" class="w-full h-full object-contain">
+              </div>
+            </div>
+
+            <p class="text-center font-black ${isPremium ? 'text-purple-400' : 'text-purple-300'} font-mono mb-1">${card.serial}</p>
+
+            <div class="space-y-1.5" onclick="event.stopPropagation()">
+              <p class="text-[11px] font-extrabold text-white truncate">${card.name}</p>
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-mono text-emerald-400 font-extrabold">${formatIDR(card.price)}</span>
+                <span class="text-[9px] text-purple-200/60 truncate max-w-[80px]">${card.owner || 'Unowned'}</span>
               </div>
 
-              <p class="ec-plate text-center font-bold text-sm ${isPremium ? 'text-amber-400' : 'text-blue-400'} mb-1">${card.serial}</p>
-
-              <div class="space-y-1.5" onclick="event.stopPropagation()">
-                <p class="text-[11px] font-extrabold text-white truncate">${card.name}</p>
-                <div class="flex items-center justify-between">
-                  <span class="ec-plate text-xs text-emerald-400 font-bold">${formatIDR(card.price)}</span>
-                  <span class="text-[9px] text-slate-400 truncate max-w-[80px]">${card.owner || 'Unowned'}</span>
-                </div>
-
-                ${!isSold ? `
-                  <button onclick="addToCart('${card.id}')" class="w-full py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-[10px] rounded-xl transition-all">${i18nDict[currentLanguage].btnAddToCart}</button>
-                ` : `
-                  <button disabled class="w-full py-1.5 bg-slate-950 text-slate-600 font-bold text-[10px] rounded-xl cursor-not-allowed">${i18nDict[currentLanguage].btnOwned}</button>
-                `}
-              </div>
+              ${!isSold ? `
+                <button onclick="addToCart('${card.id}')" class="w-full py-1.5 bg-purple-600 hover:bg-purple-500 text-white font-extrabold text-[10px] rounded-xl transition-all shadow">${i18nDict[currentLanguage].btnAddToCart}</button>
+              ` : `
+                <button disabled class="w-full py-1.5 bg-violet-950 text-purple-300/40 font-bold text-[10px] rounded-xl cursor-not-allowed border border-purple-500/10">${i18nDict[currentLanguage].btnOwned}</button>
+              `}
             </div>
           </div>
         `;
       }).join('');
 
       if (visibleCardCount < filtered.length) {
-        grid.innerHTML += `<div id="scroll-sentinel" class="col-span-full h-10 flex items-center justify-center text-xs text-slate-500 ec-plate">Loading more cards...</div>`;
+        grid.innerHTML += `<div id="scroll-sentinel" class="col-span-full h-10 flex items-center justify-center text-xs text-purple-300/50 font-mono">Loading more cards...</div>`;
         setupScrollSentinel(filtered.length);
       }
     }
